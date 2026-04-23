@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "author": "Hugo",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-led", "id": "led-lock", "top": -80, "left": 150, "attrs": { "color": "blue", "label": "Lock" } },
+    { "type": "wokwi-led", "id": "led-status", "top": -20, "left": 150, "attrs": { "color": "green", "label": "Status" } },
+    { "type": "wokwi-led", "id": "led-wifi", "top": 40, "left": 150, "attrs": { "color": "red", "label": "WiFi" } },
+    { "type": "wokwi-pushbutton", "id": "btn-finger", "top": 140, "left": -120, "attrs": { "color": "green", "label": "Fingerprint" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    
+    [ "esp:GND.1", "led-lock:C", "black", [ "v0" ] ],
+    [ "esp:26", "led-lock:A", "blue", [ "v0" ] ],
+    
+    [ "esp:GND.1", "led-status:C", "black", [ "v0" ] ],
+    [ "esp:27", "led-status:A", "green", [ "v0" ] ],
+    
+    [ "esp:GND.1", "led-wifi:C", "black", [ "v0" ] ],
+    [ "esp:25", "led-wifi:A", "red", [ "v0" ] ],
+
+    [ "esp:GND.2", "btn-finger:1.strip", "black", [ "h0" ] ],
+    [ "esp:33", "btn-finger:2.strip", "green", [ "v0" ] ]
+  ]
+}
