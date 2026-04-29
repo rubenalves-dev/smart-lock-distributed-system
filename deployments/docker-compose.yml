@@ -2,6 +2,7 @@ services:
   # Message Broker for Asynchronous calls
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: rabbitmq_broker
     ports:
       - "5672:5672" # RabbitMQ port
       - "15672:15672" # Management UI (Username/Pass: guest/guest)
@@ -9,6 +10,7 @@ services:
   # Python AI Service
   ai-service:
     build: ../ai-service
+    container_name: ai_service
     ports:
       - "50051:50051"
     depends_on:
@@ -17,6 +19,7 @@ services:
   # Go Main Server
   main-server:
     build: ../backend
+    container_name: main_server
     ports:
       - "8080:8080" # REST API for Web App
       - "50052:50052" # gRPC port
@@ -30,9 +33,22 @@ services:
   # Database for the Go Service
   postgres:
     image: postgres:15-alpine
+    container_name: postgres_db
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: lock_db
     ports:
       - "5432:5432"
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto_broker
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    restart: always

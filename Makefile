@@ -36,15 +36,15 @@ clean:
 
 # Start the whole system
 up:
-	docker-compose -f ./deployments/docker-compose.yml up --build
+	docker-compose -f ./deployments/docker-compose.yml -p smartlock up --build
 
 # Stop the system
 down:
-	docker-compose down -f ./deployments/docker-compose.yml
+	docker-compose down -f ./deployments/docker-compose.yml -p smartlock
 
 # View logs
 logs:
-	docker-compose logs -f ./deployments/docker-compose.yml
+	docker-compose logs -f ./deployments/docker-compose.yml -p smartlock
 
 # PlatformIO run
 pio-run:
