@@ -8,6 +8,8 @@
 #include <ESPmDNS.h>
 
 // --- MQTT Config ---
+const char *ssid = "Wokwi-GUEST";
+const char *password = "";
 const char *mqtt_server = "didinet.net";
 
 // --- Pins ---

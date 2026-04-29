@@ -45,3 +45,7 @@ down:
 # View logs
 logs:
 	docker-compose logs -f ./deployments/docker-compose.yml
+
+# PlatformIO run
+pio-run:
+	cd ./firmware && pio run
