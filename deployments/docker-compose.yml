@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # Message Broker for Asynchronous calls
   rabbitmq:
@@ -10,7 +8,7 @@ services:
 
   # Python AI Service
   ai-service:
-    build: ./ai-service
+    build: ../ai-service
     ports:
       - "50051:50051"
     depends_on:
@@ -18,7 +16,7 @@ services:
 
   # Go Main Server
   main-server:
-    build: ./backend
+    build: ../backend
     ports:
       - "8080:8080" # REST API for Web App
       - "50052:50052" # gRPC port
