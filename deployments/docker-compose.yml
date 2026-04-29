@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  # Message Broker for Asynchronous calls
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672" # RabbitMQ port
+      - "15672:15672" # Management UI (Username/Pass: guest/guest)
+
+  # Python AI Service
+  ai-service:
+    build: ./ai-service
+    ports:
+      - "50051:50051"
+    depends_on:
+      - rabbitmq
+
+  # Go Main Server
+  main-server:
+    build: ./backend
+    ports:
+      - "8080:8080" # REST API for Web App
+      - "50052:50052" # gRPC port
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - AI_SERVICE_ADDR=ai-service:50051
+    depends_on:
+      - rabbitmq
+      - ai-service
+
+  # Database for the Go Service
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: lock_db
+    ports:
+      - "5432:5432"
