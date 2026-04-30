@@ -10,13 +10,14 @@
 // --- MQTT Config ---
 const char *ssid = "Wokwi-GUEST";
 const char *password = "";
-const char *mqtt_server = "didinet.net";
+const char *mqtt_server = "localhost:1883";
 
 // --- Pins ---
 const int LOCK_PIN = 26;
 const int STATUS_LED = 27;
 const int WIFI_LED = 25;
 const int SENSOR_PIN = 33;
+const int VIBRATION_PIN = 14;
 
 // --- Objects ---
 AsyncWebServer server(80);
@@ -81,6 +82,7 @@ void setup()
     pinMode(STATUS_LED, OUTPUT);
     pinMode(WIFI_LED, OUTPUT);
     pinMode(SENSOR_PIN, INPUT_PULLUP);
+    pinMode(VIBRATION_PIN, INPUT_PULLUP);
 
     preferences.begin("biometric", false);
     isLocked = preferences.getBool("state", true);
@@ -129,6 +131,15 @@ void loop()
     if (digitalRead(SENSOR_PIN) == LOW)
     {
         Serial.println("Fingerprint Match!");
+        updateLockState(false);
+        delay(5000);
+        updateLockState(true);
+    }
+
+    // Vibration Sensor Logic
+    if (digitalRead(VIBRATION_PIN) == LOW)
+    {
+        Serial.println("Vibration Detected!");
         updateLockState(false);
         delay(5000);
         updateLockState(true);

@@ -13,46 +13,52 @@
     {
       "type": "wokwi-led",
       "id": "led-lock",
-      "top": -80,
-      "left": 150,
+      "top": -90,
+      "left": -101.8,
       "attrs": { "color": "blue", "label": "Lock" }
     },
     {
       "type": "wokwi-led",
       "id": "led-status",
-      "top": -20,
-      "left": 150,
+      "top": -22.8,
+      "left": -101.8,
       "attrs": { "color": "green", "label": "Status" }
     },
     {
       "type": "wokwi-led",
       "id": "led-wifi",
-      "top": 40,
-      "left": 150,
+      "top": 44.4,
+      "left": -101.8,
       "attrs": { "color": "red", "label": "WiFi" }
     },
     {
       "type": "wokwi-pushbutton",
       "id": "btn-finger",
-      "top": 140,
-      "left": -120,
+      "top": -80.2,
+      "left": 124.8,
       "attrs": { "color": "green", "label": "Fingerprint" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn-vib",
+      "top": 25.4,
+      "left": 172.8,
+      "attrs": { "color": "red", "label": "Vibration" }
     }
   ],
   "connections": [
     ["esp:TX", "$serialMonitor:RX", "", []],
     ["esp:RX", "$serialMonitor:TX", "", []],
-
-    ["esp:GND.1", "led-lock:C", "black", ["v0"]],
-    ["esp:26", "led-lock:A", "blue", ["v0"]],
-
-    ["esp:GND.1", "led-status:C", "black", ["v0"]],
-    ["esp:27", "led-status:A", "green", ["v0"]],
-
-    ["esp:GND.1", "led-wifi:C", "black", ["v0"]],
-    ["esp:25", "led-wifi:A", "red", ["v0"]],
-
-    ["esp:GND.2", "btn-finger:1.strip", "black", ["h0"]],
-    ["esp:33", "btn-finger:2.strip", "green", ["v0"]]
-  ]
+    ["esp:GND.1", "led-lock:C", "black", ["h-43.01", "v-172.8", "h-48.4"]],
+    ["esp:26", "led-lock:A", "blue", ["h-14.21", "v-144", "h-67.2"]],
+    ["esp:GND.1", "led-status:C", "black", ["h-43.01", "v-105.6", "h-48.4"]],
+    ["esp:27", "led-status:A", "green", ["h-33.41", "v-86.4", "h-48"]],
+    ["esp:GND.1", "led-wifi:C", "black", ["h-43.01", "v-38.4", "h-48.4"]],
+    ["esp:25", "led-wifi:A", "red", ["h-81.41"]],
+    ["esp:GND.2", "btn-finger:2.l", "black", ["v-76.8", "h4.84"]],
+    ["esp:33", "btn-finger:1.l", "green", ["h110.59", "v-163.2"]],
+    ["esp:GND.2", "btn-vib:2.l", "black", ["v20", "h20"]],
+    ["esp:14", "btn-vib:1.l", "red", ["h14.59", "v-96"]]
+  ],
+  "dependencies": {}
 }

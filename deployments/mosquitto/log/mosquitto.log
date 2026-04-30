@@ -8,3 +8,6 @@
 1777492041: Opening ipv4 listen socket on port 1883.
 1777492041: Opening ipv4 listen socket on port 9001.
 1777492041: mosquitto version 2.1.2 running
+1777497539: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1777499957: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1777504688: Saving in-memory database to /mosquitto/data//mosquitto.db.
