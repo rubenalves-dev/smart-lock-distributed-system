@@ -113,7 +113,7 @@ void setup()
             updateLockState(!isLocked);
             request->redirect("/");
         } else {
-            request->send(200, "text/html", "Biometric Lock Status: " + String(isLocked ? "LOCKED" : "UNLOCKED"));
+            request->send(200, "text/html", INDEX_HTML);
         } });
 
     server.begin();
