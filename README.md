@@ -23,7 +23,7 @@ To modify `.proto` files and regenerate code, team members must install:
 ## 📂 Repository Structure
 
 - `/api`: The "Source of Truth" (Protobuf definitions).
-- `/backend`: Go microservices & Distributed logic.
-- `/ai-service`: Python AI behavioral classification.
-- `/firmware`: ESP32 C++ code & Local Web UI.
+- `/backend`: Go microservices & Distributed logic. (Ref: Programação Concorrent e Distribuida)
+- `/ai-service`: Python AI behavioral classification. (Ref: Intrudução à Inteligência Artificial)
+- `/firmware`: ESP32 C++ code & Local Web UI. (Ref: Internet das Coisas)
 - `/deployments`: Docker Compose & Environment configs.

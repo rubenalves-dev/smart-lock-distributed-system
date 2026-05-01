@@ -11,3 +11,83 @@
 1777497539: Saving in-memory database to /mosquitto/data//mosquitto.db.
 1777499957: Saving in-memory database to /mosquitto/data//mosquitto.db.
 1777504688: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1777530878: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1777553597: New connection from 142.251.142.145:37816 on port 1883.
+1777553597: New client connected from 142.251.142.145:37816 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553620: Client ESP32_Lock_Hugo_Final [142.251.142.145:37816] disconnected: exceeded timeout.
+1777553620: New connection from 142.251.142.145:22678 on port 1883.
+1777553620: New client connected from 142.251.142.145:22678 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553643: Client ESP32_Lock_Hugo_Final [142.251.142.145:22678] disconnected: exceeded timeout.
+1777553643: New connection from 142.251.142.145:34111 on port 1883.
+1777553643: New client connected from 142.251.142.145:34111 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553666: Client ESP32_Lock_Hugo_Final [142.251.142.145:34111] disconnected: exceeded timeout.
+1777553666: New connection from 142.251.142.145:40742 on port 1883.
+1777553666: New client connected from 142.251.142.145:40742 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553689: Client ESP32_Lock_Hugo_Final [142.251.142.145:40742] disconnected: exceeded timeout.
+1777553689: New connection from 142.251.142.145:55725 on port 1883.
+1777553689: New client connected from 142.251.142.145:55725 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553712: Client ESP32_Lock_Hugo_Final [142.251.142.145:55725] disconnected: exceeded timeout.
+1777553712: New connection from 142.251.142.145:47795 on port 1883.
+1777553712: New client connected from 142.251.142.145:47795 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553735: Client ESP32_Lock_Hugo_Final [142.251.142.145:47795] disconnected: exceeded timeout.
+1777553735: New connection from 142.251.142.145:29329 on port 1883.
+1777553735: New client connected from 142.251.142.145:29329 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553758: Client ESP32_Lock_Hugo_Final [142.251.142.145:29329] disconnected: exceeded timeout.
+1777553758: New connection from 142.251.142.145:17431 on port 1883.
+1777553758: New client connected from 142.251.142.145:17431 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553781: Client ESP32_Lock_Hugo_Final [142.251.142.145:17431] disconnected: exceeded timeout.
+1777553781: New connection from 142.251.142.145:56831 on port 1883.
+1777553781: New client connected from 142.251.142.145:56831 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553804: Client ESP32_Lock_Hugo_Final [142.251.142.145:56831] disconnected: exceeded timeout.
+1777553804: New connection from 142.251.142.145:40380 on port 1883.
+1777553804: New client connected from 142.251.142.145:40380 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553827: Client ESP32_Lock_Hugo_Final [142.251.142.145:40380] disconnected: exceeded timeout.
+1777553827: New connection from 142.251.142.145:20282 on port 1883.
+1777553827: New client connected from 142.251.142.145:20282 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553850: Client ESP32_Lock_Hugo_Final [142.251.142.145:20282] disconnected: exceeded timeout.
+1777553850: New connection from 142.251.142.145:64613 on port 1883.
+1777553850: New client connected from 142.251.142.145:64613 as ESP32_Lock_Hugo_Final (p4, c1, k15).
+1777553873: Client ESP32_Lock_Hugo_Final [142.251.142.145:64613] disconnected: exceeded timeout.
+1777553873: New connection from 142.251.142.145:51877 on port 1883.
+1777553904: Client 142.251.142.145 [142.251.142.145:51877] disconnected: exceeded timeout.
+1777554211: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1777556012: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1777585272: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1777641807: New connection from 142.251.142.145:64689 on port 1883.
+1777641807: New client connected from 142.251.142.145:64689 as smartlock_esp32 (p4, c1, k15).
+1777641829: Client smartlock_esp32 [142.251.142.145:64689] disconnected: exceeded timeout.
+1777641829: New connection from 142.251.142.145:36944 on port 1883.
+1777641830: New client connected from 142.251.142.145:36944 as smartlock_esp32 (p4, c1, k15).
+1777641852: Client smartlock_esp32 [142.251.142.145:36944] disconnected: exceeded timeout.
+1777641855: New connection from 142.251.142.145:30483 on port 1883.
+1777641855: New client connected from 142.251.142.145:30483 as mymqtt-799334653864166 (p5, c1, k90).
+1777641958: New connection from 142.251.142.145:48978 on port 1883.
+1777641958: New client connected from 142.251.142.145:48978 as smartlock_esp32 (p4, c1, k15).
+1777642003: Client smartlock_esp32 [142.251.142.145:48978] disconnected: exceeded timeout.
+1777642003: New connection from 142.251.142.145:29848 on port 1883.
+1777642003: New client connected from 142.251.142.145:29848 as smartlock_esp32 (p4, c1, k15).
+1777642026: Client smartlock_esp32 [142.251.142.145:29848] disconnected: exceeded timeout.
+1777642026: New connection from 142.251.142.145:19984 on port 1883.
+1777642027: New client connected from 142.251.142.145:19984 as smartlock_esp32 (p4, c1, k15).
+1777642049: Client smartlock_esp32 [142.251.142.145:19984] disconnected: exceeded timeout.
+1777642049: New connection from 142.251.142.145:51573 on port 1883.
+1777642050: New client connected from 142.251.142.145:51573 as smartlock_esp32 (p4, c1, k15).
+1777642072: Client smartlock_esp32 [142.251.142.145:51573] disconnected: exceeded timeout.
+1777642072: New connection from 142.251.142.145:64195 on port 1883.
+1777642073: New client connected from 142.251.142.145:64195 as smartlock_esp32 (p4, c1, k15).
+1777642094: Client mymqtt-799334653864166 [142.251.142.145:30483] disconnected: connection closed by client.
+1777642095: Client smartlock_esp32 [142.251.142.145:64195] disconnected: exceeded timeout.
+1777642095: New connection from 142.251.142.145:31482 on port 1883.
+1777642096: New client connected from 142.251.142.145:31482 as smartlock_esp32 (p4, c1, k15).
+1777642118: Client smartlock_esp32 [142.251.142.145:31482] disconnected: exceeded timeout.
+1777642118: New connection from 142.251.142.145:21341 on port 1883.
+1777642119: New client connected from 142.251.142.145:21341 as smartlock_esp32 (p4, c1, k15).
+1777642141: Client smartlock_esp32 [142.251.142.145:21341] disconnected: exceeded timeout.
+1777642141: New connection from 142.251.142.145:31185 on port 1883.
+1777642142: New client connected from 142.251.142.145:31185 as smartlock_esp32 (p4, c1, k15).
+1777642164: Client smartlock_esp32 [142.251.142.145:31185] disconnected: exceeded timeout.
+1777642164: New connection from 142.251.142.145:36413 on port 1883.
+1777642164: New client connected from 142.251.142.145:36413 as smartlock_esp32 (p4, c1, k15).
+1777642187: Client smartlock_esp32 [142.251.142.145:36413] disconnected: exceeded timeout.
+1777642187: New connection from 142.251.142.145:48255 on port 1883.
+1777642187: New client connected from 142.251.142.145:48255 as smartlock_esp32 (p4, c1, k15).

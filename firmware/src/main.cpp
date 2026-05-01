@@ -1,16 +1,19 @@
 #include <Arduino.h>
-#include "index.h"
+#include <ArduinoJson.h>
+#include <Preferences.h>
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <PubSubClient.h>
-#include <Preferences.h>
 #include <ESPmDNS.h>
 
+#include "index.h"
+#include "utils/timer.h"
+
 // --- MQTT Config ---
-const char *ssid = "Wokwi-GUEST";
-const char *password = "";
-const char *mqtt_server = "localhost:1883";
+const char *SSID = "Wokwi-GUEST";
+const char *PASSWORD = "";
+const char *MQTT_SERVER = "192.168.1.219"; // TROQUEM PELO VOSSO IP PARA IR BUSCAR O MOSQUITTO DOCKER
 
 // --- Pins ---
 const int LOCK_PIN = 26;
@@ -19,13 +22,38 @@ const int WIFI_LED = 25;
 const int SENSOR_PIN = 33;
 const int VIBRATION_PIN = 14;
 
-// --- Objects ---
+// --- Servers ---
 AsyncWebServer server(80);
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 Preferences preferences;
 
+// --- Variables ---
 bool isLocked = true;
+
+// --- Timers ---
+Timer lockTimer(1000, []() {
+
+});
+
+void sendTelemetry(String type, float value)
+{
+    if (!mqttClient.connected())
+    {
+        Serial.println("MQTT not connected, skipping telemetry");
+        return;
+    }
+
+    StaticJsonDocument<200> doc;
+    doc["device_id"] = "";
+    doc["type"] = type;
+    doc["value"] = value;
+    doc["is_locked"] = isLocked;
+
+    char buffer[200];
+    serializeJson(doc, buffer);
+    mqttClient.publish("lock/telemetry", buffer);
+}
 
 // --- STEP 1: Define the function FIRST ---
 void updateLockState(bool lock)
@@ -34,34 +62,16 @@ void updateLockState(bool lock)
     digitalWrite(LOCK_PIN, isLocked ? LOW : HIGH);
     digitalWrite(STATUS_LED, isLocked ? LOW : HIGH);
 
-    // Save to EPROM
     preferences.putBool("state", isLocked);
-
-    if (mqttClient.connected())
-    {
-        mqttClient.publish("lock/status", isLocked ? "LOCKED" : "UNLOCKED");
-    }
+    sendTelemetry("status_change", isLocked ? 1 : 0);
 }
 
-// --- STEP 2: Define callback (it can now "see" updateLockState) ---
-void callback(char *topic, byte *payload, unsigned int length)
-{
-    String message = "";
-    for (int i = 0; i < length; i++)
-        message += (char)payload[i];
-    if (message == "UNLOCK")
-        updateLockState(false);
-    if (message == "LOCK")
-        updateLockState(true);
-}
-
-// --- STEP 3: Define reconnect ---
 void reconnect()
 {
     while (!mqttClient.connected())
     {
         Serial.print("Connecting to MQTT...");
-        if (mqttClient.connect("ESP32_Lock_Hugo_Final"))
+        if (mqttClient.connect("smartlock_esp32"))
         {
             Serial.println("connected");
             mqttClient.subscribe("lock/control");
@@ -69,9 +79,29 @@ void reconnect()
         else
         {
             Serial.print("failed, rc=");
-            Serial.print(mqttClient.state());
+            Serial.println(mqttClient.state());
             delay(5000);
         }
+    }
+}
+
+void callback(char *topic, byte *payload, unsigned int length)
+{
+    String msg = "";
+    for (int i = 0; i < length; i++)
+    {
+        msg += (char)payload[i];
+    }
+    Serial.print("Received MQTT message: ");
+    Serial.println(msg);
+
+    if (msg == "UNLOCK")
+    {
+        updateLockState(false);
+    }
+    else if (msg == "LOCK")
+    {
+        updateLockState(true);
     }
 }
 
@@ -88,34 +118,20 @@ void setup()
     isLocked = preferences.getBool("state", true);
     updateLockState(isLocked);
 
-    WiFi.begin("Wokwi-GUEST", "");
+    WiFi.begin(SSID, PASSWORD);
     while (WiFi.status() != WL_CONNECTED)
-    {
         delay(500);
-    }
     analogWrite(WIFI_LED, 128);
 
-    if (!MDNS.begin("fechadura"))
-    {
-        Serial.println("Erro ao configurar mDNS!");
-    }
-    else
-    {
-        Serial.println("mDNS configurado: http://fechadura.local");
-    }
-
-    mqttClient.setServer(mqtt_server, 1883);
+    MDNS.begin("fechadura");
+    mqttClient.setServer(MQTT_SERVER, 1883);
     mqttClient.setCallback(callback);
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              {
-        if(request->hasParam("toggle")) {
-            updateLockState(!isLocked);
-            request->redirect("/");
-        } else {
-            request->send(200, "text/html", INDEX_HTML);
-        } });
-
+              { request->send(200, "text/html", INDEX_HTML); });
+    server.on("/toggle", HTTP_GET, [](AsyncWebServerRequest *request)
+              { updateLockState(!isLocked);
+                request->send(200, "text/html", INDEX_HTML); });
     server.begin();
 }
 
