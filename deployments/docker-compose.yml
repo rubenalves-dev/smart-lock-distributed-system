@@ -11,6 +11,8 @@ services:
   ai-service:
     build: ../ai-service
     container_name: ai_service
+    environment:
+      - PYTHONUNBUFFERED=1
     ports:
       - "50051:50051"
     depends_on:

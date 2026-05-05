@@ -25,7 +25,6 @@ proto:
 	python3 -m grpc_tools.protoc --proto_path=$(PROTO_DIR) \
 		--python_out=$(PY_OUT_DIR) \
 		--grpc_python_out=$(PY_OUT_DIR) \
-		--mypy_out=$(PY_OUT_DIR) \
 		$(PROTO_DIR)/*.proto
 
 	@echo "Done! Generated files are in $(GO_OUT_DIR) and $(PY_OUT_DIR)"

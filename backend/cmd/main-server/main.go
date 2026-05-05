@@ -26,7 +26,11 @@ func main() {
 	}
 	aiClient := smartlock.NewAIServiceClient(conn)
 
-	rabbit, err := broker.NewRabbitMQ("amqp://guest:guest@rabbitmq:5672/")
+	rabbitURL := os.Getenv("RABBITMQ_URL")
+	if rabbitURL == "" {
+		rabbitURL = "amqp://user:password@localhost:5672/"
+	}
+	rabbit, err := broker.NewRabbitMQ(rabbitURL)
 	if err != nil {
 		fmt.Printf("Failed to connect to RabbitMQ: %v\n", err)
 	}

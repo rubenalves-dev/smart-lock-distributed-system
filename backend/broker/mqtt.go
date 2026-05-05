@@ -24,6 +24,6 @@ func StartSubscriber(brokerIp string, dataChan chan<- models.SensorPayload) {
 
 	client := mqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		panic(token.Error())
+		fmt.Printf("\nFailed to connect to MQTT broker: %v\n", token.Error())
 	}
 }
