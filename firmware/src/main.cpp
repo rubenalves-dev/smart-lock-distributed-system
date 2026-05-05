@@ -10,10 +10,11 @@
 #include "index.h"
 #include "utils/timer.h"
 
-// --- MQTT Config ---
+// --- Servers Config ---
 const char *SSID = "Wokwi-GUEST";
 const char *PASSWORD = "";
-const char *MQTT_SERVER = "host.wokwi.internal"; // TROQUEM PELO VOSSO IP PARA IR BUSCAR O MOSQUITTO DOCKER
+const char *MQTT_SERVER = "host.wokwi.internal";
+const int MQTT_PORT = 1883;
 
 // --- Pins ---
 const int LOCK_PIN = 26;
@@ -30,13 +31,15 @@ Preferences preferences;
 
 // --- Variables ---
 bool isLocked = true;
+int failCount = 0;
+String lastUser = "none";
 
 // --- Timers ---
-Timer lockTimer(1000, []() {
+// Timer lockTimer(1000, []() {
 
-});
+// });
 
-void sendTelemetry(String type, float value)
+void sendTelemetry(String eventType, String details)
 {
     if (!mqttClient.connected())
     {
@@ -44,26 +47,30 @@ void sendTelemetry(String type, float value)
         return;
     }
 
-    StaticJsonDocument<200> doc;
-    doc["device_id"] = "";
-    doc["type"] = type;
-    doc["value"] = value;
-    doc["is_locked"] = isLocked;
+    StaticJsonDocument<300> doc;
+    doc["device_id"] = "smartlock_esp32";
+    doc["event"] = eventType;
+    doc["status"] = isLocked ? "LOCKED" : "UNLOCKED";
+    doc["user"] = lastUser;
+    doc["fails"] = failCount;
+    doc["rssi"] = WiFi.RSSI();
+    doc["uptime"] = millis() / 1000;
 
-    char buffer[200];
+    char buffer[300];
     serializeJson(doc, buffer);
     mqttClient.publish("lock/telemetry", buffer);
 }
 
 // --- STEP 1: Define the function FIRST ---
-void updateLockState(bool lock)
+void updateLockState(bool lock, String user = "system")
 {
     isLocked = lock;
+    lastUser = user;
     digitalWrite(LOCK_PIN, isLocked ? LOW : HIGH);
     digitalWrite(STATUS_LED, isLocked ? LOW : HIGH);
 
     preferences.putBool("state", isLocked);
-    sendTelemetry("status_change", isLocked ? 1 : 0);
+    sendTelemetry("status_change", isLocked ? "LOCKED" : "UNLOCKED");
 }
 
 void reconnect()
@@ -120,11 +127,14 @@ void setup()
 
     WiFi.begin(SSID, PASSWORD);
     while (WiFi.status() != WL_CONNECTED)
+    {
         delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nWifi connected, IP: " + WiFi.localIP().toString());
     analogWrite(WIFI_LED, 128);
 
-    MDNS.begin("fechadura");
-    mqttClient.setServer(MQTT_SERVER, 1883);
+    mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
     mqttClient.setCallback(callback);
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -147,17 +157,18 @@ void loop()
     if (digitalRead(SENSOR_PIN) == LOW)
     {
         Serial.println("Fingerprint Match!");
-        updateLockState(false);
+        failCount = 0;
+        updateLockState(false, "um gajo random");
         delay(5000);
-        updateLockState(true);
+        updateLockState(true, "um gajo random");
     }
 
     // Vibration Sensor Logic
     if (digitalRead(VIBRATION_PIN) == LOW)
     {
-        Serial.println("Vibration Detected!");
-        updateLockState(false);
-        delay(5000);
-        updateLockState(true);
+        Serial.println("Vibration Detected! - Potential Breach!");
+        failCount++;
+        sendTelemetry("ALERT", "Vibration Detected");
+        delay(1000);
     }
 }
