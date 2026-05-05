@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+      - name: Build images (compose)
+        run: docker compose -f deployments/docker-compose.yml build
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+      - name: Go tests
+        run: cd backend && go test ./...
+
+      - name: Bring stack up (smoke)
+        run: docker compose -f deployments/docker-compose.yml up -d
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f deployments/docker-compose.yml down -v

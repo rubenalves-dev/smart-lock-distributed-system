@@ -1,0 +1,7 @@
+tensorflow>=2.15.0
+grpcio>=1.80.0
+grpcio-tools>=1.80.0
+protobuf>=6.31.1
+numpy<2.0.0
+keras
+h5py
