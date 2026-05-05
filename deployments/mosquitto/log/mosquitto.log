@@ -751,3 +751,4 @@
 1777990279: mosquitto version 2.1.2 running
 1777990281: New connection from 172.22.0.6:46040 on port 1883.
 1777990281: New client connected from 172.22.0.6:46040 as go_backend_subscriber (p4, c1, k30).
+1777992080: Saving in-memory database to /mosquitto/data//mosquitto.db.
