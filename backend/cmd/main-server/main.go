@@ -18,7 +18,7 @@ import (
 func main() {
 	telemetryChan := make(chan models.SensorPayload, 100)
 
-	go broker.StartSubscriber("192.168.1.219", telemetryChan)
+	go broker.StartSubscriber("mosquitto_broker", telemetryChan)
 
 	conn, err := grpc.NewClient("ai-service:50051", grpc.WithInsecure())
 	if err != nil {

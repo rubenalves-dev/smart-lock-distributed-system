@@ -13,7 +13,7 @@
 // --- MQTT Config ---
 const char *SSID = "Wokwi-GUEST";
 const char *PASSWORD = "";
-const char *MQTT_SERVER = "192.168.1.219"; // TROQUEM PELO VOSSO IP PARA IR BUSCAR O MOSQUITTO DOCKER
+const char *MQTT_SERVER = "host.wokwi.internal"; // TROQUEM PELO VOSSO IP PARA IR BUSCAR O MOSQUITTO DOCKER
 
 // --- Pins ---
 const int LOCK_PIN = 26;
