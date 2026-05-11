@@ -1,64 +1,166 @@
 {
   "version": 1,
-  "author": "Hugu Lopes, Rodrigo Ventura, Rúben Alves",
+  "author": "Smartlock Project",
   "editor": "wokwi",
   "parts": [
     {
-      "type": "board-esp32-devkit-c-v4",
-      "id": "esp",
+      "type": "board-esp32-devkit-v1",
+      "id": "esp32",
+      "top": 275.68,
+      "left": 379.2,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-breadboard",
+      "id": "bb1",
+      "top": -3,
+      "left": 2.8,
+      "attrs": { "rows": "30", "color": "#eeefed" }
+    },
+    {
+      "type": "wokwi-breadboard",
+      "id": "bb2",
       "top": 0,
-      "left": 0,
+      "left": 700,
+      "attrs": { "rows": "30" }
+    },
+    {
+      "type": "board-mfrc522",
+      "id": "rfid",
+      "top": 20,
+      "left": 720,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "ultrasonic",
+      "top": 11.1,
+      "left": 53.5,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-stepper-motor",
+      "id": "stepper",
+      "top": 599.71,
+      "left": 701.68,
+      "attrs": { "angle": "0" }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr",
+      "top": 243.2,
+      "left": 48.8,
       "attrs": {}
     },
     {
       "type": "wokwi-led",
-      "id": "led-lock",
-      "top": -90,
-      "left": -101.8,
-      "attrs": { "color": "blue", "label": "Lock" }
+      "id": "led_opening",
+      "top": 332.4,
+      "left": 23,
+      "attrs": { "color": "yellow", "label": "OPENING" }
     },
     {
       "type": "wokwi-led",
-      "id": "led-status",
-      "top": -22.8,
-      "left": -101.8,
-      "attrs": { "color": "green", "label": "Status" }
+      "id": "led_open",
+      "top": 380.4,
+      "left": 23,
+      "attrs": { "color": "green", "label": "OPEN" }
     },
     {
       "type": "wokwi-led",
-      "id": "led-wifi",
-      "top": 44.4,
-      "left": -101.8,
-      "attrs": { "color": "red", "label": "WiFi" }
+      "id": "led_closing",
+      "top": 428.4,
+      "left": 23,
+      "attrs": { "color": "orange", "label": "CLOSING" }
     },
     {
-      "type": "wokwi-pushbutton",
-      "id": "btn-finger",
-      "top": -80.2,
-      "left": 124.8,
-      "attrs": { "color": "green", "label": "Fingerprint" }
+      "type": "wokwi-led",
+      "id": "led_closed",
+      "top": 476.4,
+      "left": 23,
+      "attrs": { "color": "red", "label": "CLOSED" }
     },
     {
-      "type": "wokwi-pushbutton",
-      "id": "btn-vib",
-      "top": 25.4,
-      "left": 172.8,
-      "attrs": { "color": "red", "label": "Vibration" }
+      "type": "wokwi-resistor",
+      "id": "r_opening",
+      "top": 407.45,
+      "left": 94.6,
+      "rotate": 180,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_open",
+      "top": 435.95,
+      "left": 96,
+      "rotate": 180,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_closing",
+      "top": 483.95,
+      "left": 96,
+      "rotate": 180,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_closed",
+      "top": 520,
+      "left": 100,
+      "rotate": 180,
+      "attrs": { "value": "220" }
     }
   ],
   "connections": [
-    ["esp:TX", "$serialMonitor:RX", "", []],
-    ["esp:RX", "$serialMonitor:TX", "", []],
-    ["esp:GND.1", "led-lock:C", "black", ["h-43.01", "v-172.8", "h-48.4"]],
-    ["esp:26", "led-lock:A", "blue", ["h-14.21", "v-144", "h-67.2"]],
-    ["esp:GND.1", "led-status:C", "black", ["h-43.01", "v-105.6", "h-48.4"]],
-    ["esp:27", "led-status:A", "green", ["h-33.41", "v-86.4", "h-48"]],
-    ["esp:GND.1", "led-wifi:C", "black", ["h-43.01", "v-38.4", "h-48.4"]],
-    ["esp:25", "led-wifi:A", "red", ["h-81.41"]],
-    ["esp:GND.2", "btn-finger:2.l", "black", ["v-76.8", "h4.84"]],
-    ["esp:33", "btn-finger:1.l", "green", ["h110.59", "v-163.2"]],
-    ["esp:GND.2", "btn-vib:2.l", "black", ["v20", "h20"]],
-    ["esp:14", "btn-vib:1.l", "red", ["h14.59", "v-96"]]
+    ["esp32:GND.1", "bb1:25t.a", "black", ["h0"]],
+    ["esp32:3V3", "bb1:1t.a", "red", ["v153.6", "h-461.29", "v-537.6", "h9.6"]],
+    ["esp32:GND.2", "bb2:25t.j", "black", ["h0"]],
+    ["esp32:VIN", "bb2:1t.j", "red", ["h0"]],
+    ["ultrasonic:VCC", "bb1:1t.e", "red", ["h0"]],
+    ["ultrasonic:GND", "bb1:25t.e", "black", ["h0"]],
+    ["ultrasonic:TRIG", "esp32:D5", "green", ["v19.2", "h383.6", "v230.4"]],
+    ["ultrasonic:ECHO", "esp32:D17", "blue", ["v9.6", "h373.2", "v220.8"]],
+    ["ldr:VCC", "bb1:3t.e", "red", ["v-38.4", "h-175.6"]],
+    ["ldr:GND", "bb1:25t.d", "black", ["h0"]],
+    ["ldr:AO", "esp32:D34", "purple", ["h0"]],
+    ["rfid:3.3V", "bb2:1t.f", "red", ["h0"]],
+    ["rfid:GND", "bb2:25t.f", "black", ["h0"]],
+    ["rfid:RST", "esp32:D22", "orange", ["h0"]],
+    ["rfid:SDA", "esp32:D21", "yellow", ["h0"]],
+    ["rfid:MOSI", "esp32:D23", "green", ["h0"]],
+    ["rfid:MISO", "esp32:D19", "blue", ["h0"]],
+    ["rfid:SCK", "esp32:D15", "purple", ["h0"]],
+    ["stepper:A+", "esp32:D25", "red", ["v38.4", "h-432", "v-508.8"]],
+    ["stepper:A-", "esp32:D26", "orange", ["v28.8", "h-432", "v-489.6"]],
+    ["stepper:B+", "esp32:D27", "blue", ["v48", "h-460.8", "v-499.2"]],
+    ["stepper:B-", "esp32:D14", "purple", ["v57.6", "h-480.01", "v-499.2"]],
+    ["r_opening:1", "esp32:D13", "yellow", ["h8.2", "h222.2"]],
+    ["r_opening:2", "led_opening:A", "yellow", ["h0"]],
+    ["led_opening:C", "bb1:25t.b", "black", ["h0"]],
+    ["r_open:1", "esp32:D12", "green", ["h197.6", "v-42.45"]],
+    ["r_open:2", "led_open:A", "green", ["h0"]],
+    ["led_open:C", "bb1:25t.c", "black", ["h0"]],
+    ["r_closing:1", "esp32:D2", "orange", ["h389.6", "v-82.45"]],
+    ["r_closing:2", "led_closing:A", "orange", ["h0"]],
+    ["led_closing:C", "bb1:24t.b", "black", ["h0"]],
+    ["r_closed:1", "esp32:D4", "red", ["h399.2", "v-132.05"]],
+    ["r_closed:2", "led_closed:A", "red", ["h0"]],
+    ["led_closed:C", "bb1:24t.c", "black", ["h0"]],
+    ["bb1:25t.a", "bb1:25t.b", "black", ["h0"]],
+    ["bb1:25t.a", "bb1:25t.c", "black", ["h0"]],
+    ["bb1:25t.a", "bb1:25t.d", "black", ["h0"]],
+    ["bb1:25t.a", "bb1:24t.b", "black", ["h0"]],
+    ["bb1:25t.a", "bb1:24t.c", "black", ["h0"]],
+    ["bb1:1t.b", "bb1:tp.1", "red", ["v-48"]],
+    ["bb1:tp.2", "bb1:3t.a", "red", ["v19.5", "h-10.4"]],
+    ["rfid:SDA", "bb2:1t.b", "", ["$bb"]],
+    ["rfid:SCK", "bb2:1t.c", "", ["$bb"]],
+    ["rfid:MOSI", "bb2:1t.d", "", ["$bb"]],
+    ["rfid:MISO", "bb2:1t.e", "", ["$bb"]],
+    ["rfid:RST", "bb2:1b.f", "", ["$bb"]],
+    ["rfid:3.3V", "bb2:1b.g", "", ["$bb"]]
   ],
   "dependencies": {}
 }
