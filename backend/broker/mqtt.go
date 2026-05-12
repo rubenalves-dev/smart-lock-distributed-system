@@ -14,7 +14,7 @@ func StartSubscriber(brokerIp string, dataChan chan<- models.SensorPayload) {
 
 	opts.OnConnect = func(c mqtt.Client) {
 		fmt.Println("Connected to MQTT broker")
-		c.Subscribe("lock/telemetry", 0, func(c mqtt.Client, m mqtt.Message) {
+		c.Subscribe("lock/events", 0, func(c mqtt.Client, m mqtt.Message) {
 			var payload models.SensorPayload
 			if err := json.Unmarshal(m.Payload(), &payload); err == nil {
 				dataChan <- payload

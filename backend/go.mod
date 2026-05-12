@@ -3,6 +3,7 @@ module github.com/rubenalves-dev/smart-lock-distributed-system
 go 1.26.2
 
 require (
+	github.com/lib/pq v1.12.3
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
 )

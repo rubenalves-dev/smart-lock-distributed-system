@@ -3,6 +3,11 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq_broker
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5672:5672" # RabbitMQ port
       - "15672:15672" # Management UI (Username/Pass: guest/guest)
@@ -23,8 +28,8 @@ services:
     build: ../backend
     container_name: main_server
     ports:
-      - "8080:8080" # REST API for Web App
-      - "50052:50052" # gRPC port
+      - "8080:8080"
+      - "50052:50052"
     environment:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - AI_SERVICE_ADDR=ai-service:50051

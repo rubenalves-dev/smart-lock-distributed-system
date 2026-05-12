@@ -792,3 +792,666 @@
 1778530158: New client connected from 192.168.65.1:40959 as smartlock_esp32 (p4, c1, k15).
 1778530181: Client smartlock_esp32 [192.168.65.1:40959] disconnected: exceeded timeout.
 1778530201: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778609684: mosquitto version 2.1.2 starting
+1778609684: Config loaded from /mosquitto/config/mosquitto.conf.
+1778609684: Bridge support available.
+1778609684: Persistence support available.
+1778609684: TLS support available.
+1778609684: TLS-PSK support available.
+1778609684: Websockets support available.
+1778609684: Opening ipv4 listen socket on port 1883.
+1778609684: Opening ipv4 listen socket on port 9001.
+1778609684: mosquitto version 2.1.2 running
+1778609684: New connection from 172.18.0.6:52122 on port 1883.
+1778609684: New client connected from 172.18.0.6:52122 as go_backend_subscriber (p4, c1, k30).
+1778609783: New connection from 192.168.65.1:54169 on port 1883.
+1778609783: New client connected from 192.168.65.1:54169 as smartlock_esp32 (p4, c1, k15).
+1778609896: Client smartlock_esp32 [192.168.65.1:54169] disconnected: exceeded timeout.
+1778610179: New connection from 192.168.65.1:52021 on port 1883.
+1778610179: New client connected from 192.168.65.1:52021 as esp32_smartlock (p4, c1, k15).
+1778610202: Client esp32_smartlock [192.168.65.1:52021] disconnected: exceeded timeout.
+1778610203: New connection from 192.168.65.1:21592 on port 1883.
+1778610203: New client connected from 192.168.65.1:21592 as esp32_smartlock (p4, c1, k15).
+1778610227: Client esp32_smartlock [192.168.65.1:21592] disconnected: exceeded timeout.
+1778610231: New connection from 192.168.65.1:35085 on port 1883.
+1778610231: New client connected from 192.168.65.1:35085 as esp32_smartlock (p4, c1, k15).
+1778610253: Client esp32_smartlock [192.168.65.1:35085] disconnected: exceeded timeout.
+1778610254: New connection from 192.168.65.1:40284 on port 1883.
+1778610254: New client connected from 192.168.65.1:40284 as esp32_smartlock (p4, c1, k15).
+1778610276: Client esp32_smartlock [192.168.65.1:40284] disconnected: exceeded timeout.
+1778610276: New connection from 192.168.65.1:47247 on port 1883.
+1778610277: New client connected from 192.168.65.1:47247 as esp32_smartlock (p4, c1, k15).
+1778610299: Client esp32_smartlock [192.168.65.1:47247] disconnected: exceeded timeout.
+1778610934: New connection from 192.168.65.1:17451 on port 1883.
+1778610934: New client connected from 192.168.65.1:17451 as esp32_smartlock (p4, c1, k15).
+1778610952: New connection from 192.168.65.1:46766 on port 1883.
+1778610952: Client esp32_smartlock [192.168.65.1:17451] disconnected: session taken over.
+1778610952: New client connected from 192.168.65.1:46766 as esp32_smartlock (p4, c1, k15).
+1778610974: Client esp32_smartlock [192.168.65.1:46766] disconnected: exceeded timeout.
+1778610974: New connection from 192.168.65.1:56781 on port 1883.
+1778610975: New client connected from 192.168.65.1:56781 as esp32_smartlock (p4, c1, k15).
+1778610997: Client esp32_smartlock [192.168.65.1:56781] disconnected: exceeded timeout.
+1778611008: New connection from 192.168.65.1:28473 on port 1883.
+1778611008: New client connected from 192.168.65.1:28473 as esp32_smartlock (p4, c1, k15).
+1778611030: Client esp32_smartlock [192.168.65.1:28473] disconnected: exceeded timeout.
+1778611035: New connection from 192.168.65.1:60985 on port 1883.
+1778611035: New client connected from 192.168.65.1:60985 as esp32_smartlock (p4, c1, k15).
+1778611087: Client esp32_smartlock [192.168.65.1:60985] disconnected: exceeded timeout.
+1778611088: New connection from 192.168.65.1:20240 on port 1883.
+1778611088: New client connected from 192.168.65.1:20240 as esp32_smartlock (p4, c1, k15).
+1778611110: Client esp32_smartlock [192.168.65.1:20240] disconnected: exceeded timeout.
+1778611111: New connection from 192.168.65.1:48576 on port 1883.
+1778611111: New client connected from 192.168.65.1:48576 as esp32_smartlock (p4, c1, k15).
+1778611133: Client esp32_smartlock [192.168.65.1:48576] disconnected: exceeded timeout.
+1778611484: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778611484: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778611578: New connection from 192.168.65.1:30710 on port 1883.
+1778611578: New client connected from 192.168.65.1:30710 as esp32_smartlock (p4, c1, k15).
+1778611600: Client esp32_smartlock [192.168.65.1:30710] disconnected: exceeded timeout.
+1778611603: New connection from 192.168.65.1:19550 on port 1883.
+1778611603: New client connected from 192.168.65.1:19550 as esp32_smartlock (p4, c1, k15).
+1778611658: Client esp32_smartlock [192.168.65.1:19550] disconnected: exceeded timeout.
+1778611658: New connection from 192.168.65.1:25273 on port 1883.
+1778611659: New client connected from 192.168.65.1:25273 as esp32_smartlock (p4, c1, k15).
+1778611682: Client esp32_smartlock [192.168.65.1:25273] disconnected: exceeded timeout.
+1778611683: New connection from 192.168.65.1:39996 on port 1883.
+1778611683: New client connected from 192.168.65.1:39996 as esp32_smartlock (p4, c1, k15).
+1778611705: Client esp32_smartlock [192.168.65.1:39996] disconnected: exceeded timeout.
+1778612828: New connection from 192.168.65.1:50623 on port 1883.
+1778612828: New client connected from 192.168.65.1:50623 as esp32_smartlock (p4, c1, k15).
+1778612915: Client esp32_smartlock [192.168.65.1:50623] disconnected: exceeded timeout.
+1778612916: New connection from 192.168.65.1:35119 on port 1883.
+1778612916: New client connected from 192.168.65.1:35119 as esp32_smartlock (p4, c1, k15).
+1778612938: Client esp32_smartlock [192.168.65.1:35119] disconnected: exceeded timeout.
+1778612939: New connection from 192.168.65.1:36270 on port 1883.
+1778612939: New client connected from 192.168.65.1:36270 as esp32_smartlock (p4, c1, k15).
+1778612961: Client esp32_smartlock [192.168.65.1:36270] disconnected: exceeded timeout.
+1778612962: New connection from 192.168.65.1:56611 on port 1883.
+1778612962: New client connected from 192.168.65.1:56611 as esp32_smartlock (p4, c1, k15).
+1778612984: Client esp32_smartlock [192.168.65.1:56611] disconnected: exceeded timeout.
+1778612986: New connection from 192.168.65.1:62562 on port 1883.
+1778612986: New client connected from 192.168.65.1:62562 as esp32_smartlock (p4, c1, k15).
+1778613035: Client esp32_smartlock [192.168.65.1:62562] disconnected: exceeded timeout.
+1778613036: New connection from 192.168.65.1:26910 on port 1883.
+1778613036: New client connected from 192.168.65.1:26910 as esp32_smartlock (p4, c1, k15).
+1778613058: Client esp32_smartlock [192.168.65.1:26910] disconnected: exceeded timeout.
+1778613059: New connection from 192.168.65.1:50522 on port 1883.
+1778613059: New client connected from 192.168.65.1:50522 as esp32_smartlock (p4, c1, k15).
+1778613081: Client esp32_smartlock [192.168.65.1:50522] disconnected: exceeded timeout.
+1778613082: New connection from 192.168.65.1:62904 on port 1883.
+1778613082: New client connected from 192.168.65.1:62904 as esp32_smartlock (p4, c1, k15).
+1778613104: Client esp32_smartlock [192.168.65.1:62904] disconnected: exceeded timeout.
+1778613105: New connection from 192.168.65.1:25463 on port 1883.
+1778613105: New client connected from 192.168.65.1:25463 as esp32_smartlock (p4, c1, k15).
+1778613127: Client esp32_smartlock [192.168.65.1:25463] disconnected: exceeded timeout.
+1778613128: New connection from 192.168.65.1:30865 on port 1883.
+1778613128: New client connected from 192.168.65.1:30865 as esp32_smartlock (p4, c1, k15).
+1778613150: Client esp32_smartlock [192.168.65.1:30865] disconnected: exceeded timeout.
+1778613151: New connection from 192.168.65.1:47529 on port 1883.
+1778613151: New client connected from 192.168.65.1:47529 as esp32_smartlock (p4, c1, k15).
+1778613173: Client esp32_smartlock [192.168.65.1:47529] disconnected: exceeded timeout.
+1778613174: New connection from 192.168.65.1:22741 on port 1883.
+1778613174: New client connected from 192.168.65.1:22741 as esp32_smartlock (p4, c1, k15).
+1778613196: Client esp32_smartlock [192.168.65.1:22741] disconnected: exceeded timeout.
+1778613197: New connection from 192.168.65.1:54592 on port 1883.
+1778613197: New client connected from 192.168.65.1:54592 as esp32_smartlock (p4, c1, k15).
+1778613219: Client esp32_smartlock [192.168.65.1:54592] disconnected: exceeded timeout.
+1778613220: New connection from 192.168.65.1:54940 on port 1883.
+1778613220: New client connected from 192.168.65.1:54940 as esp32_smartlock (p4, c1, k15).
+1778613242: Client esp32_smartlock [192.168.65.1:54940] disconnected: exceeded timeout.
+1778613243: New connection from 192.168.65.1:64420 on port 1883.
+1778613243: New client connected from 192.168.65.1:64420 as esp32_smartlock (p4, c1, k15).
+1778613265: Client esp32_smartlock [192.168.65.1:64420] disconnected: exceeded timeout.
+1778613266: New connection from 192.168.65.1:53142 on port 1883.
+1778613266: New client connected from 192.168.65.1:53142 as esp32_smartlock (p4, c1, k15).
+1778613285: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778613285: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778613319: Client esp32_smartlock [192.168.65.1:53142] disconnected: exceeded timeout.
+1778613615: New connection from 127.0.0.1:45454 on port 1883.
+1778613615: New client connected from 127.0.0.1:45454 as auto-F8AD8DCA-5D88-55BF-84C5-126940B74B03 (p4, c1, k60).
+1778613656: New connection from 192.168.65.1:24831 on port 1883.
+1778613656: New client connected from 192.168.65.1:24831 as esp32_smartlock (p4, c1, k15).
+1778613712: Client esp32_smartlock [192.168.65.1:24831] disconnected: exceeded timeout.
+1778613713: New connection from 192.168.65.1:20728 on port 1883.
+1778613713: New client connected from 192.168.65.1:20728 as esp32_smartlock (p4, c1, k15).
+1778613735: Client esp32_smartlock [192.168.65.1:20728] disconnected: exceeded timeout.
+1778613736: New connection from 192.168.65.1:17443 on port 1883.
+1778613736: New client connected from 192.168.65.1:17443 as esp32_smartlock (p4, c1, k15).
+1778613758: Client esp32_smartlock [192.168.65.1:17443] disconnected: exceeded timeout.
+1778613759: New connection from 192.168.65.1:36403 on port 1883.
+1778613759: New client connected from 192.168.65.1:36403 as esp32_smartlock (p4, c1, k15).
+1778613763: Client auto-F8AD8DCA-5D88-55BF-84C5-126940B74B03 [127.0.0.1:45454] disconnected.
+1778613767: New connection from 127.0.0.1:41930 on port 1883.
+1778613767: New client connected from 127.0.0.1:41930 as auto-5F2CA6CC-08DC-CEAB-78A5-D53AE8C511F9 (p4, c1, k60).
+1778613812: New connection from 192.168.65.1:53861 on port 1883.
+1778613812: Client esp32_smartlock [192.168.65.1:36403] disconnected: session taken over.
+1778613812: New client connected from 192.168.65.1:53861 as esp32_smartlock (p4, c1, k15).
+1778613834: Client esp32_smartlock [192.168.65.1:53861] disconnected: exceeded timeout.
+1778613835: New connection from 192.168.65.1:20833 on port 1883.
+1778613835: New client connected from 192.168.65.1:20833 as esp32_smartlock (p4, c1, k15).
+1778613857: Client esp32_smartlock [192.168.65.1:20833] disconnected: exceeded timeout.
+1778613858: New connection from 192.168.65.1:40020 on port 1883.
+1778613858: New client connected from 192.168.65.1:40020 as esp32_smartlock (p4, c1, k15).
+1778613880: Client esp32_smartlock [192.168.65.1:40020] disconnected: exceeded timeout.
+1778614015: New connection from 192.168.65.1:62537 on port 1883.
+1778614015: New client connected from 192.168.65.1:62537 as esp32_smartlock (p4, c1, k15).
+1778614021: New connection from 192.168.65.1:57864 on port 1883.
+1778614021: Client esp32_smartlock [192.168.65.1:62537] disconnected: session taken over.
+1778614021: New client connected from 192.168.65.1:57864 as esp32_smartlock (p4, c1, k15).
+1778614074: Client esp32_smartlock [192.168.65.1:57864] disconnected: exceeded timeout.
+1778614075: New connection from 192.168.65.1:56860 on port 1883.
+1778614075: New client connected from 192.168.65.1:56860 as esp32_smartlock (p4, c1, k15).
+1778614097: Client esp32_smartlock [192.168.65.1:56860] disconnected: exceeded timeout.
+1778614138: New connection from 192.168.65.1:55497 on port 1883.
+1778614138: New client connected from 192.168.65.1:55497 as esp32_smartlock (p4, c1, k15).
+1778614191: Client esp32_smartlock [192.168.65.1:55497] disconnected: exceeded timeout.
+1778614192: New connection from 192.168.65.1:63835 on port 1883.
+1778614192: New client connected from 192.168.65.1:63835 as esp32_smartlock (p4, c1, k15).
+1778614214: Client esp32_smartlock [192.168.65.1:63835] disconnected: exceeded timeout.
+1778614215: New connection from 192.168.65.1:22864 on port 1883.
+1778614215: New client connected from 192.168.65.1:22864 as esp32_smartlock (p4, c1, k15).
+1778614237: Client esp32_smartlock [192.168.65.1:22864] disconnected: exceeded timeout.
+1778614238: New connection from 192.168.65.1:51606 on port 1883.
+1778614238: New client connected from 192.168.65.1:51606 as esp32_smartlock (p4, c1, k15).
+1778614260: Client esp32_smartlock [192.168.65.1:51606] disconnected: exceeded timeout.
+1778614261: New connection from 192.168.65.1:62552 on port 1883.
+1778614261: New client connected from 192.168.65.1:62552 as esp32_smartlock (p4, c1, k15).
+1778614283: Client esp32_smartlock [192.168.65.1:62552] disconnected: exceeded timeout.
+1778614284: New connection from 192.168.65.1:31092 on port 1883.
+1778614284: New client connected from 192.168.65.1:31092 as esp32_smartlock (p4, c1, k15).
+1778614306: Client esp32_smartlock [192.168.65.1:31092] disconnected: exceeded timeout.
+1778614307: New connection from 192.168.65.1:48207 on port 1883.
+1778614307: New client connected from 192.168.65.1:48207 as esp32_smartlock (p4, c1, k15).
+1778614329: Client esp32_smartlock [192.168.65.1:48207] disconnected: exceeded timeout.
+1778614330: New connection from 192.168.65.1:47154 on port 1883.
+1778614330: New client connected from 192.168.65.1:47154 as esp32_smartlock (p4, c1, k15).
+1778614352: Client esp32_smartlock [192.168.65.1:47154] disconnected: exceeded timeout.
+1778614352: New connection from 192.168.65.1:48099 on port 1883.
+1778614353: New client connected from 192.168.65.1:48099 as esp32_smartlock (p4, c1, k15).
+1778614375: Client esp32_smartlock [192.168.65.1:48099] disconnected: exceeded timeout.
+1778614376: New connection from 192.168.65.1:32086 on port 1883.
+1778614376: New client connected from 192.168.65.1:32086 as esp32_smartlock (p4, c1, k15).
+1778614398: Client esp32_smartlock [192.168.65.1:32086] disconnected: exceeded timeout.
+1778614399: New connection from 192.168.65.1:48980 on port 1883.
+1778614399: New client connected from 192.168.65.1:48980 as esp32_smartlock (p4, c1, k15).
+1778614421: Client esp32_smartlock [192.168.65.1:48980] disconnected: exceeded timeout.
+1778614422: New connection from 192.168.65.1:19616 on port 1883.
+1778614422: New client connected from 192.168.65.1:19616 as esp32_smartlock (p4, c1, k15).
+1778614444: Client esp32_smartlock [192.168.65.1:19616] disconnected: exceeded timeout.
+1778614445: New connection from 192.168.65.1:24431 on port 1883.
+1778614445: New client connected from 192.168.65.1:24431 as esp32_smartlock (p4, c1, k15).
+1778614467: Client esp32_smartlock [192.168.65.1:24431] disconnected: exceeded timeout.
+1778614468: New connection from 192.168.65.1:39574 on port 1883.
+1778614468: New client connected from 192.168.65.1:39574 as esp32_smartlock (p4, c1, k15).
+1778614481: New connection from 127.0.0.1:49044 on port 1883.
+1778614481: New client connected from 127.0.0.1:49044 as auto-952B570F-4F5B-3DBD-BADF-C8B816588B5A (p4, c1, k60).
+1778614490: Client esp32_smartlock [192.168.65.1:39574] disconnected: exceeded timeout.
+1778614491: New connection from 192.168.65.1:49068 on port 1883.
+1778614491: New client connected from 192.168.65.1:49068 as esp32_smartlock (p4, c1, k15).
+1778614514: Client esp32_smartlock [192.168.65.1:49068] disconnected: exceeded timeout.
+1778614515: New connection from 192.168.65.1:54309 on port 1883.
+1778614515: New client connected from 192.168.65.1:54309 as esp32_smartlock (p4, c1, k15).
+1778614537: Client esp32_smartlock [192.168.65.1:54309] disconnected: exceeded timeout.
+1778614538: New connection from 192.168.65.1:36523 on port 1883.
+1778614538: New client connected from 192.168.65.1:36523 as esp32_smartlock (p4, c1, k15).
+1778614560: Client esp32_smartlock [192.168.65.1:36523] disconnected: exceeded timeout.
+1778614561: New connection from 192.168.65.1:17871 on port 1883.
+1778614561: New client connected from 192.168.65.1:17871 as esp32_smartlock (p4, c1, k15).
+1778614583: Client esp32_smartlock [192.168.65.1:17871] disconnected: exceeded timeout.
+1778614584: New connection from 192.168.65.1:25366 on port 1883.
+1778614584: New client connected from 192.168.65.1:25366 as esp32_smartlock (p4, c1, k15).
+1778614606: Client esp32_smartlock [192.168.65.1:25366] disconnected: exceeded timeout.
+1778614607: New connection from 192.168.65.1:49595 on port 1883.
+1778614607: New client connected from 192.168.65.1:49595 as esp32_smartlock (p4, c1, k15).
+1778614629: Client esp32_smartlock [192.168.65.1:49595] disconnected: exceeded timeout.
+1778614630: New connection from 192.168.65.1:38162 on port 1883.
+1778614630: New client connected from 192.168.65.1:38162 as esp32_smartlock (p4, c1, k15).
+1778614652: Client esp32_smartlock [192.168.65.1:38162] disconnected: exceeded timeout.
+1778614652: New connection from 192.168.65.1:19677 on port 1883.
+1778614653: New client connected from 192.168.65.1:19677 as esp32_smartlock (p4, c1, k15).
+1778614657: Client auto-952B570F-4F5B-3DBD-BADF-C8B816588B5A [127.0.0.1:49044] disconnected.
+1778614675: Client esp32_smartlock [192.168.65.1:19677] disconnected: exceeded timeout.
+1778614676: New connection from 192.168.65.1:22828 on port 1883.
+1778614676: New client connected from 192.168.65.1:22828 as esp32_smartlock (p4, c1, k15).
+1778614698: Client esp32_smartlock [192.168.65.1:22828] disconnected: exceeded timeout.
+1778614698: New connection from 192.168.65.1:37483 on port 1883.
+1778614699: New client connected from 192.168.65.1:37483 as esp32_smartlock (p4, c1, k15).
+1778614721: Client esp32_smartlock [192.168.65.1:37483] disconnected: exceeded timeout.
+1778614722: New connection from 192.168.65.1:41329 on port 1883.
+1778614722: New client connected from 192.168.65.1:41329 as esp32_smartlock (p4, c1, k15).
+1778614744: Client esp32_smartlock [192.168.65.1:41329] disconnected: exceeded timeout.
+1778614745: New connection from 192.168.65.1:46098 on port 1883.
+1778614745: New client connected from 192.168.65.1:46098 as esp32_smartlock (p4, c1, k15).
+1778614767: Client esp32_smartlock [192.168.65.1:46098] disconnected: exceeded timeout.
+1778615086: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778615086: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778615199: New connection from 192.168.65.1:37694 on port 1883.
+1778615199: New client connected from 192.168.65.1:37694 as ESP32_Hugo (p4, c1, k15).
+1778615221: Client ESP32_Hugo [192.168.65.1:37694] disconnected: exceeded timeout.
+1778615223: New connection from 192.168.65.1:37664 on port 1883.
+1778615223: New client connected from 192.168.65.1:37664 as ESP32_Hugo (p4, c1, k15).
+1778615238: Client auto-5F2CA6CC-08DC-CEAB-78A5-D53AE8C511F9 [127.0.0.1:41930] disconnected.
+1778615245: Client ESP32_Hugo [192.168.65.1:37664] disconnected: exceeded timeout.
+1778615246: New connection from 192.168.65.1:56422 on port 1883.
+1778615246: New client connected from 192.168.65.1:56422 as ESP32_Hugo (p4, c1, k15).
+1778615268: Client ESP32_Hugo [192.168.65.1:56422] disconnected: exceeded timeout.
+1778615269: New connection from 192.168.65.1:23594 on port 1883.
+1778615269: New client connected from 192.168.65.1:23594 as ESP32_Hugo (p4, c1, k15).
+1778615291: Client ESP32_Hugo [192.168.65.1:23594] disconnected: exceeded timeout.
+1778615292: New connection from 192.168.65.1:46780 on port 1883.
+1778615292: New client connected from 192.168.65.1:46780 as ESP32_Hugo (p4, c1, k15).
+1778615314: Client ESP32_Hugo [192.168.65.1:46780] disconnected: exceeded timeout.
+1778615315: New connection from 192.168.65.1:61812 on port 1883.
+1778615315: New client connected from 192.168.65.1:61812 as ESP32_Hugo (p4, c1, k15).
+1778615371: Client ESP32_Hugo [192.168.65.1:61812] disconnected: exceeded timeout.
+1778615372: New connection from 192.168.65.1:26167 on port 1883.
+1778615372: New client connected from 192.168.65.1:26167 as ESP32_Hugo (p4, c1, k15).
+1778615394: Client ESP32_Hugo [192.168.65.1:26167] disconnected: exceeded timeout.
+1778615395: New connection from 192.168.65.1:23511 on port 1883.
+1778615395: New client connected from 192.168.65.1:23511 as ESP32_Hugo (p4, c1, k15).
+1778615452: Client ESP32_Hugo [192.168.65.1:23511] disconnected: exceeded timeout.
+1778615453: New connection from 192.168.65.1:32681 on port 1883.
+1778615453: New client connected from 192.168.65.1:32681 as ESP32_Hugo (p4, c1, k15).
+1778615475: Client ESP32_Hugo [192.168.65.1:32681] disconnected: exceeded timeout.
+1778615476: New connection from 192.168.65.1:47484 on port 1883.
+1778615476: New client connected from 192.168.65.1:47484 as ESP32_Hugo (p4, c1, k15).
+1778615506: Client ESP32_Hugo [192.168.65.1:47484] disconnected: exceeded timeout.
+1778615543: New connection from 192.168.65.1:51476 on port 1883.
+1778615543: New client connected from 192.168.65.1:51476 as ESP32_Hugo (p4, c1, k15).
+1778615555: New connection from 192.168.65.1:23293 on port 1883.
+1778615555: Client ESP32_Hugo [192.168.65.1:51476] disconnected: session taken over.
+1778615555: New client connected from 192.168.65.1:23293 as ESP32_Hugo (p4, c1, k15).
+1778615577: Client ESP32_Hugo [192.168.65.1:23293] disconnected: exceeded timeout.
+1778615578: New connection from 192.168.65.1:28301 on port 1883.
+1778615578: New client connected from 192.168.65.1:28301 as ESP32_Hugo (p4, c1, k15).
+1778615600: Client ESP32_Hugo [192.168.65.1:28301] disconnected: exceeded timeout.
+1778615601: New connection from 192.168.65.1:59848 on port 1883.
+1778615601: New client connected from 192.168.65.1:59848 as ESP32_Hugo (p4, c1, k15).
+1778615615: New connection from 127.0.0.1:38608 on port 1883.
+1778615615: New client connected from 127.0.0.1:38608 as auto-71727374-3184-37D5-B415-DCFF52D2BA3F (p4, c1, k60).
+1778615623: Client ESP32_Hugo [192.168.65.1:59848] disconnected: exceeded timeout.
+1778615624: New connection from 192.168.65.1:38810 on port 1883.
+1778615624: New client connected from 192.168.65.1:38810 as ESP32_Hugo (p4, c1, k15).
+1778615681: Client ESP32_Hugo [192.168.65.1:38810] disconnected: exceeded timeout.
+1778615682: New connection from 192.168.65.1:51410 on port 1883.
+1778615682: New client connected from 192.168.65.1:51410 as ESP32_Hugo (p4, c1, k15).
+1778615704: Client ESP32_Hugo [192.168.65.1:51410] disconnected: exceeded timeout.
+1778615705: New connection from 192.168.65.1:55437 on port 1883.
+1778615705: New client connected from 192.168.65.1:55437 as ESP32_Hugo (p4, c1, k15).
+1778615727: Client ESP32_Hugo [192.168.65.1:55437] disconnected: exceeded timeout.
+1778615728: New connection from 192.168.65.1:26931 on port 1883.
+1778615728: New client connected from 192.168.65.1:26931 as ESP32_Hugo (p4, c1, k15).
+1778615750: Client ESP32_Hugo [192.168.65.1:26931] disconnected: exceeded timeout.
+1778615751: New connection from 192.168.65.1:61367 on port 1883.
+1778615751: New client connected from 192.168.65.1:61367 as ESP32_Hugo (p4, c1, k15).
+1778615773: Client ESP32_Hugo [192.168.65.1:61367] disconnected: exceeded timeout.
+1778615774: New connection from 192.168.65.1:23524 on port 1883.
+1778615774: New client connected from 192.168.65.1:23524 as ESP32_Hugo (p4, c1, k15).
+1778615796: Client ESP32_Hugo [192.168.65.1:23524] disconnected: exceeded timeout.
+1778615797: New connection from 192.168.65.1:34207 on port 1883.
+1778615797: New client connected from 192.168.65.1:34207 as ESP32_Hugo (p4, c1, k15).
+1778615819: Client ESP32_Hugo [192.168.65.1:34207] disconnected: exceeded timeout.
+1778615820: New connection from 192.168.65.1:32769 on port 1883.
+1778615820: New client connected from 192.168.65.1:32769 as ESP32_Hugo (p4, c1, k15).
+1778615842: Client ESP32_Hugo [192.168.65.1:32769] disconnected: exceeded timeout.
+1778615843: New connection from 192.168.65.1:44437 on port 1883.
+1778615843: New client connected from 192.168.65.1:44437 as ESP32_Hugo (p4, c1, k15).
+1778615853: mosquitto version 2.1.2 terminating
+1778615853: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778615853: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778616039: mosquitto version 2.1.2 starting
+1778616039: Config loaded from /mosquitto/config/mosquitto.conf.
+1778616039: Bridge support available.
+1778616039: Persistence support available.
+1778616039: TLS support available.
+1778616039: TLS-PSK support available.
+1778616039: Websockets support available.
+1778616039: Opening ipv4 listen socket on port 1883.
+1778616039: Opening ipv4 listen socket on port 9001.
+1778616039: mosquitto version 2.1.2 running
+1778616039: New connection from 172.18.0.6:59794 on port 1883.
+1778616039: New client connected from 172.18.0.6:59794 as go_backend_subscriber (p4, c1, k30).
+1778616076: New connection from 192.168.65.1:17513 on port 1883.
+1778616076: New client connected from 192.168.65.1:17513 as ESP32_Hugo (p4, c1, k15).
+1778616098: Client ESP32_Hugo [192.168.65.1:17513] disconnected: exceeded timeout.
+1778616099: New connection from 192.168.65.1:60794 on port 1883.
+1778616099: New client connected from 192.168.65.1:60794 as ESP32_Hugo (p4, c1, k15).
+1778616121: Client ESP32_Hugo [192.168.65.1:60794] disconnected: exceeded timeout.
+1778616122: New connection from 192.168.65.1:45542 on port 1883.
+1778616122: New client connected from 192.168.65.1:45542 as ESP32_Hugo (p4, c1, k15).
+1778616144: Client ESP32_Hugo [192.168.65.1:45542] disconnected: exceeded timeout.
+1778616145: New connection from 192.168.65.1:50053 on port 1883.
+1778616145: New client connected from 192.168.65.1:50053 as ESP32_Hugo (p4, c1, k15).
+1778616167: Client ESP32_Hugo [192.168.65.1:50053] disconnected: exceeded timeout.
+1778616168: New connection from 192.168.65.1:28182 on port 1883.
+1778616168: New client connected from 192.168.65.1:28182 as ESP32_Hugo (p4, c1, k15).
+1778616190: Client ESP32_Hugo [192.168.65.1:28182] disconnected: exceeded timeout.
+1778616191: New connection from 192.168.65.1:17233 on port 1883.
+1778616191: New client connected from 192.168.65.1:17233 as ESP32_Hugo (p4, c1, k15).
+1778616213: Client ESP32_Hugo [192.168.65.1:17233] disconnected: exceeded timeout.
+1778616214: New connection from 192.168.65.1:58616 on port 1883.
+1778616214: New client connected from 192.168.65.1:58616 as ESP32_Hugo (p4, c1, k15).
+1778616236: Client ESP32_Hugo [192.168.65.1:58616] disconnected: exceeded timeout.
+1778616237: New connection from 192.168.65.1:23282 on port 1883.
+1778616237: New client connected from 192.168.65.1:23282 as ESP32_Hugo (p4, c1, k15).
+1778616259: Client ESP32_Hugo [192.168.65.1:23282] disconnected: exceeded timeout.
+1778616260: New connection from 192.168.65.1:20419 on port 1883.
+1778616260: New client connected from 192.168.65.1:20419 as ESP32_Hugo (p4, c1, k15).
+1778616282: Client ESP32_Hugo [192.168.65.1:20419] disconnected: exceeded timeout.
+1778616283: New connection from 192.168.65.1:56432 on port 1883.
+1778616283: New client connected from 192.168.65.1:56432 as ESP32_Hugo (p4, c1, k15).
+1778616285: mosquitto version 2.1.2 terminating
+1778616285: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778616285: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778616761: mosquitto version 2.1.2 starting
+1778616761: Config loaded from /mosquitto/config/mosquitto.conf.
+1778616761: Bridge support available.
+1778616761: Persistence support available.
+1778616761: TLS support available.
+1778616761: TLS-PSK support available.
+1778616761: Websockets support available.
+1778616761: Opening ipv4 listen socket on port 1883.
+1778616761: Opening ipv4 listen socket on port 9001.
+1778616761: mosquitto version 2.1.2 running
+1778616761: New connection from 172.18.0.6:58794 on port 1883.
+1778616761: New client connected from 172.18.0.6:58794 as go_backend_subscriber (p4, c1, k30).
+1778616799: Client go_backend_subscriber [172.18.0.6:58794] disconnected: connection closed by client.
+1778616799: New connection from 172.18.0.6:60510 on port 1883.
+1778616799: New client connected from 172.18.0.6:60510 as go_backend_subscriber (p4, c1, k30).
+1778616815: Client go_backend_subscriber [172.18.0.6:60510] disconnected: connection closed by client.
+1778616816: New connection from 172.18.0.6:60500 on port 1883.
+1778616816: New client connected from 172.18.0.6:60500 as go_backend_subscriber (p4, c1, k30).
+1778616882: New connection from 192.168.65.1:37902 on port 1883.
+1778616882: New client connected from 192.168.65.1:37902 as ESP32_Hugo (p4, c1, k15).
+1778616904: Client ESP32_Hugo [192.168.65.1:37902] disconnected: exceeded timeout.
+1778616905: New connection from 192.168.65.1:48209 on port 1883.
+1778616905: New client connected from 192.168.65.1:48209 as ESP32_Hugo (p4, c1, k15).
+1778616962: Client ESP32_Hugo [192.168.65.1:48209] disconnected: exceeded timeout.
+1778616962: New connection from 192.168.65.1:62557 on port 1883.
+1778616962: New client connected from 192.168.65.1:62557 as ESP32_Hugo (p4, c1, k15).
+1778616991: Client ESP32_Hugo [192.168.65.1:62557] disconnected: exceeded timeout.
+1778616992: New connection from 192.168.65.1:61150 on port 1883.
+1778616992: New client connected from 192.168.65.1:61150 as ESP32_Hugo (p4, c1, k15).
+1778617014: Client ESP32_Hugo [192.168.65.1:61150] disconnected: exceeded timeout.
+1778617015: New connection from 192.168.65.1:58721 on port 1883.
+1778617015: New client connected from 192.168.65.1:58721 as ESP32_Hugo (p4, c1, k15).
+1778617038: Client ESP32_Hugo [192.168.65.1:58721] disconnected: exceeded timeout.
+1778617038: New connection from 192.168.65.1:32454 on port 1883.
+1778617038: New client connected from 192.168.65.1:32454 as ESP32_Hugo (p4, c1, k15).
+1778617040: New connection from 127.0.0.1:48778 on port 1883.
+1778617040: New client connected from 127.0.0.1:48778 as auto-27640BF9-EF1C-20F3-D64A-47C5EC6A8EAE (p4, c1, k60).
+1778617073: Client ESP32_Hugo [192.168.65.1:32454] disconnected: exceeded timeout.
+1778617073: New connection from 192.168.65.1:53673 on port 1883.
+1778617073: New client connected from 192.168.65.1:53673 as ESP32_Hugo (p4, c1, k15).
+1778617096: Client ESP32_Hugo [192.168.65.1:53673] disconnected: exceeded timeout.
+1778617337: New connection from 192.168.65.1:55698 on port 1883.
+1778617337: New client connected from 192.168.65.1:55698 as ESP32_Hugo (p4, c1, k15).
+1778617350: New connection from 192.168.65.1:28203 on port 1883.
+1778617350: Client ESP32_Hugo [192.168.65.1:55698] disconnected: session taken over.
+1778617350: New client connected from 192.168.65.1:28203 as ESP32_Hugo (p4, c1, k15).
+1778617413: Client ESP32_Hugo [192.168.65.1:28203] disconnected: exceeded timeout.
+1778617413: New connection from 192.168.65.1:63460 on port 1883.
+1778617413: New client connected from 192.168.65.1:63460 as ESP32_Hugo (p4, c1, k15).
+1778617428: New connection from 127.0.0.1:35168 on port 1883.
+1778617428: New client connected from 127.0.0.1:35168 as auto-885B27B0-60FA-2520-BE08-0A96DF287C33 (p4, c1, k60).
+1778617428: Client auto-885B27B0-60FA-2520-BE08-0A96DF287C33 [127.0.0.1:35168] disconnected.
+1778617436: Client ESP32_Hugo [192.168.65.1:63460] disconnected: exceeded timeout.
+1778617436: New connection from 192.168.65.1:21072 on port 1883.
+1778617436: New client connected from 192.168.65.1:21072 as ESP32_Hugo (p4, c1, k15).
+1778617459: Client ESP32_Hugo [192.168.65.1:21072] disconnected: exceeded timeout.
+1778617459: New connection from 192.168.65.1:58534 on port 1883.
+1778617459: New client connected from 192.168.65.1:58534 as ESP32_Hugo (p4, c1, k15).
+1778617482: Client ESP32_Hugo [192.168.65.1:58534] disconnected: exceeded timeout.
+1778617482: New connection from 192.168.65.1:39510 on port 1883.
+1778617482: New client connected from 192.168.65.1:39510 as ESP32_Hugo (p4, c1, k15).
+1778617505: Client ESP32_Hugo [192.168.65.1:39510] disconnected: exceeded timeout.
+1778617505: New connection from 192.168.65.1:52720 on port 1883.
+1778617505: New client connected from 192.168.65.1:52720 as ESP32_Hugo (p4, c1, k15).
+1778617528: Client ESP32_Hugo [192.168.65.1:52720] disconnected: exceeded timeout.
+1778617528: New connection from 192.168.65.1:46698 on port 1883.
+1778617528: New client connected from 192.168.65.1:46698 as ESP32_Hugo (p4, c1, k15).
+1778617550: Client ESP32_Hugo [192.168.65.1:46698] disconnected: exceeded timeout.
+1778617642: Client go_backend_subscriber [172.18.0.6:60500] disconnected: connection closed by client.
+1778617643: New connection from 172.18.0.6:39072 on port 1883.
+1778617643: New client connected from 172.18.0.6:39072 as go_backend_subscriber (p4, c1, k30).
+1778617673: New connection from 192.168.65.1:52018 on port 1883.
+1778617673: New client connected from 192.168.65.1:52018 as ESP32_Hugo (p4, c1, k15).
+1778617679: New connection from 192.168.65.1:56200 on port 1883.
+1778617679: Client ESP32_Hugo [192.168.65.1:52018] disconnected: session taken over.
+1778617679: New client connected from 192.168.65.1:56200 as ESP32_Hugo (p4, c1, k15).
+1778617701: Client ESP32_Hugo [192.168.65.1:56200] disconnected: exceeded timeout.
+1778617702: New connection from 192.168.65.1:37973 on port 1883.
+1778617702: New client connected from 192.168.65.1:37973 as ESP32_Hugo (p4, c1, k15).
+1778617729: Client ESP32_Hugo [192.168.65.1:37973] disconnected: exceeded timeout.
+1778617729: New connection from 192.168.65.1:53035 on port 1883.
+1778617729: New client connected from 192.168.65.1:53035 as ESP32_Hugo (p4, c1, k15).
+1778617752: Client ESP32_Hugo [192.168.65.1:53035] disconnected: exceeded timeout.
+1778617752: New connection from 192.168.65.1:41539 on port 1883.
+1778617752: New client connected from 192.168.65.1:41539 as ESP32_Hugo (p4, c1, k15).
+1778617774: Client ESP32_Hugo [192.168.65.1:41539] disconnected: exceeded timeout.
+1778617775: New connection from 192.168.65.1:49412 on port 1883.
+1778617775: New client connected from 192.168.65.1:49412 as ESP32_Hugo (p4, c1, k15).
+1778617798: Client ESP32_Hugo [192.168.65.1:49412] disconnected: exceeded timeout.
+1778617798: New connection from 192.168.65.1:17988 on port 1883.
+1778617798: New client connected from 192.168.65.1:17988 as ESP32_Hugo (p4, c1, k15).
+1778617821: Client ESP32_Hugo [192.168.65.1:17988] disconnected: exceeded timeout.
+1778617821: New connection from 192.168.65.1:24157 on port 1883.
+1778617821: New client connected from 192.168.65.1:24157 as ESP32_Hugo (p4, c1, k15).
+1778617843: Client ESP32_Hugo [192.168.65.1:24157] disconnected: exceeded timeout.
+1778617844: New connection from 192.168.65.1:19106 on port 1883.
+1778617844: New client connected from 192.168.65.1:19106 as ESP32_Hugo (p4, c1, k15).
+1778617867: Client ESP32_Hugo [192.168.65.1:19106] disconnected: exceeded timeout.
+1778617867: New connection from 192.168.65.1:33121 on port 1883.
+1778617867: New client connected from 192.168.65.1:33121 as ESP32_Hugo (p4, c1, k15).
+1778617890: Client ESP32_Hugo [192.168.65.1:33121] disconnected: exceeded timeout.
+1778617890: New connection from 192.168.65.1:30604 on port 1883.
+1778617890: New client connected from 192.168.65.1:30604 as ESP32_Hugo (p4, c1, k15).
+1778617945: Client ESP32_Hugo [192.168.65.1:30604] disconnected: exceeded timeout.
+1778617946: New connection from 192.168.65.1:64510 on port 1883.
+1778617946: New client connected from 192.168.65.1:64510 as ESP32_Hugo (p4, c1, k15).
+1778617969: Client ESP32_Hugo [192.168.65.1:64510] disconnected: exceeded timeout.
+1778617969: New connection from 192.168.65.1:47873 on port 1883.
+1778617969: New client connected from 192.168.65.1:47873 as ESP32_Hugo (p4, c1, k15).
+1778617991: Client ESP32_Hugo [192.168.65.1:47873] disconnected: exceeded timeout.
+1778617992: New connection from 192.168.65.1:52959 on port 1883.
+1778617992: New client connected from 192.168.65.1:52959 as ESP32_Hugo (p4, c1, k15).
+1778618015: Client ESP32_Hugo [192.168.65.1:52959] disconnected: exceeded timeout.
+1778618015: New connection from 192.168.65.1:54840 on port 1883.
+1778618015: New client connected from 192.168.65.1:54840 as ESP32_Hugo (p4, c1, k15).
+1778618038: Client ESP32_Hugo [192.168.65.1:54840] disconnected: exceeded timeout.
+1778618038: New connection from 192.168.65.1:54985 on port 1883.
+1778618038: New client connected from 192.168.65.1:54985 as ESP32_Hugo (p4, c1, k15).
+1778618061: Client ESP32_Hugo [192.168.65.1:54985] disconnected: exceeded timeout.
+1778618061: New connection from 192.168.65.1:32155 on port 1883.
+1778618061: New client connected from 192.168.65.1:32155 as ESP32_Hugo (p4, c1, k15).
+1778618083: Client ESP32_Hugo [192.168.65.1:32155] disconnected: exceeded timeout.
+1778618562: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778618562: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778618704: Client go_backend_subscriber [172.18.0.6:39072] disconnected: connection closed by client.
+1778618705: New connection from 172.18.0.6:60748 on port 1883.
+1778618705: New client connected from 172.18.0.6:60748 as go_backend_subscriber (p4, c1, k30).
+1778618713: New connection from 192.168.65.1:59054 on port 1883.
+1778618714: New client connected from 192.168.65.1:59054 as ESP32_Hugo (p4, c1, k15).
+1778618719: New connection from 192.168.65.1:61526 on port 1883.
+1778618719: Client ESP32_Hugo [192.168.65.1:59054] disconnected: session taken over.
+1778618719: New client connected from 192.168.65.1:61526 as ESP32_Hugo (p4, c1, k15).
+1778618775: Client ESP32_Hugo [192.168.65.1:61526] disconnected: exceeded timeout.
+1778618775: New connection from 192.168.65.1:63278 on port 1883.
+1778618775: New client connected from 192.168.65.1:63278 as ESP32_Hugo (p4, c1, k15).
+1778618798: Client ESP32_Hugo [192.168.65.1:63278] disconnected: exceeded timeout.
+1778618798: New connection from 192.168.65.1:37155 on port 1883.
+1778618798: New client connected from 192.168.65.1:37155 as ESP32_Hugo (p4, c1, k15).
+1778618821: Client ESP32_Hugo [192.168.65.1:37155] disconnected: exceeded timeout.
+1778618821: New connection from 192.168.65.1:40766 on port 1883.
+1778618821: New client connected from 192.168.65.1:40766 as ESP32_Hugo (p4, c1, k15).
+1778618835: New connection from 192.168.65.1:24254 on port 1883.
+1778618835: Client ESP32_Hugo [192.168.65.1:40766] disconnected: session taken over.
+1778618835: New client connected from 192.168.65.1:24254 as ESP32_Hugo (p4, c1, k15).
+1778618892: Client ESP32_Hugo [192.168.65.1:24254] disconnected: exceeded timeout.
+1778618892: New connection from 192.168.65.1:21480 on port 1883.
+1778618892: New client connected from 192.168.65.1:21480 as ESP32_Hugo (p4, c1, k15).
+1778618914: Client ESP32_Hugo [192.168.65.1:21480] disconnected: exceeded timeout.
+1778618915: New connection from 192.168.65.1:37760 on port 1883.
+1778618915: New client connected from 192.168.65.1:37760 as ESP32_Hugo (p4, c1, k15).
+1778618934: Client go_backend_subscriber [172.18.0.6:60748] disconnected: connection closed by client.
+1778618934: mosquitto version 2.1.2 terminating
+1778618934: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778618934: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778618997: mosquitto version 2.1.2 starting
+1778618997: Config loaded from /mosquitto/config/mosquitto.conf.
+1778618997: Bridge support available.
+1778618997: Persistence support available.
+1778618997: TLS support available.
+1778618997: TLS-PSK support available.
+1778618997: Websockets support available.
+1778618997: Opening ipv4 listen socket on port 1883.
+1778618997: Opening ipv4 listen socket on port 9001.
+1778618997: mosquitto version 2.1.2 running
+1778618997: New connection from 172.18.0.6:60684 on port 1883.
+1778618997: New client connected from 172.18.0.6:60684 as go_backend_subscriber (p4, c1, k30).
+1778619355: Client go_backend_subscriber [172.18.0.6:60684] disconnected: connection closed by client.
+1778619356: New connection from 172.18.0.6:55398 on port 1883.
+1778619356: New client connected from 172.18.0.6:55398 as go_backend_subscriber (p4, c1, k30).
+1778619435: New connection from 192.168.65.1:60207 on port 1883.
+1778619435: New client connected from 192.168.65.1:60207 as ESP32_Hugo (p4, c1, k15).
+1778619458: Client ESP32_Hugo [192.168.65.1:60207] disconnected: exceeded timeout.
+1778619458: New connection from 192.168.65.1:61366 on port 1883.
+1778619458: New client connected from 192.168.65.1:61366 as ESP32_Hugo (p4, c1, k15).
+1778619489: Client ESP32_Hugo [192.168.65.1:61366] disconnected: exceeded timeout.
+1778619490: New connection from 192.168.65.1:53938 on port 1883.
+1778619490: New client connected from 192.168.65.1:53938 as ESP32_Hugo (p4, c1, k15).
+1778619498: New connection from 192.168.65.1:38508 on port 1883.
+1778619498: Client ESP32_Hugo [192.168.65.1:53938] disconnected: session taken over.
+1778619498: New client connected from 192.168.65.1:38508 as ESP32_Hugo (p4, c1, k15).
+1778619522: Client ESP32_Hugo [192.168.65.1:38508] disconnected: exceeded timeout.
+1778619522: New connection from 192.168.65.1:60229 on port 1883.
+1778619522: New client connected from 192.168.65.1:60229 as ESP32_Hugo (p4, c1, k15).
+1778619545: Client ESP32_Hugo [192.168.65.1:60229] disconnected: exceeded timeout.
+1778619545: New connection from 192.168.65.1:44244 on port 1883.
+1778619545: New client connected from 192.168.65.1:44244 as ESP32_Hugo (p4, c1, k15).
+1778619568: Client ESP32_Hugo [192.168.65.1:44244] disconnected: exceeded timeout.
+1778619568: New connection from 192.168.65.1:39155 on port 1883.
+1778619568: New client connected from 192.168.65.1:39155 as ESP32_Hugo (p4, c1, k15).
+1778619624: Client ESP32_Hugo [192.168.65.1:39155] disconnected: exceeded timeout.
+1778619625: New connection from 192.168.65.1:33869 on port 1883.
+1778619625: New client connected from 192.168.65.1:33869 as ESP32_Hugo (p4, c1, k15).
+1778619648: Client ESP32_Hugo [192.168.65.1:33869] disconnected: exceeded timeout.
+1778619648: New connection from 192.168.65.1:45736 on port 1883.
+1778619648: New client connected from 192.168.65.1:45736 as ESP32_Hugo (p4, c1, k15).
+1778619670: Client ESP32_Hugo [192.168.65.1:45736] disconnected: exceeded timeout.
+1778619671: New connection from 192.168.65.1:40816 on port 1883.
+1778619671: New client connected from 192.168.65.1:40816 as ESP32_Hugo (p4, c1, k15).
+1778619694: Client ESP32_Hugo [192.168.65.1:40816] disconnected: exceeded timeout.
+1778619694: New connection from 192.168.65.1:59373 on port 1883.
+1778619694: New client connected from 192.168.65.1:59373 as ESP32_Hugo (p4, c1, k15).
+1778619717: Client ESP32_Hugo [192.168.65.1:59373] disconnected: exceeded timeout.
+1778619717: New connection from 192.168.65.1:17033 on port 1883.
+1778619717: New client connected from 192.168.65.1:17033 as ESP32_Hugo (p4, c1, k15).
+1778619739: Client ESP32_Hugo [192.168.65.1:17033] disconnected: exceeded timeout.
+1778619740: New connection from 192.168.65.1:29403 on port 1883.
+1778619740: New client connected from 192.168.65.1:29403 as ESP32_Hugo (p4, c1, k15).
+1778619763: Client ESP32_Hugo [192.168.65.1:29403] disconnected: exceeded timeout.
+1778619763: New connection from 192.168.65.1:28295 on port 1883.
+1778619763: New client connected from 192.168.65.1:28295 as ESP32_Hugo (p4, c1, k15).
+1778619786: Client ESP32_Hugo [192.168.65.1:28295] disconnected: exceeded timeout.
+1778619786: New connection from 192.168.65.1:16061 on port 1883.
+1778619786: New client connected from 192.168.65.1:16061 as ESP32_Hugo (p4, c1, k15).
+1778619809: Client ESP32_Hugo [192.168.65.1:16061] disconnected: exceeded timeout.
+1778619809: New connection from 192.168.65.1:33212 on port 1883.
+1778619809: New client connected from 192.168.65.1:33212 as ESP32_Hugo (p4, c1, k15).
+1778619832: Client ESP32_Hugo [192.168.65.1:33212] disconnected: exceeded timeout.
+1778619832: New connection from 192.168.65.1:36929 on port 1883.
+1778619832: New client connected from 192.168.65.1:36929 as ESP32_Hugo (p4, c1, k15).
+1778619854: Client ESP32_Hugo [192.168.65.1:36929] disconnected: exceeded timeout.
+1778620798: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778620798: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778621911: Client go_backend_subscriber [172.18.0.6:55398] disconnected: connection closed by client.
+1778621911: mosquitto version 2.1.2 terminating
+1778621911: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778621911: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778622139: mosquitto version 2.1.2 starting
+1778622139: Config loaded from /mosquitto/config/mosquitto.conf.
+1778622139: Bridge support available.
+1778622139: Persistence support available.
+1778622139: TLS support available.
+1778622139: TLS-PSK support available.
+1778622139: Websockets support available.
+1778622139: Opening ipv4 listen socket on port 1883.
+1778622139: Opening ipv4 listen socket on port 9001.
+1778622139: mosquitto version 2.1.2 running
+1778622139: New connection from 172.18.0.6:35948 on port 1883.
+1778622139: New client connected from 172.18.0.6:35948 as go_backend_subscriber (p4, c1, k30).
+1778622352: mosquitto version 2.1.2 terminating
+1778622352: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778622352: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778622559: mosquitto version 2.1.2 starting
+1778622559: Config loaded from /mosquitto/config/mosquitto.conf.
+1778622559: Bridge support available.
+1778622559: Persistence support available.
+1778622559: TLS support available.
+1778622559: TLS-PSK support available.
+1778622559: Websockets support available.
+1778622559: Opening ipv4 listen socket on port 1883.
+1778622559: Opening ipv4 listen socket on port 9001.
+1778622559: mosquitto version 2.1.2 running
+1778622560: New connection from 172.18.0.6:35362 on port 1883.
+1778622560: New client connected from 172.18.0.6:35362 as go_backend_subscriber (p4, c1, k30).
+1778622796: mosquitto version 2.1.2 terminating
+1778622796: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778622796: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778623146: mosquitto version 2.1.2 starting
+1778623146: Config loaded from /mosquitto/config/mosquitto.conf.
+1778623146: Bridge support available.
+1778623146: Persistence support available.
+1778623146: TLS support available.
+1778623146: TLS-PSK support available.
+1778623146: Websockets support available.
+1778623146: Opening ipv4 listen socket on port 1883.
+1778623146: Opening ipv4 listen socket on port 9001.
+1778623146: mosquitto version 2.1.2 running
+1778623146: New connection from 172.18.0.6:59260 on port 1883.
+1778623146: New client connected from 172.18.0.6:59260 as go_backend_subscriber (p4, c1, k30).
+1778623975: mosquitto version 2.1.2 terminating
+1778623975: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778623975: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1778624255: mosquitto version 2.1.2 starting
+1778624255: Config loaded from /mosquitto/config/mosquitto.conf.
+1778624255: Bridge support available.
+1778624255: Persistence support available.
+1778624255: TLS support available.
+1778624255: TLS-PSK support available.
+1778624255: Websockets support available.
+1778624255: Opening ipv4 listen socket on port 1883.
+1778624255: Opening ipv4 listen socket on port 9001.
+1778624255: mosquitto version 2.1.2 running
+1778624255: New connection from 172.18.0.6:34106 on port 1883.
+1778624255: New client connected from 172.18.0.6:34106 as go_backend_subscriber (p4, c1, k30).
+1778624328: mosquitto version 2.1.2 terminating
+1778624328: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778624328: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
