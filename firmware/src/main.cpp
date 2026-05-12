@@ -171,6 +171,11 @@ void callback(char *topic, byte *payload, unsigned int length)
     }
 }
 
+// --- Timer
+Timer telemetryTimer(5000, []
+                     { sendTelemetry("heartbeat", "Periodic status update"); }, Timer::Mode::Periodic);
+
+// --- Setup
 void setup()
 {
     Serial.begin(115200);
@@ -233,13 +238,20 @@ void setup()
 
 void loop()
 {
-    Serial.println("\n--- LOOP START ---");
+    Serial.println("--- LOOP START ---");
     // MQTT Loop
     if (!mqttClient.connected())
     {
         reconnect();
     }
     mqttClient.loop();
+
+    // Telemetry Loop
+    if (telemetryTimer.state() == Timer::State::Idle)
+    {
+        telemetryTimer.start();
+    }
+    telemetryTimer.update();
 
     // Stepper Loop
     stepper.run();
@@ -274,21 +286,21 @@ void loop()
     }
 
     // --- Audit
-    Serial.print("\nDistance (cm): ");
-    Serial.print(dist);
+    Serial.println("\nDistance (cm): ");
+    Serial.println(dist);
 
-    Serial.print("\nPerson Nearby: ");
+    Serial.println("\nPerson Nearby: ");
     Serial.println(personNearby ? "Yes" : "No");
 
-    Serial.print("\nLight Level (analog): ");
+    Serial.println("\nLight Level (analog): ");
     Serial.println(lightLevel);
 
-    Serial.print("\nLights On: ");
+    Serial.println("\nLights On: ");
     Serial.println(isDark ? "No" : "Yes");
 
-    Serial.print("\nLock State: ");
+    Serial.println("\nLock State: ");
     Serial.println(stepper.stateString());
 
-    Serial.println("\n--- LOOP END ---");
-    delay(5000);
+    Serial.println("\n--- LOOP END ---\n");
+    delay(1000);
 }

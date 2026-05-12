@@ -792,3 +792,67 @@
 1778530158: New client connected from 192.168.65.1:40959 as smartlock_esp32 (p4, c1, k15).
 1778530181: Client smartlock_esp32 [192.168.65.1:40959] disconnected: exceeded timeout.
 1778530201: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1778612687: mosquitto version 2.1.2 starting
+1778612687: Config loaded from /mosquitto/config/mosquitto.conf.
+1778612687: Bridge support available.
+1778612687: Persistence support available.
+1778612687: TLS support available.
+1778612687: TLS-PSK support available.
+1778612687: Websockets support available.
+1778612687: Opening ipv4 listen socket on port 1883.
+1778612687: Opening ipv4 listen socket on port 9001.
+1778612687: mosquitto version 2.1.2 running
+1778612687: New connection from 192.168.65.1:34820 on port 9001.
+1778612687: Client 192.168.65.1 [192.168.65.1:34820] disconnected: connection closed by client.
+1778612688: New connection from 172.22.0.6:42252 on port 1883.
+1778612688: New client connected from 172.22.0.6:42252 as go_backend_subscriber (p4, c1, k30).
+1778612690: New connection from 192.168.65.1:33052 on port 1883.
+1778612690: New client connected from 192.168.65.1:33052 as smartlock_esp32 (p4, c1, k15).
+1778613026: New connection from 192.168.65.1:35657 on port 1883.
+1778613026: Client smartlock_esp32 [192.168.65.1:33052] disconnected: session taken over.
+1778613026: New client connected from 192.168.65.1:35657 as smartlock_esp32 (p4, c1, k15).
+1778613032: Client go_backend_subscriber [172.22.0.6:42252] disconnected: connection closed by client.
+1778613037: New connection from 192.168.65.1:53291 on port 1883.
+1778613037: Client smartlock_esp32 [192.168.65.1:35657] disconnected: session taken over.
+1778613037: New client connected from 192.168.65.1:53291 as smartlock_esp32 (p4, c1, k15).
+1778613047: New connection from 192.168.65.1:34127 on port 1883.
+1778613047: New client connected from 192.168.65.1:34127 as mymqtt-800305192057899 (p5, c1, k90).
+1778613186: Client mymqtt-800305192057899 [192.168.65.1:34127] disconnected: connection closed by client.
+1778613197: Client smartlock_esp32 [192.168.65.1:53291] disconnected: exceeded timeout.
+1778619501: New connection from 192.168.65.1:41617 on port 1883.
+1778619501: New client connected from 192.168.65.1:41617 as smartlock_esp32 (p4, c1, k15).
+1778619534: Client smartlock_esp32 [192.168.65.1:41617] disconnected: exceeded timeout.
+1778619562: New connection from 192.168.65.1:51646 on port 1883.
+1778619562: New client connected from 192.168.65.1:51646 as smartlock_esp32 (p4, c1, k15).
+1778619601: Client smartlock_esp32 [192.168.65.1:51646] disconnected: exceeded timeout.
+1778619647: New connection from 192.168.65.1:50892 on port 1883.
+1778619647: New client connected from 192.168.65.1:50892 as smartlock_esp32 (p4, c1, k15).
+1778619670: Client smartlock_esp32 [192.168.65.1:50892] disconnected: exceeded timeout.
+1778619713: New connection from 192.168.65.1:34016 on port 1883.
+1778619713: New client connected from 192.168.65.1:34016 as smartlock_esp32 (p4, c1, k15).
+1778619761: Client smartlock_esp32 [192.168.65.1:34016] disconnected: exceeded timeout.
+1778619776: New connection from 192.168.65.1:50871 on port 1883.
+1778619776: New client connected from 192.168.65.1:50871 as smartlock_esp32 (p4, c1, k15).
+1778619843: New connection from 192.168.65.1:57288 on port 1883.
+1778619843: Client smartlock_esp32 [192.168.65.1:50871] disconnected: session taken over.
+1778619843: New client connected from 192.168.65.1:57288 as smartlock_esp32 (p4, c1, k15).
+1778619866: Client smartlock_esp32 [192.168.65.1:57288] disconnected: exceeded timeout.
+1778619929: New connection from 192.168.65.1:57086 on port 1883.
+1778619929: New client connected from 192.168.65.1:57086 as smartlock_esp32 (p4, c1, k15).
+1778619951: New connection from 192.168.65.1:31616 on port 1883.
+1778619951: Client smartlock_esp32 [192.168.65.1:57086] disconnected: session taken over.
+1778619951: New client connected from 192.168.65.1:31616 as smartlock_esp32 (p4, c1, k15).
+1778619974: New connection from 192.168.65.1:50176 on port 1883.
+1778619974: Client smartlock_esp32 [192.168.65.1:31616] disconnected: session taken over.
+1778619974: New client connected from 192.168.65.1:50176 as smartlock_esp32 (p4, c1, k15).
+1778619979: New connection from 192.168.65.1:43812 on port 1883.
+1778619979: Client smartlock_esp32 [192.168.65.1:50176] disconnected: session taken over.
+1778619979: New client connected from 192.168.65.1:43812 as smartlock_esp32 (p4, c1, k15).
+1778620003: New connection from 192.168.65.1:59418 on port 1883.
+1778620003: Client smartlock_esp32 [192.168.65.1:43812] disconnected: session taken over.
+1778620003: New client connected from 192.168.65.1:59418 as smartlock_esp32 (p4, c1, k15).
+1778620030: New connection from 192.168.65.1:43860 on port 1883.
+1778620030: Client smartlock_esp32 [192.168.65.1:59418] disconnected: session taken over.
+1778620030: New client connected from 192.168.65.1:43860 as smartlock_esp32 (p4, c1, k15).
+1778620073: Client smartlock_esp32 [192.168.65.1:43860] disconnected: exceeded timeout.
+1778620828: Saving in-memory database to /mosquitto/data//mosquitto.db.
