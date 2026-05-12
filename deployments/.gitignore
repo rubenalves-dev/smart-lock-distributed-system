@@ -1,2 +1,2 @@
-mosquitto/data/
-mosquitto/log/
+mosquitto/data
+mosquitto/log

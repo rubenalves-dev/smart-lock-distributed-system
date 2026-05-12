@@ -290,5 +290,5 @@ void loop()
     Serial.println(stepper.stateString());
 
     Serial.println("\n--- LOOP END ---");
-    delay(100);
+    delay(5000);
 }
