@@ -14,6 +14,7 @@
 #include "utils/timer.h"
 #include "components/stepper.h"
 #include "components/ultrassonic.h"
+#include "components/photoresistor.h"
 
 // --- RFID
 #define RFID_SDA_PIN 21
@@ -28,6 +29,7 @@ Ultrassonic ultrassonic(TRIGGER_PIN, ECHO_PIN, DISTANCE_THRESHOLD_CM);
 
 // --- Light Sensor (LDR)
 #define LDR_PIN 34
+Photoresistor ldr(LDR_PIN);
 
 // --- Stepper Motor
 #define STEPPER_PIN_1 32
@@ -104,6 +106,7 @@ void sendTelemetry(String eventType, String details)
 
     doc["status"] = stepper.stateString();
     doc["distance_cm"] = ultrassonic.distance();
+    doc["light_level"] = ldr.lightLevel();
     doc["rssi"] = WiFi.RSSI();
 
     doc["user"] = lastUser;
@@ -195,6 +198,7 @@ void setup()
     // Components
     stepper.setup();
     ultrassonic.setup();
+    ldr.setup();
 
     // Timers
     telemetryTimer.start();
@@ -249,13 +253,10 @@ void loop()
     // Components
     stepper.run();
     ultrassonic.update();
+    ldr.update();
 
     // Timers
     telemetryTimer.update();
-
-    // --- 2. Light Level
-    int lightLevel = analogRead(LDR_PIN);
-    bool isDark = lightLevel < 2000; // Adjust threshold based on testing
 
     // --- 3. RFID Check
     if (ultrassonic.isObjectClose() && stepper.state() == Stepper::State::Closed)

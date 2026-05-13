@@ -17,7 +17,7 @@ void Ultrassonic::setup()
 
 void Ultrassonic::update()
 {
-    readDistanceCm();
+    distance_ = readDistanceCm();
 }
 
 double Ultrassonic::readDistanceCm()
@@ -30,7 +30,6 @@ double Ultrassonic::readDistanceCm()
 
     long duration = pulseIn(echoPin_, HIGH, 30000);
     double distance = duration * 0.034 / 2;
-    distance_ = distance;
     return distance; // Convert to cm
 }
 
