@@ -13,6 +13,7 @@
 #include "index.h"
 #include "utils/timer.h"
 #include "components/stepper.h"
+#include "components/ultrassonic.h"
 
 // --- RFID
 #define RFID_SDA_PIN 21
@@ -22,14 +23,18 @@ MFRC522 rfid(RFID_SDA_PIN, RFID_RST_PIN);
 // --- Ultrasonic
 #define TRIGGER_PIN 5
 #define ECHO_PIN 17
+#define DISTANCE_THRESHOLD_CM 100
+Ultrassonic ultrassonic(TRIGGER_PIN, ECHO_PIN, DISTANCE_THRESHOLD_CM);
 
 // --- Light Sensor (LDR)
 #define LDR_PIN 34
 
 // --- Stepper Motor
-#define STEPPER_SPEED 500
-#define STEPPER_ACCEL 100
-Stepper stepper(32, 33, 25, 26);
+#define STEPPER_PIN_1 32
+#define STEPPER_PIN_2 33
+#define STEPPER_PIN_3 25
+#define STEPPER_PIN_4 26
+Stepper stepper(STEPPER_PIN_1, STEPPER_PIN_2, STEPPER_PIN_3, STEPPER_PIN_4);
 
 // --- LEDs
 #define LED_OPENING 13
@@ -69,18 +74,6 @@ void setStateLEDs()
     digitalWrite(LED_CLOSED, stepper.state() == Stepper::State::Closed ? HIGH : LOW);
 }
 
-long readDistanceCm()
-{
-    digitalWrite(TRIGGER_PIN, LOW);
-    delayMicroseconds(2);
-    digitalWrite(TRIGGER_PIN, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(TRIGGER_PIN, LOW);
-
-    long duration = pulseIn(ECHO_PIN, HIGH, 30000);
-    return duration * 0.034 / 2; // Convert to cm
-}
-
 bool checkRFID()
 {
     if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial())
@@ -107,10 +100,14 @@ void sendTelemetry(String eventType, String details)
     StaticJsonDocument<300> doc;
     doc["device_id"] = "smartlock_esp32";
     doc["event"] = eventType;
+    doc["details"] = details;
+
     doc["status"] = stepper.stateString();
+    doc["distance_cm"] = ultrassonic.distance();
+    doc["rssi"] = WiFi.RSSI();
+
     doc["user"] = lastUser;
     doc["fails"] = failCount;
-    doc["rssi"] = WiFi.RSSI();
     doc["uptime"] = millis() / 1000;
 
     char buffer[300];
@@ -195,8 +192,12 @@ void setup()
     SPI.begin();
     rfid.PCD_Init();
 
-    // Stepper
+    // Components
     stepper.setup();
+    ultrassonic.setup();
+
+    // Timers
+    telemetryTimer.start();
 
     // Wifi
     int attempts = 0;
@@ -238,7 +239,6 @@ void setup()
 
 void loop()
 {
-    Serial.println("--- LOOP START ---");
     // MQTT Loop
     if (!mqttClient.connected())
     {
@@ -246,26 +246,19 @@ void loop()
     }
     mqttClient.loop();
 
-    // Telemetry Loop
-    if (telemetryTimer.state() == Timer::State::Idle)
-    {
-        telemetryTimer.start();
-    }
-    telemetryTimer.update();
-
-    // Stepper Loop
+    // Components
     stepper.run();
+    ultrassonic.update();
 
-    // --- 1. Proximity Check
-    long dist = readDistanceCm();
-    bool personNearby = dist > 0 && dist < 100; // 100 cm threshold - 1 meter
+    // Timers
+    telemetryTimer.update();
 
     // --- 2. Light Level
     int lightLevel = analogRead(LDR_PIN);
     bool isDark = lightLevel < 2000; // Adjust threshold based on testing
 
     // --- 3. RFID Check
-    if (personNearby && stepper.state() == Stepper::State::Closed)
+    if (ultrassonic.isObjectClose() && stepper.state() == Stepper::State::Closed)
     {
         if (checkRFID())
         {
@@ -285,22 +278,5 @@ void loop()
         }
     }
 
-    // --- Audit
-    Serial.println("\nDistance (cm): ");
-    Serial.println(dist);
-
-    Serial.println("\nPerson Nearby: ");
-    Serial.println(personNearby ? "Yes" : "No");
-
-    Serial.println("\nLight Level (analog): ");
-    Serial.println(lightLevel);
-
-    Serial.println("\nLights On: ");
-    Serial.println(isDark ? "No" : "Yes");
-
-    Serial.println("\nLock State: ");
-    Serial.println(stepper.stateString());
-
-    Serial.println("\n--- LOOP END ---\n");
     delay(1000);
 }
