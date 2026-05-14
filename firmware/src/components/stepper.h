@@ -1,5 +1,4 @@
 #include <AccelStepper.h>
-#include <map>
 
 class Stepper
 {
@@ -24,12 +23,6 @@ private:
     AccelStepper stepper_;
     State state_ = State::Closed;
 
-    std::map<State, String> stateNames_ = {
-        {State::Closed, "CLOSED"},
-        {State::Opening, "OPENING"},
-        {State::Closing, "CLOSING"},
-        {State::Open, "OPEN"}};
-
 public:
     Stepper(int pin1, int pin2, int pin3, int pin4);
 
@@ -39,8 +32,5 @@ public:
     void close(int dPin = -1);
 
     State state() const { return state_; }
-    String stateString()
-    {
-        return stateNames_[state_];
-    }
+    const char *stateString() const;
 };

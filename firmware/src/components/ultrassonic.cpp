@@ -32,8 +32,3 @@ double Ultrassonic::readDistanceCm()
     double distance = duration * 0.034 / 2;
     return distance; // Convert to cm
 }
-
-double Ultrassonic::distance() const
-{
-    return distance_;
-}

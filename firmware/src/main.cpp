@@ -7,12 +7,14 @@
 #include <PubSubClient.h>
 #include <ESPmDNS.h>
 
-#include "index.h"
-#include "utils/timer.h"
 #include "components/stepper.h"
 #include "components/ultrassonic.h"
 #include "components/photoresistor.h"
 #include "components/rfid.h"
+#include "ports/mqtt.h"
+#include "templates/index.h"
+#include "templates/wifi.h"
+#include "utils/timer.h"
 
 // --- RFID
 #define RFID_SDA_PIN 21
@@ -45,16 +47,17 @@ Stepper stepper(STEPPER_PIN_1, STEPPER_PIN_2, STEPPER_PIN_3, STEPPER_PIN_4);
 // --- Authorized UID
 byte authorizedUID[4] = {0xDE, 0xAD, 0xBE, 0xEF}; // Example UID, replace with actual
 
+// --- MQTT
+const char *MQTT_SERVER = "host.wokwi.internal";
+const uint16_t MQTT_PORT = 1883;
+MQTT mqtt(MQTT_SERVER, MQTT_PORT);
+
 // --- Servers Config
 const char *SSID = "Wokwi-GUEST";
 const char *PASSWORD = "";
-const char *MQTT_SERVER = "host.wokwi.internal";
-const int MQTT_PORT = 1883;
+AsyncWebServer server(80);
 
 // --- Servers
-AsyncWebServer server(80);
-WiFiClient espClient;
-PubSubClient mqttClient(espClient);
 Preferences preferences;
 
 // --- Timer
@@ -76,12 +79,6 @@ void setStateLEDs()
 
 void sendTelemetry(String eventType, String details)
 {
-    if (!mqttClient.connected())
-    {
-        Serial.println("MQTT not connected, skipping telemetry");
-        return;
-    }
-
     StaticJsonDocument<300> doc;
     doc["device_id"] = "smartlock_esp32";
     doc["event"] = eventType;
@@ -101,7 +98,7 @@ void sendTelemetry(String eventType, String details)
 
     char buffer[300];
     serializeJson(doc, buffer);
-    mqttClient.publish("lock/telemetry", buffer);
+    mqtt.publish("lock/telemetry", buffer);
 }
 
 // --- STEP 1: Define the function FIRST ---
@@ -116,25 +113,6 @@ void updateLockState(bool lock, String user = "system")
         stepper.open();
     }
     sendTelemetry("status_change", stepper.stateString());
-}
-
-void reconnect()
-{
-    while (!mqttClient.connected())
-    {
-        Serial.print("Connecting to MQTT...");
-        if (mqttClient.connect("smartlock_esp32"))
-        {
-            Serial.println("connected");
-            mqttClient.subscribe("lock/control");
-        }
-        else
-        {
-            Serial.print("failed, rc=");
-            Serial.println(mqttClient.state());
-            delay(5000);
-        }
-    }
 }
 
 void callback(char *topic, byte *payload, unsigned int length)
@@ -173,9 +151,10 @@ void setup()
     pinMode(LED_CLOSED, OUTPUT);
     setStateLEDs();
 
-    // Ultrasonic
-    pinMode(TRIGGER_PIN, OUTPUT);
-    pinMode(ECHO_PIN, INPUT);
+    // Servers
+    mqtt.subscribe("lock/commands", callback);
+    mqtt.subscribe("lock/ai/response", callback);
+    mqtt.setup();
 
     // Components
     stepper.setup();
@@ -205,10 +184,6 @@ void setup()
         Serial.println("\nWifi connected, IP: " + WiFi.localIP().toString());
     }
 
-    // MQTT
-    mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
-    mqttClient.setCallback(callback);
-
     // mDNS
     if (!MDNS.begin("smartlock"))
     {
@@ -218,6 +193,8 @@ void setup()
     // Web Server
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
               { request->send(200, "text/html", INDEX_HTML); });
+    server.on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(200, "text/html", WIFI_HTML); });
     server.on("/toggle", HTTP_GET, [](AsyncWebServerRequest *request)
               { updateLockState(stepper.state() == Stepper::State::Closed ? false : true);
                 request->send(200, "text/html", INDEX_HTML); });
@@ -226,12 +203,8 @@ void setup()
 
 void loop()
 {
-    // MQTT Loop
-    if (!mqttClient.connected())
-    {
-        reconnect();
-    }
-    mqttClient.loop();
+    // Servers
+    mqtt.update();
 
     // Components
     stepper.update();

@@ -2,8 +2,8 @@
 #include "stepper.h"
 
 Stepper::Stepper(int stepPin1, int stepPin2, int stepPin3, int stepPin4)
+    : stepper_(AccelStepper::FULL4WIRE, stepPin1, stepPin2, stepPin3, stepPin4)
 {
-    stepper_ = AccelStepper(AccelStepper::FULL4WIRE, stepPin1, stepPin2, stepPin3, stepPin4);
 }
 
 void Stepper::setup()
@@ -61,4 +61,21 @@ void Stepper::close(int dPin)
     }
     state_ = State::Closed;
     Serial.println("[LOCK] Closed");
+}
+
+const char *Stepper::stateString() const
+{
+    switch (state_)
+    {
+    case State::Closed:
+        return "CLOSED";
+    case State::Opening:
+        return "OPENING";
+    case State::Closing:
+        return "CLOSING";
+    case State::Open:
+        return "OPEN";
+    default:
+        return "UNKNOWN";
+    }
 }
