@@ -232,5 +232,5 @@ void loop()
         }
     }
 
-    delay(1000);
+    delay(10000); // Main loop delay to reduce CPU usage
 }
