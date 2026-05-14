@@ -34,7 +34,7 @@ public:
     Stepper(int pin1, int pin2, int pin3, int pin4);
 
     void setup();
-    void run();
+    void update();
     void open(int dPin = -1);
     void close(int dPin = -1);
 

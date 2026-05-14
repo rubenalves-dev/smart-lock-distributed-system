@@ -12,7 +12,7 @@ void Stepper::setup()
     stepper_.setAcceleration(ACCELERATION);
 }
 
-void Stepper::run()
+void Stepper::update()
 {
     if (state_ == State::Opening || state_ == State::Closing)
     {

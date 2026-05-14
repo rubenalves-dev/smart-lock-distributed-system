@@ -7,19 +7,17 @@
 #include <PubSubClient.h>
 #include <ESPmDNS.h>
 
-#include <SPI.h>
-#include <MFRC522.h>
-
 #include "index.h"
 #include "utils/timer.h"
 #include "components/stepper.h"
 #include "components/ultrassonic.h"
 #include "components/photoresistor.h"
+#include "components/rfid.h"
 
 // --- RFID
 #define RFID_SDA_PIN 21
 #define RFID_RST_PIN 22
-MFRC522 rfid(RFID_SDA_PIN, RFID_RST_PIN);
+RFID rfid(RFID_SDA_PIN, RFID_RST_PIN);
 
 // --- Ultrasonic
 #define TRIGGER_PIN 5
@@ -76,21 +74,6 @@ void setStateLEDs()
     digitalWrite(LED_CLOSED, stepper.state() == Stepper::State::Closed ? HIGH : LOW);
 }
 
-bool checkRFID()
-{
-    if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial())
-        return false;
-
-    if (rfid.uid.size != sizeof(authorizedUID))
-        return false;
-
-    bool match = memcmp(rfid.uid.uidByte, authorizedUID, rfid.uid.size) == 0;
-
-    rfid.PICC_HaltA();
-    rfid.PCD_StopCrypto1();
-    return match;
-}
-
 void sendTelemetry(String eventType, String details)
 {
     if (!mqttClient.connected())
@@ -107,11 +90,14 @@ void sendTelemetry(String eventType, String details)
     doc["status"] = stepper.stateString();
     doc["distance_cm"] = ultrassonic.distance();
     doc["light_level"] = ldr.lightLevel();
-    doc["rssi"] = WiFi.RSSI();
+    doc["fails"] = rfid.failCount();
+    if (rfid.failCount() > 0)
+    {
+        doc["user"] = lastUser;
+    }
 
-    doc["user"] = lastUser;
-    doc["fails"] = failCount;
-    doc["uptime"] = millis() / 1000;
+    doc["rssi"] = WiFi.RSSI();
+    doc["uptime"] = millis() / 1000; // Uptime in seconds
 
     char buffer[300];
     serializeJson(doc, buffer);
@@ -191,14 +177,11 @@ void setup()
     pinMode(TRIGGER_PIN, OUTPUT);
     pinMode(ECHO_PIN, INPUT);
 
-    // RFID
-    SPI.begin();
-    rfid.PCD_Init();
-
     // Components
     stepper.setup();
     ultrassonic.setup();
     ldr.setup();
+    rfid.setup();
 
     // Timers
     telemetryTimer.start();
@@ -251,9 +234,10 @@ void loop()
     mqttClient.loop();
 
     // Components
-    stepper.run();
+    stepper.update();
     ultrassonic.update();
     ldr.update();
+    rfid.update();
 
     // Timers
     telemetryTimer.update();
@@ -261,20 +245,16 @@ void loop()
     // --- 3. RFID Check
     if (ultrassonic.isObjectClose() && stepper.state() == Stepper::State::Closed)
     {
-        if (checkRFID())
+        if (rfid.check(authorizedUID))
         {
-            Serial.println("Access Granted!");
             lastUser = "authorized_user"; // In real case, map UID to user
-            failCount = 0;
             updateLockState(false, lastUser);
             // autoCloseTimer.start();
             sendTelemetry("access_granted", "Valid RFID");
         }
         else
         {
-            Serial.println("Access Denied!");
             lastUser = "unknown";
-            failCount++;
             sendTelemetry("access_denied", "Invalid RFID");
         }
     }
