@@ -17,7 +17,6 @@ import (
 
 func main() {
 	telemetryChan := make(chan models.SensorPayload, 100)
-
 	go broker.StartSubscriber("mosquitto_broker", telemetryChan)
 
 	conn, err := grpc.NewClient("ai-service:50051", grpc.WithInsecure())
@@ -36,7 +35,7 @@ func main() {
 	}
 
 	for event := range telemetryChan {
-		fmt.Printf("Processing %s from %s\n", event.EventType, event.DeviceID)
+		fmt.Printf("Processing %s from %s\n", event.Event, event.DeviceID)
 		bytes, err := json.Marshal(event)
 		if err != nil {
 			fmt.Printf("Failed to marshal event: %v\n", err)
@@ -45,11 +44,19 @@ func main() {
 
 		go rabbit.PublishSensorEvent(bytes)
 
-		if event.EventType == "vibration" {
+		if event.Event != "heartbeat" {
 			resp, err := aiClient.PredictSeverity(context.Background(), &smartlock.PredictSeverityRequest{
 				Events: []*smartlock.SensorEvent{{
-					VibrationIntensity: float32(event.Value),
-					EntryMethod:        "vibration",
+					DeviceId:   event.DeviceID,
+					Event:      event.Event,
+					Detail:     event.Details,
+					Status:     event.Status,
+					DistanceCm: event.DistanceCm,
+					LightLevel: int32(event.LightLevel),
+					Fails:      int32(event.Fails),
+					User:       event.User,
+					Rssi:       int32(event.RSSI),
+					Uptime:     event.Uptime,
 				}},
 			})
 

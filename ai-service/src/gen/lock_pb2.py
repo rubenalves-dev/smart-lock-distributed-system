@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nlock.proto\x12\x04lock\x1a\x1fgoogle/protobuf/timestamp.proto\"\x07\n\x05\x45mpty\"\x93\x01\n\x0bSensorEvent\x12\x11\n\tdevice_id\x18\x01 \x01(\t\x12\x1b\n\x13vibration_intensity\x18\x02 \x01(\x02\x12\x14\n\x0c\x65ntry_method\x18\x03 \x01(\t\x12\x0f\n\x07success\x18\x04 \x01(\x08\x12-\n\ttimestamp\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\";\n\x16PredictSeverityRequest\x12!\n\x06\x65vents\x18\x01 \x03(\x0b\x32\x11.lock.SensorEvent\"m\n\x17PredictSeverityResponse\x12&\n\x0e\x63lassification\x18\x01 \x01(\x0e\x32\x0e.lock.Severity\x12\x12\n\nconfidence\x18\x02 \x01(\x02\x12\x16\n\x0erecommendation\x18\x03 \x01(\t\"[\n\x17\x41uthenticateUserRequest\x12\x11\n\tdevice_id\x18\x01 \x01(\t\x12\x11\n\tauth_type\x18\x02 \x01(\t\x12\x1a\n\x12\x63redential_payload\x18\x03 \x01(\t\"A\n\x18\x41uthenticateUserResponse\x12\x12\n\nauthorized\x18\x01 \x01(\x08\x12\x11\n\tuser_name\x18\x02 \x01(\t\"?\n\x13RemoteUnlockRequest\x12\x14\n\x0crequester_id\x18\x01 \x01(\t\x12\x12\n\nsecret_key\x18\x02 \x01(\t\"8\n\x14RemoteUnlockResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"8\n\x14RetrainModelResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"h\n\x17GetSystemHealthResponse\x12\x14\n\x0cservice_name\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\t\x12\x11\n\tcpu_usage\x18\x03 \x01(\x02\x12\x14\n\x0cmemory_usage\x18\x04 \x01(\x02\";\n\x13RetrainModelRequest\x12\x14\n\x0c\x64\x61taset_path\x18\x01 \x01(\t\x12\x0e\n\x06\x65pochs\x18\x02 \x01(\x05*o\n\x08Severity\x12\x1b\n\x17SEVERITY_OK_UNSPECIFIED\x10\x00\x12\x16\n\x12SEVERITY_IRREGULAR\x10\x01\x12\x17\n\x13SEVERITY_SUSPICIOUS\x10\x02\x12\x15\n\x11SEVERITY_CRITICAL\x10\x03\x32\xa2\x01\n\tAIService\x12N\n\x0fPredictSeverity\x12\x1c.lock.PredictSeverityRequest\x1a\x1d.lock.PredictSeverityResponse\x12\x45\n\x0cRetrainModel\x12\x19.lock.RetrainModelRequest\x1a\x1a.lock.RetrainModelResponse2\xe6\x01\n\x0bLockService\x12Q\n\x10\x41uthenticateUser\x12\x1d.lock.AuthenticateUserRequest\x1a\x1e.lock.AuthenticateUserResponse\x12\x45\n\x0cRemoteUnlock\x12\x19.lock.RemoteUnlockRequest\x1a\x1a.lock.RemoteUnlockResponse\x12=\n\x0fGetSystemHealth\x12\x0b.lock.Empty\x1a\x1d.lock.GetSystemHealthResponseB Z\x1e\x62\x61\x63kend/internal/gen/smartlockb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nlock.proto\x12\x04lock\x1a\x1fgoogle/protobuf/timestamp.proto\"\x07\n\x05\x45mpty\"\xe3\x01\n\x0bSensorEvent\x12\x11\n\tdevice_id\x18\x01 \x01(\t\x12\r\n\x05\x65vent\x18\x02 \x01(\t\x12\x0e\n\x06\x64\x65tail\x18\x03 \x01(\t\x12\x0e\n\x06status\x18\x04 \x01(\t\x12\x13\n\x0b\x64istance_cm\x18\x05 \x01(\x02\x12\x13\n\x0blight_level\x18\x06 \x01(\x05\x12\r\n\x05\x66\x61ils\x18\x07 \x01(\x05\x12\x0c\n\x04user\x18\x08 \x01(\t\x12\x0c\n\x04rssi\x18\t \x01(\x05\x12\x0e\n\x06uptime\x18\n \x01(\x02\x12-\n\ttimestamp\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.Timestamp\";\n\x16PredictSeverityRequest\x12!\n\x06\x65vents\x18\x01 \x03(\x0b\x32\x11.lock.SensorEvent\"m\n\x17PredictSeverityResponse\x12&\n\x0e\x63lassification\x18\x01 \x01(\x0e\x32\x0e.lock.Severity\x12\x12\n\nconfidence\x18\x02 \x01(\x02\x12\x16\n\x0erecommendation\x18\x03 \x01(\t\"[\n\x17\x41uthenticateUserRequest\x12\x11\n\tdevice_id\x18\x01 \x01(\t\x12\x11\n\tauth_type\x18\x02 \x01(\t\x12\x1a\n\x12\x63redential_payload\x18\x03 \x01(\t\"A\n\x18\x41uthenticateUserResponse\x12\x12\n\nauthorized\x18\x01 \x01(\x08\x12\x11\n\tuser_name\x18\x02 \x01(\t\"?\n\x13RemoteUnlockRequest\x12\x14\n\x0crequester_id\x18\x01 \x01(\t\x12\x12\n\nsecret_key\x18\x02 \x01(\t\"8\n\x14RemoteUnlockResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"8\n\x14RetrainModelResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"h\n\x17GetSystemHealthResponse\x12\x14\n\x0cservice_name\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\t\x12\x11\n\tcpu_usage\x18\x03 \x01(\x02\x12\x14\n\x0cmemory_usage\x18\x04 \x01(\x02\";\n\x13RetrainModelRequest\x12\x14\n\x0c\x64\x61taset_path\x18\x01 \x01(\t\x12\x0e\n\x06\x65pochs\x18\x02 \x01(\x05*o\n\x08Severity\x12\x1b\n\x17SEVERITY_OK_UNSPECIFIED\x10\x00\x12\x16\n\x12SEVERITY_IRREGULAR\x10\x01\x12\x17\n\x13SEVERITY_SUSPICIOUS\x10\x02\x12\x15\n\x11SEVERITY_CRITICAL\x10\x03\x32\xa2\x01\n\tAIService\x12N\n\x0fPredictSeverity\x12\x1c.lock.PredictSeverityRequest\x1a\x1d.lock.PredictSeverityResponse\x12\x45\n\x0cRetrainModel\x12\x19.lock.RetrainModelRequest\x1a\x1a.lock.RetrainModelResponse2\xe6\x01\n\x0bLockService\x12Q\n\x10\x41uthenticateUser\x12\x1d.lock.AuthenticateUserRequest\x1a\x1e.lock.AuthenticateUserResponse\x12\x45\n\x0cRemoteUnlock\x12\x19.lock.RemoteUnlockRequest\x1a\x1a.lock.RemoteUnlockResponse\x12=\n\x0fGetSystemHealth\x12\x0b.lock.Empty\x1a\x1d.lock.GetSystemHealthResponseB Z\x1e\x62\x61\x63kend/internal/gen/smartlockb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,32 +33,32 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'lock_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'Z\036backend/internal/gen/smartlock'
-  _globals['_SEVERITY']._serialized_start=892
-  _globals['_SEVERITY']._serialized_end=1003
+  _globals['_SEVERITY']._serialized_start=972
+  _globals['_SEVERITY']._serialized_end=1083
   _globals['_EMPTY']._serialized_start=53
   _globals['_EMPTY']._serialized_end=60
   _globals['_SENSOREVENT']._serialized_start=63
-  _globals['_SENSOREVENT']._serialized_end=210
-  _globals['_PREDICTSEVERITYREQUEST']._serialized_start=212
-  _globals['_PREDICTSEVERITYREQUEST']._serialized_end=271
-  _globals['_PREDICTSEVERITYRESPONSE']._serialized_start=273
-  _globals['_PREDICTSEVERITYRESPONSE']._serialized_end=382
-  _globals['_AUTHENTICATEUSERREQUEST']._serialized_start=384
-  _globals['_AUTHENTICATEUSERREQUEST']._serialized_end=475
-  _globals['_AUTHENTICATEUSERRESPONSE']._serialized_start=477
-  _globals['_AUTHENTICATEUSERRESPONSE']._serialized_end=542
-  _globals['_REMOTEUNLOCKREQUEST']._serialized_start=544
-  _globals['_REMOTEUNLOCKREQUEST']._serialized_end=607
-  _globals['_REMOTEUNLOCKRESPONSE']._serialized_start=609
-  _globals['_REMOTEUNLOCKRESPONSE']._serialized_end=665
-  _globals['_RETRAINMODELRESPONSE']._serialized_start=667
-  _globals['_RETRAINMODELRESPONSE']._serialized_end=723
-  _globals['_GETSYSTEMHEALTHRESPONSE']._serialized_start=725
-  _globals['_GETSYSTEMHEALTHRESPONSE']._serialized_end=829
-  _globals['_RETRAINMODELREQUEST']._serialized_start=831
-  _globals['_RETRAINMODELREQUEST']._serialized_end=890
-  _globals['_AISERVICE']._serialized_start=1006
-  _globals['_AISERVICE']._serialized_end=1168
-  _globals['_LOCKSERVICE']._serialized_start=1171
-  _globals['_LOCKSERVICE']._serialized_end=1401
+  _globals['_SENSOREVENT']._serialized_end=290
+  _globals['_PREDICTSEVERITYREQUEST']._serialized_start=292
+  _globals['_PREDICTSEVERITYREQUEST']._serialized_end=351
+  _globals['_PREDICTSEVERITYRESPONSE']._serialized_start=353
+  _globals['_PREDICTSEVERITYRESPONSE']._serialized_end=462
+  _globals['_AUTHENTICATEUSERREQUEST']._serialized_start=464
+  _globals['_AUTHENTICATEUSERREQUEST']._serialized_end=555
+  _globals['_AUTHENTICATEUSERRESPONSE']._serialized_start=557
+  _globals['_AUTHENTICATEUSERRESPONSE']._serialized_end=622
+  _globals['_REMOTEUNLOCKREQUEST']._serialized_start=624
+  _globals['_REMOTEUNLOCKREQUEST']._serialized_end=687
+  _globals['_REMOTEUNLOCKRESPONSE']._serialized_start=689
+  _globals['_REMOTEUNLOCKRESPONSE']._serialized_end=745
+  _globals['_RETRAINMODELRESPONSE']._serialized_start=747
+  _globals['_RETRAINMODELRESPONSE']._serialized_end=803
+  _globals['_GETSYSTEMHEALTHRESPONSE']._serialized_start=805
+  _globals['_GETSYSTEMHEALTHRESPONSE']._serialized_end=909
+  _globals['_RETRAINMODELREQUEST']._serialized_start=911
+  _globals['_RETRAINMODELREQUEST']._serialized_end=970
+  _globals['_AISERVICE']._serialized_start=1086
+  _globals['_AISERVICE']._serialized_end=1248
+  _globals['_LOCKSERVICE']._serialized_start=1251
+  _globals['_LOCKSERVICE']._serialized_end=1481
 # @@protoc_insertion_point(module_scope)
