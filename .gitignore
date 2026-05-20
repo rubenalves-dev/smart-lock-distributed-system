@@ -1,3 +1,5 @@
 .DS_Store
 deployments/mosquitto/data/
 deployments/mosquitto/log/
+
+firmware_*
