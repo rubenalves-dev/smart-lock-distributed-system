@@ -16,6 +16,7 @@ import (
 )
 
 func main() {
+	fmt.Println("Starting main server...")
 	ctx := context.Background()
 	telemetryChan := make(chan models.SensorPayload, 100)
 	go broker.StartSubscriber("mosquitto_broker", telemetryChan)
