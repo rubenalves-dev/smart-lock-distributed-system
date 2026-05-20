@@ -228,9 +228,9 @@ void loop()
         else
         {
             lastUser = "unknown";
-            sendTelemetry("access_denied", "Invalid RFID");
+            sendTelemetry("access_denied", "Invalid RFID. Fails: " + String(rfid.failCount()) + " | Last UID: " + String(rfid.buffer()[0], HEX) + ":" + String(rfid.buffer()[1], HEX) + ":" + String(rfid.buffer()[2], HEX) + ":" + String(rfid.buffer()[3], HEX));
         }
     }
 
-    delay(10000); // Main loop delay to reduce CPU usage
+    delay(500); // Main loop delay to reduce CPU usage
 }

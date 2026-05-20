@@ -113,14 +113,20 @@ func (*Empty) Descriptor() ([]byte, []int) {
 
 // Data coming from ESP32 or stored in DB for AI
 type SensorEvent struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	DeviceId           string                 `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	VibrationIntensity float32                `protobuf:"fixed32,2,opt,name=vibration_intensity,json=vibrationIntensity,proto3" json:"vibration_intensity,omitempty"`
-	EntryMethod        string                 `protobuf:"bytes,3,opt,name=entry_method,json=entryMethod,proto3" json:"entry_method,omitempty"`
-	Success            bool                   `protobuf:"varint,4,opt,name=success,proto3" json:"success,omitempty"`
-	Timestamp          *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeviceId      string                 `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	Event         string                 `protobuf:"bytes,2,opt,name=event,proto3" json:"event,omitempty"`
+	Detail        string                 `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	DistanceCm    float32                `protobuf:"fixed32,5,opt,name=distance_cm,json=distanceCm,proto3" json:"distance_cm,omitempty"`
+	LightLevel    int32                  `protobuf:"varint,6,opt,name=light_level,json=lightLevel,proto3" json:"light_level,omitempty"`
+	Fails         int32                  `protobuf:"varint,7,opt,name=fails,proto3" json:"fails,omitempty"`
+	User          string                 `protobuf:"bytes,8,opt,name=user,proto3" json:"user,omitempty"`
+	Rssi          int32                  `protobuf:"varint,9,opt,name=rssi,proto3" json:"rssi,omitempty"`
+	Uptime        float32                `protobuf:"fixed32,10,opt,name=uptime,proto3" json:"uptime,omitempty"`
+	Timestamp     *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SensorEvent) Reset() {
@@ -160,25 +166,67 @@ func (x *SensorEvent) GetDeviceId() string {
 	return ""
 }
 
-func (x *SensorEvent) GetVibrationIntensity() float32 {
+func (x *SensorEvent) GetEvent() string {
 	if x != nil {
-		return x.VibrationIntensity
-	}
-	return 0
-}
-
-func (x *SensorEvent) GetEntryMethod() string {
-	if x != nil {
-		return x.EntryMethod
+		return x.Event
 	}
 	return ""
 }
 
-func (x *SensorEvent) GetSuccess() bool {
+func (x *SensorEvent) GetDetail() string {
 	if x != nil {
-		return x.Success
+		return x.Detail
 	}
-	return false
+	return ""
+}
+
+func (x *SensorEvent) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *SensorEvent) GetDistanceCm() float32 {
+	if x != nil {
+		return x.DistanceCm
+	}
+	return 0
+}
+
+func (x *SensorEvent) GetLightLevel() int32 {
+	if x != nil {
+		return x.LightLevel
+	}
+	return 0
+}
+
+func (x *SensorEvent) GetFails() int32 {
+	if x != nil {
+		return x.Fails
+	}
+	return 0
+}
+
+func (x *SensorEvent) GetUser() string {
+	if x != nil {
+		return x.User
+	}
+	return ""
+}
+
+func (x *SensorEvent) GetRssi() int32 {
+	if x != nil {
+		return x.Rssi
+	}
+	return 0
+}
+
+func (x *SensorEvent) GetUptime() float32 {
+	if x != nil {
+		return x.Uptime
+	}
+	return 0
 }
 
 func (x *SensorEvent) GetTimestamp() *timestamppb.Timestamp {
@@ -687,13 +735,22 @@ const file_lock_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
 	"lock.proto\x12\x04lock\x1a\x1fgoogle/protobuf/timestamp.proto\"\a\n" +
-	"\x05Empty\"\xd2\x01\n" +
+	"\x05Empty\"\xc2\x02\n" +
 	"\vSensorEvent\x12\x1b\n" +
-	"\tdevice_id\x18\x01 \x01(\tR\bdeviceId\x12/\n" +
-	"\x13vibration_intensity\x18\x02 \x01(\x02R\x12vibrationIntensity\x12!\n" +
-	"\fentry_method\x18\x03 \x01(\tR\ventryMethod\x12\x18\n" +
-	"\asuccess\x18\x04 \x01(\bR\asuccess\x128\n" +
-	"\ttimestamp\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"C\n" +
+	"\tdevice_id\x18\x01 \x01(\tR\bdeviceId\x12\x14\n" +
+	"\x05event\x18\x02 \x01(\tR\x05event\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1f\n" +
+	"\vdistance_cm\x18\x05 \x01(\x02R\n" +
+	"distanceCm\x12\x1f\n" +
+	"\vlight_level\x18\x06 \x01(\x05R\n" +
+	"lightLevel\x12\x14\n" +
+	"\x05fails\x18\a \x01(\x05R\x05fails\x12\x12\n" +
+	"\x04user\x18\b \x01(\tR\x04user\x12\x12\n" +
+	"\x04rssi\x18\t \x01(\x05R\x04rssi\x12\x16\n" +
+	"\x06uptime\x18\n" +
+	" \x01(\x02R\x06uptime\x128\n" +
+	"\ttimestamp\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"C\n" +
 	"\x16PredictSeverityRequest\x12)\n" +
 	"\x06events\x18\x01 \x03(\v2\x11.lock.SensorEventR\x06events\"\x99\x01\n" +
 	"\x17PredictSeverityResponse\x126\n" +
