@@ -856,3 +856,15 @@
 1778620030: New client connected from 192.168.65.1:43860 as smartlock_esp32 (p4, c1, k15).
 1778620073: Client smartlock_esp32 [192.168.65.1:43860] disconnected: exceeded timeout.
 1778620828: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779296184: mosquitto version 2.1.2 starting
+1779296184: Config loaded from /mosquitto/config/mosquitto.conf.
+1779296184: Bridge support available.
+1779296184: Persistence support available.
+1779296184: TLS support available.
+1779296184: TLS-PSK support available.
+1779296184: Websockets support available.
+1779296184: Opening ipv4 listen socket on port 1883.
+1779296184: Opening ipv4 listen socket on port 9001.
+1779296184: mosquitto version 2.1.2 running
+1779296185: New connection from 172.22.0.6:54964 on port 1883.
+1779296185: New client connected from 172.22.0.6:54964 as go_backend_subscriber (p4, c1, k30).

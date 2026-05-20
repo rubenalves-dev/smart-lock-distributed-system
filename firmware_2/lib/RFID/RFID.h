@@ -12,7 +12,7 @@ private:
 
 public:
     RFID(int sdaPin, int rstPin);
-    void setup();
+    void setup(int sckPin, int misoPin, int mosiPin);
     bool check(byte uid[4]);
     void update();
     void halt();

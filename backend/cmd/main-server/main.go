@@ -16,6 +16,7 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	telemetryChan := make(chan models.SensorPayload, 100)
 	go broker.StartSubscriber("mosquitto_broker", telemetryChan)
 
@@ -45,7 +46,7 @@ func main() {
 		go rabbit.PublishSensorEvent(bytes)
 
 		if event.Event != "heartbeat" {
-			resp, err := aiClient.PredictSeverity(context.Background(), &smartlock.PredictSeverityRequest{
+			resp, err := aiClient.PredictSeverity(ctx, &smartlock.PredictSeverityRequest{
 				Events: []*smartlock.SensorEvent{{
 					DeviceId:   event.DeviceID,
 					Event:      event.Event,

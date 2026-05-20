@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "author": "Smartlock Project",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-s3-devkitc-1",
+      "id": "esp32",
+      "top": 275.68,
+      "left": 379.2,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-breadboard",
+      "id": "bb1",
+      "top": -3,
+      "left": 2.8,
+      "attrs": { "rows": "30", "color": "#eeefed" }
+    },
+    {
+      "type": "wokwi-breadboard",
+      "id": "bb2",
+      "top": 0,
+      "left": 700,
+      "attrs": { "rows": "30" }
+    },
+    {
+      "type": "board-mfrc522",
+      "id": "rfid",
+      "top": 20,
+      "left": 720,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "ultrasonic",
+      "top": 11.1,
+      "left": 53.5,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr",
+      "top": 243.2,
+      "left": 48.8,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    ["esp32:TX", "$serialMonitor:RX", "", []],
+    ["esp32:RX", "$serialMonitor:TX", "", []],
+    ["esp32:GND.1", "bb1:25t.a", "black", ["h0"]],
+    [
+      "esp32:3V3.1",
+      "bb1:1t.a",
+      "red",
+      ["h-47.81", "v153.6", "h-413.48", "v-537.6", "h86.61", "v127.34"]
+    ],
+    ["esp32:GND.2", "bb2:25t.j", "black", ["h0"]],
+    ["esp32:VIN", "bb2:1t.j", "red", ["h0"]],
+    ["ultrasonic:VCC", "bb1:1t.e", "red", ["h0"]],
+    ["ultrasonic:GND", "bb1:25t.e", "black", ["h0"]],
+    ["ultrasonic:TRIG", "esp32:16", "green", ["v19.2", "h383.6", "v230.4"]],
+    ["ultrasonic:ECHO", "esp32:17", "blue", ["v9.6", "h364", "v285.28"]],
+    ["ldr:VCC", "bb1:3t.e", "red", ["v-38.4", "h-175.6"]],
+    ["ldr:GND", "bb1:25t.d", "black", ["h0"]],
+    ["ldr:AO", "esp32:4", "purple", ["h124.8", "v54.18"]],
+    ["rfid:RST", "esp32:6", "orange", ["h-361.36", "v320.41"]],
+    ["rfid:SDA", "esp32:5", "yellow", ["h-370.96", "v387.61"]],
+    ["rfid:MOSI", "esp32:23", "green", ["h-236.56", "v233.83"]],
+    ["rfid:MISO", "esp32:19", "blue", ["h-226.96", "v281.83"]],
+    ["rfid:SCK", "esp32:18", "purple", ["h-198.16", "v377.83"]],
+    ["bb1:25t.a", "bb1:25t.b", "black", ["h0"]],
+    ["bb1:25t.a", "bb1:25t.c", "black", ["h0"]],
+    ["bb1:25t.a", "bb1:25t.d", "black", ["h0"]],
+    ["bb1:25t.a", "bb1:24t.b", "black", ["h0"]],
+    ["bb1:25t.a", "bb1:24t.c", "black", ["h0"]],
+    ["bb1:1t.b", "bb1:tp.1", "red", ["h9.6", "v-48.3"]],
+    ["bb1:tp.2", "bb1:3t.a", "red", ["v19.5", "h-10.4"]],
+    ["rfid:3.3V", "esp32:3V3.1", "red", ["h-159.76", "v102.15", "h-182.59"]],
+    ["rfid:GND", "esp32:GND.2", "black", ["h-150.16", "v198.15"]],
+    ["rfid:SDA", "bb2:1t.b", "", ["$bb"]],
+    ["rfid:SCK", "bb2:1t.c", "", ["$bb"]],
+    ["rfid:MOSI", "bb2:1t.d", "", ["$bb"]],
+    ["rfid:MISO", "bb2:1t.e", "", ["$bb"]],
+    ["rfid:RST", "bb2:1b.f", "", ["$bb"]],
+    ["rfid:3.3V", "bb2:1b.g", "", ["$bb"]]
+  ],
+  "dependencies": {}
+}
