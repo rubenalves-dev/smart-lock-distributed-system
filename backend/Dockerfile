@@ -4,7 +4,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o main-server ./cmd/main-server/main.go
+RUN go build -o main-server ./cmd/api/main.go
 
 # Stage 2: Run
 FROM alpine:latest
