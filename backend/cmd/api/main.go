@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -12,13 +11,13 @@ import (
 	"syscall"
 	"time"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	_ "github.com/lib/pq"
-	"github.com/rubenalves-dev/smart-lock-distributed-system/broker"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/config"
+	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/core"
+	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/ai"
+	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/telemetry"
+	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/user"
 	smartlock "github.com/rubenalves-dev/smart-lock-distributed-system/internal/gen"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/models"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/monitor"
@@ -34,82 +33,74 @@ func main() {
 
 	log.Printf("Starting backend with Config: Port=%d, AIAddr=%s, RabbitURL=%s\n", cfg.Port, cfg.AIServiceAddr, cfg.RabbitMQURL)
 
+	// Create channel for MQTT telemetry events
 	telemetryChan := make(chan models.SensorPayload, 100)
 
-	// Connect to PostgreSQL with retry
-	var db *sql.DB
-	for {
-		db, err = sql.Open("postgres", cfg.PostgresURL)
-		if err == nil {
-			err = db.Ping()
-			if err == nil {
-				log.Println("Connected to PostgreSQL DB successfully")
-				break
-			}
-		}
-		log.Printf("Failed to connect to PostgreSQL (URL: %s), retrying in 2 seconds...: %v", cfg.PostgresURL, err)
-		time.Sleep(2 * time.Second)
+	// 1. Initialize PostgreSQL Client
+	dbClient, err := core.NewPostgresClient(cfg.PostgresURL)
+	if err != nil {
+		log.Fatalf("Critical: Failed to connect to PostgreSQL: %v", err)
 	}
-	defer db.Close()
+	defer dbClient.Close()
 
-	// Connect to MQTT Mosquitto with retry
-	var mqttClient mqtt.Client
-	for {
-		mqttClient, err = broker.StartSubscriber(cfg.MQTTBroker, telemetryChan)
-		if err == nil {
-			log.Println("Connected to MQTT broker successfully")
-			break
-		}
-		log.Printf("Failed to connect to MQTT broker (%s), retrying in 2 seconds...: %v", cfg.MQTTBroker, err)
-		time.Sleep(2 * time.Second)
+	// 2. Initialize InfluxDB Client
+	influxClient, err := core.NewInfluxClient(cfg.InfluxDBURL, cfg.InfluxDBToken)
+	if err != nil {
+		log.Fatalf("Critical: Failed to connect to InfluxDB: %v", err)
 	}
-
-	// Connect to InfluxDB with retry
-	influxClient := influxdb2.NewClient(cfg.InfluxDBURL, cfg.InfluxDBToken)
 	defer influxClient.Close()
-	for {
-		ok, err := influxClient.Ping(context.Background())
-		if err == nil && ok {
-			log.Println("Connected to InfluxDB successfully")
-			break
-		}
-		log.Printf("Failed to connect to InfluxDB (URL: %s), retrying in 2 seconds...: %v", cfg.InfluxDBURL, err)
-		time.Sleep(2 * time.Second)
-	}
 
-	// Connect to RabbitMQ with retry
-	var rabbit *broker.RabbitMQClient
-	for {
-		rabbit, err = broker.NewRabbitMQ(cfg.RabbitMQURL)
-		if err == nil {
-			log.Println("Connected to RabbitMQ successfully")
-			break
-		}
-		log.Printf("Failed to connect to RabbitMQ (URL: %s), retrying in 2 seconds...: %v", cfg.RabbitMQURL, err)
-		time.Sleep(2 * time.Second)
+	// 3. Initialize RabbitMQ Client
+	rabbitClient, err := core.NewRabbitMQClient(cfg.RabbitMQURL)
+	if err != nil {
+		log.Fatalf("Critical: Failed to connect to RabbitMQ: %v", err)
 	}
-	defer rabbit.Close()
+	defer rabbitClient.Close()
 
-	// gRPC connection to AI Service with retry
+	// 4. Initialize gRPC connection to AI Service
 	var grpcConn *grpc.ClientConn
-	for {
+	for i := 0; i < 15; i++ {
 		grpcConn, err = grpc.NewClient(cfg.AIServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err == nil {
 			log.Println("Connected to AI service gRPC server successfully")
 			break
 		}
-		log.Printf("Failed to connect to AI service gRPC, retrying in 2 seconds...: %v", err)
+		log.Printf("Failed to connect to AI service gRPC, retrying in 2 seconds... (%d/15): %v", i+1, err)
 		time.Sleep(2 * time.Second)
 	}
+	if err != nil {
+		log.Fatalf("Critical: Failed to connect to AI Service: %v", err)
+	}
 	defer grpcConn.Close()
-	aiClient := smartlock.NewAIServiceClient(grpcConn)
 
-	// Start Background Health Monitor
+	// 5. Initialize domains
+	// AI Domain
+	rawAIClient := smartlock.NewAIServiceClient(grpcConn)
+	aiService := ai.NewGRPCClient(rawAIClient)
+
+	// User Domain
+	userRepo := user.NewRepository(dbClient.DB)
+	userService := user.NewService(userRepo)
+	userHandler := user.NewHandler(userService)
+
+	// Telemetry Domain
+	telemetryRepo := telemetry.NewRepository(dbClient.DB)
+	telemetryService := telemetry.NewService(telemetryRepo, userService, rabbitClient, aiService)
+	telemetryHandler := telemetry.NewHandler(telemetryService)
+
+	// 6. Initialize MQTT Mosquitto Client
+	mqttClient, err := core.NewMQTTClient(cfg.MQTTBroker, telemetryChan)
+	if err != nil {
+		log.Fatalf("Critical: Failed to connect to MQTT broker: %v", err)
+	}
+	defer mqttClient.Close()
+
+	// 7. Start Background Health Monitor
 	healthMonitor := monitor.NewMonitor(
-		db,
+		dbClient,
 		mqttClient,
 		influxClient,
-		rabbit,
+		rabbitClient,
 		cfg.RabbitMQURL,
 		cfg.InfluxDBOrg,
 		cfg.InfluxDBBucket,
@@ -119,50 +110,17 @@ func main() {
 	defer cancelMonitor()
 	go healthMonitor.Start(monitorCtx)
 
-	// Start MQTT Event Consumer loop asynchronously
+	// 8. Start MQTT Event Consumer loop asynchronously
 	go func() {
 		for event := range telemetryChan {
-			log.Printf("Processing %s from %s\n", event.Event, event.DeviceID)
-			bytes, err := json.Marshal(event)
-			if err != nil {
-				log.Printf("Failed to marshal event: %v\n", err)
-				continue
-			}
-
-			if rabbit != nil {
-				go rabbit.PublishSensorEvent(bytes)
-			}
-
-			if event.Event != "heartbeat" && aiClient != nil {
-				resp, err := aiClient.PredictSeverity(context.Background(), &smartlock.PredictSeverityRequest{
-					Events: []*smartlock.SensorEvent{{
-						DeviceId:   event.DeviceID,
-						Event:      event.Event,
-						Detail:     event.Details,
-						Status:     event.Status,
-						DistanceCm: event.DistanceCm,
-						LightLevel: int32(event.LightLevel),
-						Fails:      int32(event.Fails),
-						User:       event.User,
-						Rssi:       int32(event.RSSI),
-						Uptime:     event.Uptime,
-					}},
-				})
-
-				if err == nil {
-					log.Printf("AI response: classification=%v, confidence=%.2f, recommendation=%s\n",
-						resp.Classification, resp.Confidence, resp.Recommendation)
-					if resp.Classification >= smartlock.Severity_SEVERITY_SUSPICIOUS {
-						log.Printf("⚠️ ALERT: AI classified this as %v\n", resp.Classification)
-					}
-				} else {
-					log.Printf("Failed to predict severity: %v\n", err)
-				}
+			log.Printf("Processing MQTT event: %s from device: %s\n", event.Event, event.DeviceID)
+			if err := telemetryService.Ingest(context.Background(), event); err != nil {
+				log.Printf("Error ingesting telemetry event: %v\n", err)
 			}
 		}
 	}()
 
-	// Setup go-chi router
+	// 9. Setup go-chi router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -179,6 +137,11 @@ func main() {
 		json.NewEncoder(w).Encode(statuses)
 	})
 
+	// Register domain routes
+	userHandler.RegisterRoutes(r)
+	telemetryHandler.RegisterRoutes(r)
+
+	// AI retrain endpoint
 	r.Post("/api/ai/retrain", func(w http.ResponseWriter, r *http.Request) {
 		type RetrainRequest struct {
 			Epochs      int32  `json:"epochs"`
@@ -192,33 +155,26 @@ func main() {
 			req.Epochs = 10
 		}
 
-		if aiClient == nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusServiceUnavailable)
-			w.Write([]byte(`{"success":false,"message":"AI client is not connected"}`))
-			return
-		}
-
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
-		resp, err := aiClient.RetrainModel(ctx, &smartlock.RetrainModelRequest{
-			Epochs:      req.Epochs,
-			DatasetPath: req.DatasetPath,
-		})
+		success, message, err := aiService.RetrainModel(ctx, req.Epochs, req.DatasetPath)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"success": false,
-				"message": fmt.Sprintf("gRPC error: %v", err),
+				"message": fmt.Sprintf("AI error: %v", err),
 			})
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resp)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": success,
+			"message": message,
+		})
 	})
 
 	srv := &http.Server{

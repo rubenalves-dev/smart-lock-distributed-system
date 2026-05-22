@@ -40,11 +40,11 @@ up:
 
 # Stop the system
 down:
-	docker-compose down -f ./deployments/docker-compose.yml -p smartlock
+	docker-compose -f ./deployments/docker-compose.yml -p smartlock down
 
 # View logs
 logs:
-	docker-compose logs -f ./deployments/docker-compose.yml -p smartlock
+	docker-compose -f ./deployments/docker-compose.yml -p smartlock logs -f
 
 # PlatformIO run
 pio-run:

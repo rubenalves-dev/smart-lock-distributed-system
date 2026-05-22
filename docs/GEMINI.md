@@ -25,3 +25,36 @@ This document tracks structural changes made to the repository code.
 - **[Deployment configuration]**:
   - Modified [backend/Dockerfile](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/Dockerfile): Updated build directive to compile `./cmd/api/main.go` and run `./api-server`.
   - Modified [deployments/docker-compose.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/deployments/docker-compose.yml): Added static admin token environment variable to InfluxDB, set database URLs on main-server, and updated dependencies.
+
+## 2026-05-22: Simplified DDD Refactor and Core Subfolder
+
+### Firmware (`/firmware`)
+- **[Refactoring & Features]**: Modified [main.cpp](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/firmware/src/main.cpp) to transmit the `rfid_uid` field in authentication telemetry payloads (e.g., `access_granted`, `access_denied`).
+
+### Go Backend (`/backend`)
+- **[NEW]** Created `internal/core` package consolidating all shared infrastructure clients, configurations, health check Pings, and close cleanups:
+  - [postgres.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/core/postgres.go): Schema migration for `users` and `telemetry` tables and client setup.
+  - [mqtt.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/core/mqtt.go): Paho MQTT subscriber setup.
+  - [influx.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/core/influx.go): InfluxDB v2 integration with WriteAPI.
+  - [rabbitmq.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/core/rabbitmq.go): Queue publishers, reconnect handlers, and check states.
+- **[NEW]** Created `user` domain layer managing RFID cards/tags and appending personal data:
+  - [entity.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/user/entity.go): Domain structure definition.
+  - [repository.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/user/repository.go): Postgres user storage interface and implementation.
+  - [service.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/user/service.go): Register and update user domain business logic.
+  - [handler.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/user/handler.go): HTTP handler for user query (`GET /api/users`) and details update (`PUT /api/users/{uid}`).
+- **[NEW]** Created `telemetry` domain layer for ingestion pipeline and audit logs:
+  - [repository.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/telemetry/repository.go): PostgreSQL telemetry logs persistence.
+  - [service.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/telemetry/service.go): Ingestion orchestrator that persists telemetry, notifies RabbitMQ, triggers AI security evaluation, and automatically registers new RFID cards in the user domain.
+  - [handler.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/telemetry/handler.go): Ingestion simulation endpoint `POST /api/telemetry` for system manual verification.
+- **[NEW]** Created `ai` domain adapter pattern decoupled from the gRPC definition:
+  - [service.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/ai/service.go): Clean AI interface for Go backend ports.
+  - [grpc_client.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/ai/grpc_client.go): Adapt client to the gRPC client endpoints.
+- **[DELETE]** Removed the old broker package (`backend/broker/mqtt.go`, `backend/broker/rabbitmq.go`).
+- **[Refactoring & Features]**:
+  - Updated [models.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/models/models.go) to support the optional `rfid_uid` field in sensor payload.
+  - Updated [monitor.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/monitor/monitor.go) to utilize the unified `internal/core` components for checking connections.
+  - Updated [main.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/cmd/api/main.go) to initialize the DDD domains and route API calls.
+- **[Tests]**: Added new unit tests verifying service logic in users and telemetry domains:
+  - [user/service_test.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/user/service_test.go)
+  - [telemetry/service_test.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/telemetry/service_test.go)
+

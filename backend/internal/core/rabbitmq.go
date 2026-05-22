@@ -1,7 +1,9 @@
-package broker
+package core
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -15,35 +17,37 @@ type RabbitMQClient struct {
 	queue   amqp.Queue
 }
 
-// NewRabbitMQ initializes the connection
-func NewRabbitMQ(url string) (*RabbitMQClient, error) {
-	conn, err := amqp.Dial(url)
-	if err != nil {
-		return nil, err
+// NewRabbitMQClient initializes the connection with retries
+func NewRabbitMQClient(url string) (*RabbitMQClient, error) {
+	var conn *amqp.Connection
+	var err error
+
+	for i := 0; i < 15; i++ {
+		conn, err = amqp.Dial(url)
+		if err == nil {
+			ch, err := conn.Channel()
+			if err == nil {
+				q, err := ch.QueueDeclare(
+					"sensor_events", // name
+					true,            // durable
+					false,           // delete when unused
+					false,           // exclusive
+					false,           // no-wait
+					nil,             // arguments
+				)
+				if err == nil {
+					log.Println("Connected to RabbitMQ successfully")
+					return &RabbitMQClient{conn: conn, channel: ch, queue: q}, nil
+				}
+				ch.Close()
+			}
+			conn.Close()
+		}
+		log.Printf("Failed to connect to RabbitMQ (URL: %s), retrying in 2 seconds... (%d/15): %v", url, i+1, err)
+		time.Sleep(2 * time.Second)
 	}
 
-	ch, err := conn.Channel()
-	if err != nil {
-		conn.Close()
-		return nil, err
-	}
-
-	// Declare a queue (creates it if it doesn't exist)
-	q, err := ch.QueueDeclare(
-		"sensor_events", // name
-		true,            // durable
-		false,           // delete when unused
-		false,           // exclusive
-		false,           // no-wait
-		nil,             // arguments
-	)
-	if err != nil {
-		ch.Close()
-		conn.Close()
-		return nil, err
-	}
-
-	return &RabbitMQClient{conn: conn, channel: ch, queue: q}, nil
+	return nil, fmt.Errorf("failed to connect to RabbitMQ after retries: %w", err)
 }
 
 // PublishSensorEvent sends data to the AI service asynchronously

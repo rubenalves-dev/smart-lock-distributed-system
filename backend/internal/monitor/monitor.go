@@ -2,15 +2,13 @@ package monitor
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"sync"
 	"time"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"github.com/rubenalves-dev/smart-lock-distributed-system/broker"
+	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/core"
 )
 
 type ServiceStatus struct {
@@ -21,10 +19,10 @@ type ServiceStatus struct {
 }
 
 type Monitor struct {
-	db             *sql.DB
-	mqttClient     mqtt.Client
-	influxClient   influxdb2.Client
-	rabbitClient   *broker.RabbitMQClient
+	db             *core.PostgresClient
+	mqttClient     *core.MQTTClient
+	influxClient   *core.InfluxClient
+	rabbitClient   *core.RabbitMQClient
 	rabbitURL      string
 	influxOrg      string
 	influxBucket   string
@@ -33,10 +31,10 @@ type Monitor struct {
 }
 
 func NewMonitor(
-	db *sql.DB,
-	mqttClient mqtt.Client,
-	influxClient influxdb2.Client,
-	rabbitClient *broker.RabbitMQClient,
+	db *core.PostgresClient,
+	mqttClient *core.MQTTClient,
+	influxClient *core.InfluxClient,
+	rabbitClient *core.RabbitMQClient,
 	rabbitURL string,
 	influxOrg string,
 	influxBucket string,
@@ -71,7 +69,6 @@ func (m *Monitor) Start(ctx context.Context) {
 	defer ticker.Stop()
 
 	log.Println("Background service health monitor started.")
-	// Run once initially
 	m.checkAndLogHealth(ctx)
 
 	for {
@@ -115,7 +112,12 @@ func (m *Monitor) checkAndLogHealth(ctx context.Context) {
 
 func (m *Monitor) checkPostgres(ctx context.Context) ServiceStatus {
 	start := time.Now()
-	err := m.db.PingContext(ctx)
+	var err error
+	if m.db != nil {
+		err = m.db.Ping(ctx)
+	} else {
+		err = fmt.Errorf("postgres client is nil")
+	}
 	latency := time.Since(start).Seconds() * 1000.0
 
 	status := ServiceStatus{
@@ -182,7 +184,13 @@ func (m *Monitor) checkRabbitMQ() ServiceStatus {
 
 func (m *Monitor) checkInfluxDB(ctx context.Context) ServiceStatus {
 	start := time.Now()
-	ok, err := m.influxClient.Ping(ctx)
+	var ok bool
+	var err error
+	if m.influxClient != nil {
+		ok, err = m.influxClient.Ping(ctx)
+	} else {
+		err = fmt.Errorf("influx client is nil")
+	}
 	latency := time.Since(start).Seconds() * 1000.0
 
 	status := ServiceStatus{
@@ -199,9 +207,11 @@ func (m *Monitor) checkInfluxDB(ctx context.Context) ServiceStatus {
 }
 
 func (m *Monitor) writeStatusesToInflux(statuses map[string]ServiceStatus) {
+	if m.influxClient == nil {
+		return
+	}
 	writeAPI := m.influxClient.WriteAPI(m.influxOrg, m.influxBucket)
 
-	// Create goroutine to handle errors asynchronously
 	go func() {
 		for err := range writeAPI.Errors() {
 			log.Printf("InfluxDB Write error: %v", err)
