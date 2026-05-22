@@ -54,3 +54,23 @@ services:
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
     restart: always
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influx_db
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=UmaSenhaMuitoSegura123
+      - DOCKER_INFLUXDB_INIT_ORG=A MinhaOrganizacao
+      - DOCKER_INFLUXDB_INIT_BUCKET=esp32_pings
+    restart: unless-stopped
+
+volumes:
+  influxdb-data:
+  influxdb-config:
