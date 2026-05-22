@@ -4,12 +4,12 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o main-server ./cmd/main-server/main.go
+RUN go build -o api-server ./cmd/api/main.go
 
 # Stage 2: Run
 FROM alpine:latest
 WORKDIR /root/
-COPY --from=builder /app/main-server .
+COPY --from=builder /app/api-server .
 # Expose REST API and gRPC ports
 EXPOSE 8080 50052
-CMD ["./main-server"]
+CMD ["./api-server"]

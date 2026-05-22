@@ -2,12 +2,14 @@ package broker
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type RabbitMQClient struct {
+	mu      sync.RWMutex
 	conn    *amqp.Connection
 	channel *amqp.Channel
 	queue   amqp.Queue
@@ -22,6 +24,7 @@ func NewRabbitMQ(url string) (*RabbitMQClient, error) {
 
 	ch, err := conn.Channel()
 	if err != nil {
+		conn.Close()
 		return nil, err
 	}
 
@@ -34,12 +37,24 @@ func NewRabbitMQ(url string) (*RabbitMQClient, error) {
 		false,           // no-wait
 		nil,             // arguments
 	)
+	if err != nil {
+		ch.Close()
+		conn.Close()
+		return nil, err
+	}
 
-	return &RabbitMQClient{conn: conn, channel: ch, queue: q}, err
+	return &RabbitMQClient{conn: conn, channel: ch, queue: q}, nil
 }
 
 // PublishSensorEvent sends data to the AI service asynchronously
 func (r *RabbitMQClient) PublishSensorEvent(body []byte) error {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if r.channel == nil || r.conn == nil || r.conn.IsClosed() {
+		return amqp.ErrClosed
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -52,4 +67,66 @@ func (r *RabbitMQClient) PublishSensorEvent(body []byte) error {
 			ContentType: "application/json",
 			Body:        body,
 		})
+}
+
+// IsConnected checks if the connection is active and not closed
+func (r *RabbitMQClient) IsConnected() bool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.conn != nil && !r.conn.IsClosed()
+}
+
+// Reconnect attempts to close any existing resources and establish a new connection
+func (r *RabbitMQClient) Reconnect(url string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.channel != nil {
+		_ = r.channel.Close()
+	}
+	if r.conn != nil {
+		_ = r.conn.Close()
+	}
+
+	conn, err := amqp.Dial(url)
+	if err != nil {
+		return err
+	}
+
+	ch, err := conn.Channel()
+	if err != nil {
+		_ = conn.Close()
+		return err
+	}
+
+	q, err := ch.QueueDeclare(
+		"sensor_events",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		_ = ch.Close()
+		_ = conn.Close()
+		return err
+	}
+
+	r.conn = conn
+	r.channel = ch
+	r.queue = q
+	return nil
+}
+
+// Close closes the RabbitMQ connection and channel
+func (r *RabbitMQClient) Close() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.channel != nil {
+		_ = r.channel.Close()
+	}
+	if r.conn != nil {
+		_ = r.conn.Close()
+	}
 }
