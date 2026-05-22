@@ -54,12 +54,17 @@ Preferences preferences;
 String lastUser = "none";
 int failCount = 0;
 
-void sendTelemetry(String eventType, String details)
+void sendTelemetry(String eventType, String details, String rfidUid = "")
 {
   StaticJsonDocument<300> doc;
   doc["device_id"] = "smartlock_esp32";
   doc["event"] = eventType;
   doc["details"] = details;
+
+  if (rfidUid != "")
+  {
+    doc["rfid_uid"] = rfidUid;
+  }
 
   doc["status"] = "";
   doc["distance_cm"] = ultrassonic.distance();
@@ -193,12 +198,16 @@ void loop()
       lastUser = "authorized_user"; // In real case, map UID to user
       updateLockState(false, lastUser);
       // autoCloseTimer.start();
-      sendTelemetry("access_granted", "Valid RFID");
+      char uidStr[20];
+      sprintf(uidStr, "%02X:%02X:%02X:%02X", rfid.lastMatchUID()[0], rfid.lastMatchUID()[1], rfid.lastMatchUID()[2], rfid.lastMatchUID()[3]);
+      sendTelemetry("access_granted", "Valid RFID", uidStr);
     }
     else
     {
       lastUser = "unknown";
-      sendTelemetry("access_denied", "Invalid RFID. Fails: " + String(rfid.failCount()) + " | Last UID: " + String(rfid.buffer()[0], HEX) + ":" + String(rfid.buffer()[1], HEX) + ":" + String(rfid.buffer()[2], HEX) + ":" + String(rfid.buffer()[3], HEX));
+      char uidStr[20];
+      sprintf(uidStr, "%02X:%02X:%02X:%02X", rfid.buffer()[0], rfid.buffer()[1], rfid.buffer()[2], rfid.buffer()[3]);
+      sendTelemetry("access_denied", "Invalid RFID. Fails: " + String(rfid.failCount()), uidStr);
     }
   }
 

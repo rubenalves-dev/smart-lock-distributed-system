@@ -14,4 +14,6 @@ type SensorPayload struct {
 
 	RSSI   int     `json:"rssi"`
 	Uptime float32 `json:"uptime"`
+
+	RfidUID string `json:"rfid_uid,omitempty"`
 }
