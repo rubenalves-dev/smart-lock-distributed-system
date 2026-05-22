@@ -2,20 +2,26 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	_ "github.com/lib/pq"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/broker"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/config"
 	smartlock "github.com/rubenalves-dev/smart-lock-distributed-system/internal/gen"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/models"
+	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/monitor"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -23,43 +29,103 @@ import (
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		fmt.Printf("Failed to load config: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	fmt.Printf("Starting backend with Config: Port=%s, AIAddr=%s, RabbitURL=%s\n", cfg.Port, cfg.AIServiceAddr, cfg.RabbitMQURL)
+	log.Printf("Starting backend with Config: Port=%d, AIAddr=%s, RabbitURL=%s\n", cfg.Port, cfg.AIServiceAddr, cfg.RabbitMQURL)
 
-	// gRPC connection to AI Service using modern grpc.NewClient
-	conn, err := grpc.NewClient(cfg.AIServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		fmt.Printf("Failed to connect to AI service: %v\n", err)
-	}
-	defer conn.Close()
-	aiClient := smartlock.NewAIServiceClient(conn)
+	telemetryChan := make(chan models.SensorPayload, 100)
 
-	// RabbitMQ initialization with retry loop
-	var rabbit *broker.RabbitMQClient
-	for i := 1; i <= 10; i++ {
-		rabbit, err = broker.NewRabbitMQ(cfg.RabbitMQURL)
+	// Connect to PostgreSQL with retry
+	var db *sql.DB
+	for {
+		db, err = sql.Open("postgres", cfg.PostgresURL)
 		if err == nil {
-			fmt.Println("Successfully connected to RabbitMQ broker")
+			err = db.Ping()
+			if err == nil {
+				log.Println("Connected to PostgreSQL DB successfully")
+				break
+			}
+		}
+		log.Printf("Failed to connect to PostgreSQL (URL: %s), retrying in 2 seconds...: %v", cfg.PostgresURL, err)
+		time.Sleep(2 * time.Second)
+	}
+	defer db.Close()
+
+	// Connect to MQTT Mosquitto with retry
+	var mqttClient mqtt.Client
+	for {
+		mqttClient, err = broker.StartSubscriber(cfg.MQTTBroker, telemetryChan)
+		if err == nil {
+			log.Println("Connected to MQTT broker successfully")
 			break
 		}
-		fmt.Printf("Failed to connect to RabbitMQ (attempt %d/10): %v. Retrying in 3 seconds...\n", i, err)
-		time.Sleep(3 * time.Second)
+		log.Printf("Failed to connect to MQTT broker (%s), retrying in 2 seconds...: %v", cfg.MQTTBroker, err)
+		time.Sleep(2 * time.Second)
 	}
 
-	// Start Telemetry subscriber
-	telemetryChan := make(chan models.SensorPayload, 100)
-	go broker.StartSubscriber("mosquitto_broker", telemetryChan)
+	// Connect to InfluxDB with retry
+	influxClient := influxdb2.NewClient(cfg.InfluxDBURL, cfg.InfluxDBToken)
+	defer influxClient.Close()
+	for {
+		ok, err := influxClient.Ping(context.Background())
+		if err == nil && ok {
+			log.Println("Connected to InfluxDB successfully")
+			break
+		}
+		log.Printf("Failed to connect to InfluxDB (URL: %s), retrying in 2 seconds...: %v", cfg.InfluxDBURL, err)
+		time.Sleep(2 * time.Second)
+	}
 
-	// Run Telemetry processing in a separate goroutine (non-blocking)
+	// Connect to RabbitMQ with retry
+	var rabbit *broker.RabbitMQClient
+	for {
+		rabbit, err = broker.NewRabbitMQ(cfg.RabbitMQURL)
+		if err == nil {
+			log.Println("Connected to RabbitMQ successfully")
+			break
+		}
+		log.Printf("Failed to connect to RabbitMQ (URL: %s), retrying in 2 seconds...: %v", cfg.RabbitMQURL, err)
+		time.Sleep(2 * time.Second)
+	}
+	defer rabbit.Close()
+
+	// gRPC connection to AI Service with retry
+	var grpcConn *grpc.ClientConn
+	for {
+		grpcConn, err = grpc.NewClient(cfg.AIServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err == nil {
+			log.Println("Connected to AI service gRPC server successfully")
+			break
+		}
+		log.Printf("Failed to connect to AI service gRPC, retrying in 2 seconds...: %v", err)
+		time.Sleep(2 * time.Second)
+	}
+	defer grpcConn.Close()
+	aiClient := smartlock.NewAIServiceClient(grpcConn)
+
+	// Start Background Health Monitor
+	healthMonitor := monitor.NewMonitor(
+		db,
+		mqttClient,
+		influxClient,
+		rabbit,
+		cfg.RabbitMQURL,
+		cfg.InfluxDBOrg,
+		cfg.InfluxDBBucket,
+	)
+
+	monitorCtx, cancelMonitor := context.WithCancel(context.Background())
+	defer cancelMonitor()
+	go healthMonitor.Start(monitorCtx)
+
+	// Start MQTT Event Consumer loop asynchronously
 	go func() {
 		for event := range telemetryChan {
-			fmt.Printf("Processing %s from %s\n", event.Event, event.DeviceID)
+			log.Printf("Processing %s from %s\n", event.Event, event.DeviceID)
 			bytes, err := json.Marshal(event)
 			if err != nil {
-				fmt.Printf("Failed to marshal event: %v\n", err)
+				log.Printf("Failed to marshal event: %v\n", err)
 				continue
 			}
 
@@ -84,19 +150,19 @@ func main() {
 				})
 
 				if err == nil {
-					fmt.Printf("AI response: classification=%v, confidence=%.2f, recommendation=%s\n",
+					log.Printf("AI response: classification=%v, confidence=%.2f, recommendation=%s\n",
 						resp.Classification, resp.Confidence, resp.Recommendation)
 					if resp.Classification >= smartlock.Severity_SEVERITY_SUSPICIOUS {
-						fmt.Printf("⚠️ ALERT: AI classified this as %v\n", resp.Classification)
+						log.Printf("⚠️ ALERT: AI classified this as %v\n", resp.Classification)
 					}
 				} else {
-					fmt.Printf("Failed to predict severity: %v\n", err)
+					log.Printf("Failed to predict severity: %v\n", err)
 				}
 			}
 		}
 	}()
 
-	// chi Router
+	// Setup go-chi router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -107,6 +173,12 @@ func main() {
 		w.Write([]byte(`{"status":"OK"}`))
 	})
 
+	r.Get("/api/health", func(w http.ResponseWriter, r *http.Request) {
+		statuses := healthMonitor.GetLatestStatuses()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(statuses)
+	})
+
 	r.Post("/api/ai/retrain", func(w http.ResponseWriter, r *http.Request) {
 		type RetrainRequest struct {
 			Epochs      int32  `json:"epochs"`
@@ -114,7 +186,6 @@ func main() {
 		}
 
 		var req RetrainRequest
-		// Attempt to decode, if fails or body is empty, we fall back to defaults
 		_ = json.NewDecoder(r.Body).Decode(&req)
 
 		if req.Epochs <= 0 {
@@ -150,30 +221,31 @@ func main() {
 		json.NewEncoder(w).Encode(resp)
 	})
 
-	// Server shutdown setup
-	server := &http.Server{
-		Addr:    ":" + cfg.Port,
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", cfg.Port),
 		Handler: r,
 	}
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-
 	go func() {
-		fmt.Printf("HTTP Server is listening on port %s...\n", cfg.Port)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			fmt.Printf("HTTP server listen error: %v\n", err)
+		log.Printf("REST API server listening on :%d", cfg.Port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Listen and serve error: %v", err)
 		}
 	}()
 
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
-	fmt.Println("Shutting down HTTP server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	log.Println("Shutting down server...")
 
-	if err := server.Shutdown(ctx); err != nil {
-		fmt.Printf("Server shutdown error: %v\n", err)
+	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelShutdown()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Printf("Server forced shutdown: %v", err)
 	}
-	fmt.Println("Server stopped.")
+
+	log.Println("Server stopped.")
+	os.Exit(0)
 }

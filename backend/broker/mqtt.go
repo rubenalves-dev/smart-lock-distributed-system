@@ -8,9 +8,10 @@ import (
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/models"
 )
 
-func StartSubscriber(brokerIp string, dataChan chan<- models.SensorPayload) {
+func StartSubscriber(brokerIp string, dataChan chan<- models.SensorPayload) (mqtt.Client, error) {
 	opts := mqtt.NewClientOptions().AddBroker(fmt.Sprintf("tcp://%s:1883", brokerIp))
 	opts.SetClientID("go_backend_subscriber")
+	opts.SetAutoReconnect(true)
 
 	opts.OnConnect = func(c mqtt.Client) {
 		fmt.Println("Connected to MQTT broker")
@@ -24,6 +25,7 @@ func StartSubscriber(brokerIp string, dataChan chan<- models.SensorPayload) {
 
 	client := mqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		fmt.Printf("\nFailed to connect to MQTT broker: %v\n", token.Error())
+		return nil, token.Error()
 	}
+	return client, nil
 }
