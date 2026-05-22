@@ -32,6 +32,8 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
+	log.Printf("Starting backend with Config: Port=%d, AIAddr=%s, RabbitURL=%s\n", cfg.Port, cfg.AIServiceAddr, cfg.RabbitMQURL)
+
 	telemetryChan := make(chan models.SensorPayload, 100)
 
 	// Connect to PostgreSQL with retry
@@ -120,16 +122,18 @@ func main() {
 	// Start MQTT Event Consumer loop asynchronously
 	go func() {
 		for event := range telemetryChan {
-			fmt.Printf("Processing %s from %s\n", event.Event, event.DeviceID)
+			log.Printf("Processing %s from %s\n", event.Event, event.DeviceID)
 			bytes, err := json.Marshal(event)
 			if err != nil {
-				fmt.Printf("Failed to marshal event: %v\n", err)
+				log.Printf("Failed to marshal event: %v\n", err)
 				continue
 			}
 
-			go rabbit.PublishSensorEvent(bytes)
+			if rabbit != nil {
+				go rabbit.PublishSensorEvent(bytes)
+			}
 
-			if event.Event != "heartbeat" {
+			if event.Event != "heartbeat" && aiClient != nil {
 				resp, err := aiClient.PredictSeverity(context.Background(), &smartlock.PredictSeverityRequest{
 					Events: []*smartlock.SensorEvent{{
 						DeviceId:   event.DeviceID,
@@ -145,8 +149,14 @@ func main() {
 					}},
 				})
 
-				if err == nil && resp.Classification >= smartlock.Severity_SEVERITY_SUSPICIOUS {
-					fmt.Printf("⚠️ ALERT: AI classified this as %v\n", resp.Classification)
+				if err == nil {
+					log.Printf("AI response: classification=%v, confidence=%.2f, recommendation=%s\n",
+						resp.Classification, resp.Confidence, resp.Recommendation)
+					if resp.Classification >= smartlock.Severity_SEVERITY_SUSPICIOUS {
+						log.Printf("⚠️ ALERT: AI classified this as %v\n", resp.Classification)
+					}
+				} else {
+					log.Printf("Failed to predict severity: %v\n", err)
 				}
 			}
 		}
@@ -158,14 +168,57 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Server is healthy"))
+		w.Write([]byte(`{"status":"OK"}`))
 	})
 
 	r.Get("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		statuses := healthMonitor.GetLatestStatuses()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(statuses)
+	})
+
+	r.Post("/api/ai/retrain", func(w http.ResponseWriter, r *http.Request) {
+		type RetrainRequest struct {
+			Epochs      int32  `json:"epochs"`
+			DatasetPath string `json:"dataset_path"`
+		}
+
+		var req RetrainRequest
+		_ = json.NewDecoder(r.Body).Decode(&req)
+
+		if req.Epochs <= 0 {
+			req.Epochs = 10
+		}
+
+		if aiClient == nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte(`{"success":false,"message":"AI client is not connected"}`))
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		resp, err := aiClient.RetrainModel(ctx, &smartlock.RetrainModelRequest{
+			Epochs:      req.Epochs,
+			DatasetPath: req.DatasetPath,
+		})
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"success": false,
+				"message": fmt.Sprintf("gRPC error: %v", err),
+			})
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(resp)
 	})
 
 	srv := &http.Server{
@@ -186,7 +239,6 @@ func main() {
 
 	log.Println("Shutting down server...")
 
-	// Graceful shutdown context
 	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelShutdown()
 
