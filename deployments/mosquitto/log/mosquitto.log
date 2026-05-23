@@ -988,3 +988,4 @@
 1779564287: mosquitto version 2.1.2 running
 1779564294: New connection from 172.19.0.8:44192 on port 1883.
 1779564294: New client connected from 172.19.0.8:44192 as go_backend_subscriber (p4, c1, k30).
+1779568990: Saving in-memory database to /mosquitto/data//mosquitto.db.
