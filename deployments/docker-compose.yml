@@ -1,3 +1,17 @@
+x-influx-env: &influx_env
+  INFLUXDB_URL: http://influxdb:8086
+  INFLUXDB_TOKEN: "ZYPGu_Lu6NaP8M4iT5_TLx1xSZag9sAbR9i2vH8zr7P253VcxIMuXHbbkYagn2bOzfVZCRpsrIH5_77r3G1Mag=="
+  INFLUXDB_ORG: "A MinhaOrganizacao"
+  INFLUXDB_BUCKET: esp32_pings
+
+x-influx-init-env: &influx_init_env
+  DOCKER_INFLUXDB_INIT_MODE: setup
+  DOCKER_INFLUXDB_INIT_USERNAME: admin
+  DOCKER_INFLUXDB_INIT_PASSWORD: UmaSenhaMuitoSegura123
+  DOCKER_INFLUXDB_INIT_ORG: "A MinhaOrganizacao"
+  DOCKER_INFLUXDB_INIT_BUCKET: esp32_pings
+  DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: MinhaTokenMuitoSegura123
+
 services:
   # Message Broker for Asynchronous calls
   rabbitmq:
@@ -26,14 +40,11 @@ services:
       - "8080:8080" # REST API for Web App
       - "50052:50052" # gRPC port
     environment:
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
-      - AI_SERVICE_ADDR=ai-service:50051
-      - POSTGRES_URL=postgres://user:password@postgres:5432/lock_db?sslmode=disable
-      - MQTT_BROKER=mosquitto_broker
-      - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_TOKEN=MinhaTokenMuitoSegura123
-      - INFLUXDB_ORG=A MinhaOrganizacao
-      - INFLUXDB_BUCKET=esp32_pings
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      AI_SERVICE_ADDR: ai-service:50051
+      POSTGRES_URL: postgres://user:password@postgres:5432/lock_db?sslmode=disable
+      MQTT_BROKER: mosquitto_broker
+      <<: *influx_env
     depends_on:
       - rabbitmq
       - ai-service
@@ -72,12 +83,7 @@ services:
       - influxdb-data:/var/lib/influxdb2
       - influxdb-config:/etc/influxdb2
     environment:
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=UmaSenhaMuitoSegura123
-      - DOCKER_INFLUXDB_INIT_ORG=A MinhaOrganizacao
-      - DOCKER_INFLUXDB_INIT_BUCKET=esp32_pings
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=MinhaTokenMuitoSegura123
+      <<: *influx_init_env
     restart: unless-stopped
 
 volumes:
