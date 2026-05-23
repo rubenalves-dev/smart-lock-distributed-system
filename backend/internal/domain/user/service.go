@@ -65,3 +65,14 @@ func (s *Service) GetAllUsers(ctx context.Context) ([]User, error) {
 func (s *Service) GetUserByUID(ctx context.Context, rfidUID string) (*User, error) {
 	return s.repo.FindByUID(ctx, rfidUID)
 }
+
+func (s *Service) ProcessAuthentication(ctx context.Context, rfidUID string) (*User, error) {
+	u, err := s.repo.ProcessMFAAuthentication(ctx, rfidUID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch user for authentication: %w", err)
+	}
+	if u == nil {
+		return nil, fmt.Errorf("authentication failed: unknown RFID UID %s", rfidUID)
+	}
+	return u, nil
+}

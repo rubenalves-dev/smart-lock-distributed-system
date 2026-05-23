@@ -22,7 +22,7 @@ func NewRabbitMQClient(url string) (*RabbitMQClient, error) {
 	var conn *amqp.Connection
 	var err error
 
-	for i := 0; i < 15; i++ {
+	for i := range 15 {
 		conn, err = amqp.Dial(url)
 		if err == nil {
 			ch, err := conn.Channel()
@@ -70,6 +70,28 @@ func (r *RabbitMQClient) PublishSensorEvent(body []byte) error {
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        body,
+		})
+}
+
+func (r *RabbitMQClient) PublishRequestMFA() error {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if r.channel == nil || r.conn == nil || r.conn.IsClosed() {
+		return amqp.ErrClosed
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return r.channel.PublishWithContext(ctx,
+		"",           // exchange
+		r.queue.Name, // routing key
+		false,        // mandatory
+		false,        // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte("request_mfa"),
 		})
 }
 

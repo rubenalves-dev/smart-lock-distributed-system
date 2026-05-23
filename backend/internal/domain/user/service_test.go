@@ -36,6 +36,10 @@ func (m *mockRepository) ListAll(ctx context.Context) ([]User, error) {
 	return list, nil
 }
 
+func (m *mockRepository) ProcessMFAAuthentication(ctx context.Context, rfidUID string) (*User, error) {
+	return m.FindByUID(ctx, rfidUID)
+}
+
 func TestRegisterTagIfNotExists(t *testing.T) {
 	repo := &mockRepository{users: make(map[string]*User)}
 	svc := NewService(repo)

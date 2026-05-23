@@ -948,3 +948,43 @@
 1779474301: New client connected from 172.19.0.1:64162 as smartlock_esp32 (p4, c1, k15).
 1779474348: mosquitto version 2.1.2 terminating
 1779474348: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779560484: mosquitto version 2.1.2 starting
+1779560484: Config loaded from /mosquitto/config/mosquitto.conf.
+1779560484: Bridge support available.
+1779560484: Persistence support available.
+1779560484: TLS support available.
+1779560484: TLS-PSK support available.
+1779560484: Websockets support available.
+1779560484: Opening ipv4 listen socket on port 1883.
+1779560484: Opening ipv4 listen socket on port 9001.
+1779560484: mosquitto version 2.1.2 running
+1779560495: New connection from 172.19.0.7:57998 on port 1883.
+1779560495: New client connected from 172.19.0.7:57998 as go_backend_subscriber (p4, c1, k30).
+1779560708: mosquitto version 2.1.2 terminating
+1779560708: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779561052: mosquitto version 2.1.2 starting
+1779561052: Config loaded from /mosquitto/config/mosquitto.conf.
+1779561052: Bridge support available.
+1779561052: Persistence support available.
+1779561052: TLS support available.
+1779561052: TLS-PSK support available.
+1779561052: Websockets support available.
+1779561052: Opening ipv4 listen socket on port 1883.
+1779561052: Opening ipv4 listen socket on port 9001.
+1779561052: mosquitto version 2.1.2 running
+1779561058: New connection from 172.19.0.7:36362 on port 1883.
+1779561058: New client connected from 172.19.0.7:36362 as go_backend_subscriber (p4, c1, k30).
+1779564179: mosquitto version 2.1.2 terminating
+1779564179: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779564287: mosquitto version 2.1.2 starting
+1779564287: Config loaded from /mosquitto/config/mosquitto.conf.
+1779564287: Bridge support available.
+1779564287: Persistence support available.
+1779564287: TLS support available.
+1779564287: TLS-PSK support available.
+1779564287: Websockets support available.
+1779564287: Opening ipv4 listen socket on port 1883.
+1779564287: Opening ipv4 listen socket on port 9001.
+1779564287: mosquitto version 2.1.2 running
+1779564294: New connection from 172.19.0.8:44192 on port 1883.
+1779564294: New client connected from 172.19.0.8:44192 as go_backend_subscriber (p4, c1, k30).

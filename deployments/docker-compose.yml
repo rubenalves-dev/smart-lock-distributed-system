@@ -51,6 +51,13 @@ services:
       - postgres
       - influxdb
 
+  # Frontend
+  frontend:
+    build: ../frontend
+    container_name: frontend
+    ports:
+      - "3000:8080"
+
   # Database for the Go Service
   postgres:
     image: postgres:15-alpine

@@ -7,11 +7,14 @@ import (
 	"fmt"
 )
 
+var _ Repository = (*sqlRepository)(nil)
+
 type Repository interface {
 	Create(ctx context.Context, u *User) error
 	Update(ctx context.Context, u *User) error
 	FindByUID(ctx context.Context, rfidUID string) (*User, error)
 	ListAll(ctx context.Context) ([]User, error)
+	ProcessMFAAuthentication(ctx context.Context, rfidUID string) (*User, error)
 }
 
 type sqlRepository struct {
@@ -89,4 +92,16 @@ func (r *sqlRepository) ListAll(ctx context.Context) ([]User, error) {
 		return nil, fmt.Errorf("error during rows iteration: %w", err)
 	}
 	return users, nil
+}
+
+func (r *sqlRepository) ProcessMFAAuthentication(ctx context.Context, rfidUID string) (*User, error) {
+	u, err := r.FindByUID(ctx, rfidUID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch user for MFA: %w", err)
+	}
+	if u == nil {
+		return nil, fmt.Errorf("user not found for MFA: %s", rfidUID)
+	}
+
+	return u, nil
 }

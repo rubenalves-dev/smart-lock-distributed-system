@@ -43,6 +43,10 @@ func (f *fakeUserRepo) ListAll(ctx context.Context) ([]user.User, error) {
 	return nil, nil
 }
 
+func (f *fakeUserRepo) ProcessMFAAuthentication(ctx context.Context, rfidUID string) (*user.User, error) {
+	return f.FindByUID(ctx, rfidUID)
+}
+
 type fakeAIService struct {
 	predictCalls int
 }
@@ -62,7 +66,7 @@ func TestTelemetryIngest(t *testing.T) {
 	uSvc := user.NewService(uRepo)
 	aiSvc := &fakeAIService{}
 
-	svc := NewService(telemetryRepo, uSvc, nil, aiSvc)
+	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc)
 
 	// Ingest access_granted telemetry
 	payload := models.SensorPayload{

@@ -34,7 +34,7 @@ func NewMQTTClient(brokerIp string, dataChan chan<- models.SensorPayload) (*MQTT
 	client := mqtt.NewClient(opts)
 
 	var err error
-	for i := 0; i < 15; i++ {
+	for i := range 15 {
 		token := client.Connect()
 		if token.Wait() && token.Error() == nil {
 			log.Println("Connected to MQTT broker successfully")
@@ -46,6 +46,12 @@ func NewMQTTClient(brokerIp string, dataChan chan<- models.SensorPayload) (*MQTT
 	}
 
 	return nil, fmt.Errorf("failed to connect to MQTT broker after retries: %w", err)
+}
+
+func (m *MQTTClient) PublishOpenDoor() error {
+	token := m.Client.Publish("lock/control", 0, false, "open_door")
+	token.Wait()
+	return token.Error()
 }
 
 func (m *MQTTClient) IsConnected() bool {

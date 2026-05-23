@@ -15,6 +15,7 @@ type Service struct {
 	repo         Repository
 	userService  *user.Service
 	rabbitClient *core.RabbitMQClient
+	mqttClient   *core.MQTTClient
 	aiService    ai.AIService
 }
 
@@ -22,12 +23,14 @@ func NewService(
 	repo Repository,
 	userService *user.Service,
 	rabbitClient *core.RabbitMQClient,
+	mqttClient *core.MQTTClient,
 	aiService ai.AIService,
 ) *Service {
 	return &Service{
 		repo:         repo,
 		userService:  userService,
 		rabbitClient: rabbitClient,
+		mqttClient:   mqttClient,
 		aiService:    aiService,
 	}
 }
@@ -70,8 +73,18 @@ func (s *Service) Ingest(ctx context.Context, payload models.SensorPayload) erro
 			}
 			log.Printf("AI Service Response: classification=%d, confidence=%.2f, recommendation=%s\n",
 				classification, confidence, recommendation)
+			go func() {
+				if err := s.mqttClient.PublishOpenDoor(); err != nil {
+					log.Printf("Failed to publish open door command to MQTT: %v\n", err)
+				}
+			}()
+
 			if classification >= 2 { // Severity 2 is Suspicious, 3 is High
-				log.Printf("⚠️ ALERT: AI Service classified severity high/suspicious (level %d)\n", classification)
+				go func() {
+					if err := s.rabbitClient.PublishRequestMFA(); err != nil {
+						log.Printf("Failed to publish MFA request to RabbitMQ: %v\n", err)
+					}
+				}()
 			}
 		}()
 	}

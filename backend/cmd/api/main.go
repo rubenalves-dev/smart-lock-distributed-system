@@ -36,30 +36,30 @@ func main() {
 	// Create channel for MQTT telemetry events
 	telemetryChan := make(chan models.SensorPayload, 100)
 
-	// 1. Initialize PostgreSQL Client
+	// Initialize PostgreSQL Client
 	dbClient, err := core.NewPostgresClient(cfg.PostgresURL)
 	if err != nil {
 		log.Fatalf("Critical: Failed to connect to PostgreSQL: %v", err)
 	}
 	defer dbClient.Close()
 
-	// 2. Initialize InfluxDB Client
+	// Initialize InfluxDB Client
 	influxClient, err := core.NewInfluxClient(cfg.InfluxDBURL, cfg.InfluxDBToken)
 	if err != nil {
 		log.Fatalf("Critical: Failed to connect to InfluxDB: %v", err)
 	}
 	defer influxClient.Close()
 
-	// 3. Initialize RabbitMQ Client
+	// Initialize RabbitMQ Client
 	rabbitClient, err := core.NewRabbitMQClient(cfg.RabbitMQURL)
 	if err != nil {
 		log.Fatalf("Critical: Failed to connect to RabbitMQ: %v", err)
 	}
 	defer rabbitClient.Close()
 
-	// 4. Initialize gRPC connection to AI Service
+	// Initialize gRPC connection to AI Service
 	var grpcConn *grpc.ClientConn
-	for i := 0; i < 15; i++ {
+	for i := range 15 {
 		grpcConn, err = grpc.NewClient(cfg.AIServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err == nil {
 			log.Println("Connected to AI service gRPC server successfully")
@@ -73,7 +73,14 @@ func main() {
 	}
 	defer grpcConn.Close()
 
-	// 5. Initialize domains
+	// Initialize MQTT Mosquitto Client
+	mqttClient, err := core.NewMQTTClient(cfg.MQTTBroker, telemetryChan)
+	if err != nil {
+		log.Fatalf("Critical: Failed to connect to MQTT broker: %v", err)
+	}
+	defer mqttClient.Close()
+
+	// Initialize domains
 	// AI Domain
 	rawAIClient := smartlock.NewAIServiceClient(grpcConn)
 	aiService := ai.NewGRPCClient(rawAIClient)
@@ -85,15 +92,8 @@ func main() {
 
 	// Telemetry Domain
 	telemetryRepo := telemetry.NewRepository(dbClient.DB)
-	telemetryService := telemetry.NewService(telemetryRepo, userService, rabbitClient, aiService)
+	telemetryService := telemetry.NewService(telemetryRepo, userService, rabbitClient, mqttClient, aiService)
 	telemetryHandler := telemetry.NewHandler(telemetryService)
-
-	// 6. Initialize MQTT Mosquitto Client
-	mqttClient, err := core.NewMQTTClient(cfg.MQTTBroker, telemetryChan)
-	if err != nil {
-		log.Fatalf("Critical: Failed to connect to MQTT broker: %v", err)
-	}
-	defer mqttClient.Close()
 
 	// 7. Start Background Health Monitor
 	healthMonitor := monitor.NewMonitor(

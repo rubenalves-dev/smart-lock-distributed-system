@@ -18,7 +18,7 @@ func NewInfluxClient(url, token string) (*InfluxClient, error) {
 	client := influxdb2.NewClient(url, token)
 
 	var err error
-	for i := 0; i < 15; i++ {
+	for i := range 15 {
 		ok, pingErr := client.Ping(context.Background())
 		if pingErr == nil && ok {
 			log.Println("Connected to InfluxDB successfully")

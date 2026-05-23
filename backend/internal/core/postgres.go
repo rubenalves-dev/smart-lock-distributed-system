@@ -19,7 +19,7 @@ func NewPostgresClient(url string) (*PostgresClient, error) {
 	var err error
 
 	// Retry connecting to PostgreSQL
-	for i := 0; i < 15; i++ {
+	for i := range 15 {
 		db, err = sql.Open("postgres", url)
 		if err == nil {
 			err = db.Ping()
