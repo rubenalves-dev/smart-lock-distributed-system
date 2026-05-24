@@ -36,12 +36,31 @@ func NewService(
 }
 
 func (s *Service) Ingest(ctx context.Context, payload models.SensorPayload) error {
-	// 1. Save telemetry log to Postgres
+	// Marshal the sensor payload
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		log.Printf("Failed to marshal sensor payload: %v\n", err)
+		return err
+	}
+
+	// 1. If it is a heartbeat event, publish to RabbitMQ heartbeat queue and bypass synchronous DB/AI actions
+	if payload.Event == "heartbeat" {
+		if s.rabbitClient != nil {
+			go func() {
+				if err := s.rabbitClient.PublishHeartbeat(payloadBytes); err != nil {
+					log.Printf("Failed to publish heartbeat event to RabbitMQ: %v\n", err)
+				}
+			}()
+		}
+		return nil
+	}
+
+	// 2. Save telemetry log to Postgres synchronously for real events
 	if err := s.repo.Save(ctx, payload); err != nil {
 		log.Printf("Failed to save telemetry to DB: %v\n", err)
 	}
 
-	// 2. Automatically register new RFID tag if it's access_granted
+	// 3. Automatically register new RFID tag if it's access_granted
 	if payload.Event == "access_granted" && payload.RfidUID != "" {
 		_, err := s.userService.RegisterTagIfNotExists(ctx, payload.RfidUID)
 		if err != nil {
@@ -51,11 +70,8 @@ func (s *Service) Ingest(ctx context.Context, payload models.SensorPayload) erro
 		}
 	}
 
-	// 3. Publish to RabbitMQ
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		log.Printf("Failed to marshal sensor payload: %v\n", err)
-	} else if s.rabbitClient != nil {
+	// 4. Publish to RabbitMQ sensor events
+	if s.rabbitClient != nil {
 		go func() {
 			if err := s.rabbitClient.PublishSensorEvent(payloadBytes); err != nil {
 				log.Printf("Failed to publish sensor event to RabbitMQ: %v\n", err)
@@ -63,8 +79,8 @@ func (s *Service) Ingest(ctx context.Context, payload models.SensorPayload) erro
 		}()
 	}
 
-	// 4. Request AI prediction if not heartbeat
-	if payload.Event != "heartbeat" && s.aiService != nil {
+	// 5. Request AI prediction if not heartbeat
+	if s.aiService != nil {
 		go func() {
 			classification, confidence, recommendation, err := s.aiService.PredictSeverity(context.Background(), payload)
 			if err != nil {

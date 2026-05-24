@@ -58,3 +58,21 @@ This document tracks structural changes made to the repository code.
   - [user/service_test.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/user/service_test.go)
   - [telemetry/service_test.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/refactor-backend-domain-structure/backend/internal/domain/telemetry/service_test.go)
 
+## 2026-05-24: Porting Collaborator Web Server and Backend Changes
+
+### Firmware (`/firmware`)
+- **[Aesthetics & Features]**: Modified [index.h](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/firmware/include/web/index.h) and [wifi.h](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/firmware/include/web/wifi.h) to replace default layouts with a premium dark-themed glassmorphism interface. Included AJAX controllers for unlocking, live status polling, consolidated health checking, and a registered users explorer.
+- **[Refactoring & Features]**: Refactored [main.cpp](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/firmware/src/main.cpp):
+  - Added an auto-close timer (`autoCloseTimer`) using the `Timer` library to automatically relock the door 5 seconds after opening.
+  - Set up dynamic WiFi credentials loading from ESP32 `Preferences` (NVRAM) and saving via `/wifi-save` (triggers automatic reboot).
+  - Implemented `/open`, `/status`, `/wifi-info`, `/users`, `/user-details`, and `/check-services` endpoints, acting as a JSON/REST proxy to the Go backend.
+
+### Go Backend (`/backend`)
+- **[Routing Update]**: Registered the `GET /api/users/{uid}` endpoint in [handler.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/backend/internal/domain/user/handler.go) to fetch detailed profile information for specific card UIDs.
+- **[MQ Restructuring]**: Modified [rabbitmq.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/backend/internal/core/rabbitmq.go) to declare a new `heartbeat_events` queue and implement methods for publishing and consuming heartbeat events.
+- **[Refactoring & Pipeline]**:
+  - Updated `Ingest()` in [service.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/backend/internal/domain/telemetry/service.go) to publish heartbeat messages to RabbitMQ and return immediately, bypassing synchronous database saves and AI service evaluations.
+  - Updated [main.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/backend/cmd/api/main.go) to launch an asynchronous heartbeat queue consumer that writes heartbeat events to the database in the background.
+- **[Tests]**: Added `TestTelemetryIngestHeartbeat` to [service_test.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/backend/internal/domain/telemetry/service_test.go) to validate the new heartbeat offloading flow.
+
+

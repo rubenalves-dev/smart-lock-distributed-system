@@ -12,6 +12,10 @@
 #include <web/index.h>
 #include <web/wifi.h>
 #include <ESPmDNS.h>
+#include <HTTPClient.h>
+
+void updateLockState(bool lock, String user = "system");
+
 
 #define RFID_SDA_PIN 10
 #define RFID_RST_PIN 9
@@ -53,6 +57,11 @@ Preferences preferences;
 // --- State
 String lastUser = "none";
 int failCount = 0;
+bool isLocked = true;
+
+Timer autoCloseTimer(5000, []()
+                     { updateLockState(true, "auto_close"); }, Timer::Mode::OneShot);
+
 
 void sendTelemetry(String eventType, String details, String rfidUid = "")
 {
@@ -84,18 +93,12 @@ void sendTelemetry(String eventType, String details, String rfidUid = "")
 }
 
 // --- STEP 1: Define the function FIRST ---
-void updateLockState(bool lock, String user = "system")
+void updateLockState(bool lock, String user)
 {
-  // if (lock)
-  // {
-  //   stepper.close();
-  // }
-  // else
-  // {
-  //   stepper.open();
-  // }
-  // sendTelemetry("status_change", stepper.stateString());
+  isLocked = lock;
+  sendTelemetry("status_change", isLocked ? "LOCKED" : "UNLOCKED");
 }
+
 
 void callback(char *topic, byte *payload, unsigned int length)
 {
@@ -141,9 +144,14 @@ void setup()
   telemetryTimer.start();
 
   // Wifi
+  preferences.begin("wifi", true);
+  String storedSSID = preferences.getString("ssid", SSID);
+  String storedPassword = preferences.getString("password", PASSWORD);
+  preferences.end();
+
   int attempts = 0;
 
-  WiFi.begin(SSID, PASSWORD);
+  WiFi.begin(storedSSID.c_str(), storedPassword.c_str());
   while (WiFi.status() != WL_CONNECTED && attempts < 20)
   {
     delay(500);
@@ -159,6 +167,7 @@ void setup()
     Serial.println("\nWifi connected, IP: " + WiFi.localIP().toString());
   }
 
+
   // mDNS
   if (!MDNS.begin("smartlock"))
   {
@@ -170,10 +179,81 @@ void setup()
             { request->send(200, "text/html", INDEX_HTML); });
   server.on("/wifi", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(200, "text/html", WIFI_HTML); });
-  server.on("/toggle", HTTP_GET, [](AsyncWebServerRequest *request)
-            { updateLockState(/* stepper.state() == Stepper::State::Closed ? false : true */true);
-                request->send(200, "text/html", INDEX_HTML); });
+  server.on("/open", HTTP_GET, [](AsyncWebServerRequest *request) {
+    updateLockState(false, "web_button");
+    autoCloseTimer.reset();
+    autoCloseTimer.start();
+    request->send(200, "text/plain", "PORTA ABERTA");
+  });
+  server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/plain", isLocked ? "LOCKED" : "UNLOCKED");
+  });
+  server.on("/wifi-save", HTTP_POST, [](AsyncWebServerRequest *request) {
+    if (request->hasParam("ssid", true) && request->hasParam("password", true)) {
+      String ssid = request->getParam("ssid", true)->value();
+      String password = request->getParam("password", true)->value();
+
+      preferences.begin("wifi", false);
+      preferences.putString("ssid", ssid);
+      preferences.putString("password", password);
+      preferences.end();
+
+      request->send(200, "text/plain", "OK");
+
+      delay(1000);
+      ESP.restart();
+    } else {
+      request->send(400, "text/plain", "Missing ssid or password");
+    }
+  });
+  server.on("/wifi-info", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "text/plain", "IP: " + WiFi.localIP().toString());
+  });
+  server.on("/users", HTTP_GET, [](AsyncWebServerRequest *request) {
+    HTTPClient http;
+    http.begin("http://host.wokwi.internal:8080/api/users");
+    int httpCode = http.GET();
+    if (httpCode > 0) {
+      String payload = http.getString();
+      request->send(200, "application/json", payload);
+    } else {
+      request->send(500, "text/plain", "[]");
+    }
+    http.end();
+  });
+  server.on("/user-details", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->hasParam("uid")) {
+      request->send(400, "text/plain", "Missing uid");
+      return;
+    }
+    String uid = request->getParam("uid")->value();
+    HTTPClient http;
+    http.begin("http://host.wokwi.internal:8080/api/users/" + uid);
+    int httpCode = http.GET();
+    if (httpCode > 0) {
+      String payload = http.getString();
+      request->send(200, "application/json", payload);
+    } else {
+      request->send(500, "text/plain", "{}");
+    }
+    http.end();
+  });
+  server.on("/check-services", HTTP_GET, [](AsyncWebServerRequest *request) {
+    HTTPClient http;
+    http.begin("http://host.wokwi.internal:8080/api/health");
+    int httpCode = http.GET();
+    String backendStatus = "{}";
+    if (httpCode > 0) {
+      backendStatus = http.getString();
+    }
+    http.end();
+
+    String response = "{\"local_mqtt\":" + String(mqtt.connected() ? "true" : "false") +
+                      ",\"backend_services\":" + backendStatus + "}";
+    request->send(200, "application/json", response);
+  });
   server.begin();
+
 }
 
 void loop()
@@ -189,6 +269,8 @@ void loop()
 
   // Timers
   telemetryTimer.update();
+  autoCloseTimer.update();
+
 
   // --- 3. RFID Check
   if (ultrassonic.isObjectClose() /*&&stepper.state() == Stepper::State::Closed*/)

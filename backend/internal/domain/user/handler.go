@@ -17,6 +17,7 @@ func NewHandler(service *Service) *Handler {
 
 func (h *Handler) RegisterRoutes(r chi.Router) {
 	r.Get("/api/users", h.ListUsers)
+	r.Get("/api/users/{uid}", h.GetUser)
 	r.Put("/api/users/{uid}", h.UpdateUser)
 }
 
