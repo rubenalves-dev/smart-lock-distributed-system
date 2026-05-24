@@ -16,6 +16,9 @@ service AIService {
 
     // Triggered via Web Ap to retrain models
     rpc RetrainModel(RetrainModelRequest) returns (RetrainModelResponse);
+
+    // Evaluate AI models on a labeled dataset
+    rpc EvaluateModel(EvaluateModelRequest) returns (EvaluateModelResponse);
 }
 
 // Main server / Auth Service
@@ -103,3 +106,32 @@ message RetrainModelRequest {
     string dataset_path = 1;
     int32 epochs = 2;
 }
+
+message EvaluateModelRequest {
+    string dataset_path = 1;
+}
+
+message ConfusionMatrixRow {
+    repeated int32 values = 1;
+}
+
+message EvaluationMetrics {
+    float accuracy = 1;
+    float precision_macro = 2;
+    float recall_macro = 3;
+    float f1_macro = 4;
+}
+
+message BinaryEvaluationMetrics {
+    float accuracy = 1;
+    float precision = 2;
+    float recall = 3;
+    float f1 = 4;
+}
+
+message EvaluateModelResponse {
+    repeated ConfusionMatrixRow confusion_matrix = 1;
+    EvaluationMetrics metrics = 2;
+    BinaryEvaluationMetrics binary_metrics = 3;
+}
+

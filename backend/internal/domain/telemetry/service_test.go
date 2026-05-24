@@ -17,6 +17,17 @@ func (m *mockTelemetryRepository) Save(ctx context.Context, p models.SensorPaylo
 	return nil
 }
 
+func (m *mockTelemetryRepository) GetLatest(ctx context.Context, deviceID string) (*models.SensorPayload, error) {
+	var latest *models.SensorPayload
+	for i := len(m.payloads) - 1; i >= 0; i-- {
+		if m.payloads[i].DeviceID == deviceID {
+			latest = &m.payloads[i]
+			break
+		}
+	}
+	return latest, nil
+}
+
 type fakeUserRepo struct {
 	users map[string]*user.User
 }
@@ -59,6 +70,11 @@ func (f *fakeAIService) PredictSeverity(ctx context.Context, event models.Sensor
 func (f *fakeAIService) RetrainModel(ctx context.Context, epochs int32, datasetPath string) (bool, string, error) {
 	return true, "Retrained", nil
 }
+
+func (f *fakeAIService) EvaluateModel(ctx context.Context, datasetPath string) (*models.EvaluationResult, error) {
+	return &models.EvaluationResult{}, nil
+}
+
 
 func TestTelemetryIngest(t *testing.T) {
 	telemetryRepo := &mockTelemetryRepository{}

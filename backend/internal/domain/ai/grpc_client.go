@@ -61,3 +61,50 @@ func (g *grpcClient) RetrainModel(ctx context.Context, epochs int32, datasetPath
 
 	return resp.Success, resp.Message, nil
 }
+
+func (g *grpcClient) EvaluateModel(ctx context.Context, datasetPath string) (*models.EvaluationResult, error) {
+	if g.client == nil {
+		return nil, fmt.Errorf("gRPC AI Service client is nil")
+	}
+
+	req := &smartlock.EvaluateModelRequest{
+		DatasetPath: datasetPath,
+	}
+
+	resp, err := g.client.EvaluateModel(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	matrix := make([][]int32, len(resp.ConfusionMatrix))
+	for i, row := range resp.ConfusionMatrix {
+		matrix[i] = row.Values
+	}
+
+	var metrics models.EvaluationMetrics
+	if resp.Metrics != nil {
+		metrics = models.EvaluationMetrics{
+			Accuracy:       resp.Metrics.Accuracy,
+			PrecisionMacro: resp.Metrics.PrecisionMacro,
+			RecallMacro:    resp.Metrics.RecallMacro,
+			F1Macro:        resp.Metrics.F1Macro,
+		}
+	}
+
+	var binaryMetrics models.BinaryEvaluationMetrics
+	if resp.BinaryMetrics != nil {
+		binaryMetrics = models.BinaryEvaluationMetrics{
+			Accuracy:  resp.BinaryMetrics.Accuracy,
+			Precision: resp.BinaryMetrics.Precision,
+			Recall:    resp.BinaryMetrics.Recall,
+			F1:        resp.BinaryMetrics.F1,
+		}
+	}
+
+	return &models.EvaluationResult{
+		ConfusionMatrix: matrix,
+		Metrics:         metrics,
+		BinaryMetrics:   binaryMetrics,
+	}, nil
+}
+
