@@ -96,3 +96,34 @@ func TestTelemetryIngest(t *testing.T) {
 		t.Errorf("expected registered user UID 99:88:77:66, got %s", registeredUser.RfidUID)
 	}
 }
+
+func TestTelemetryIngestHeartbeat(t *testing.T) {
+	telemetryRepo := &mockTelemetryRepository{}
+	uRepo := &fakeUserRepo{users: make(map[string]*user.User)}
+	uSvc := user.NewService(uRepo)
+	aiSvc := &fakeAIService{}
+
+	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc)
+
+	// Ingest heartbeat telemetry
+	payload := models.SensorPayload{
+		DeviceID: "lock_test",
+		Event:    "heartbeat",
+	}
+
+	err := svc.Ingest(context.Background(), payload)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Verify telemetry was NOT saved synchronously
+	if len(telemetryRepo.payloads) != 0 {
+		t.Errorf("expected 0 synchronously saved telemetry payloads for heartbeat, got %d", len(telemetryRepo.payloads))
+	}
+
+	// Verify AI predict was NOT called
+	if aiSvc.predictCalls != 0 {
+		t.Errorf("expected 0 AI predict calls for heartbeat, got %d", aiSvc.predictCalls)
+	}
+}
+

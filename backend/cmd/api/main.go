@@ -120,6 +120,22 @@ func main() {
 		}
 	}()
 
+	// 9. Start RabbitMQ Heartbeat Consumer loop asynchronously
+	go func() {
+		log.Println("Starting background RabbitMQ heartbeat consumer...")
+		err := rabbitClient.ConsumeHeartbeats(context.Background(), func(body []byte) error {
+			var payload models.SensorPayload
+			if err := json.Unmarshal(body, &payload); err != nil {
+				return err
+			}
+			log.Printf("Background saving heartbeat event from device: %s (uptime: %.1f)\n", payload.DeviceID, payload.Uptime)
+			return telemetryRepo.Save(context.Background(), payload)
+		})
+		if err != nil {
+			log.Printf("Failed to start RabbitMQ heartbeat consumer: %v\n", err)
+		}
+	}()
+
 	// 9. Setup go-chi router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

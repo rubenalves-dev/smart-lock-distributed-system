@@ -11,10 +11,11 @@ import (
 )
 
 type RabbitMQClient struct {
-	mu      sync.RWMutex
-	conn    *amqp.Connection
-	channel *amqp.Channel
-	queue   amqp.Queue
+	mu             sync.RWMutex
+	conn           *amqp.Connection
+	channel        *amqp.Channel
+	sensorQueue    amqp.Queue
+	heartbeatQueue amqp.Queue
 }
 
 // NewRabbitMQClient initializes the connection with retries
@@ -36,8 +37,18 @@ func NewRabbitMQClient(url string) (*RabbitMQClient, error) {
 					nil,             // arguments
 				)
 				if err == nil {
-					log.Println("Connected to RabbitMQ successfully")
-					return &RabbitMQClient{conn: conn, channel: ch, queue: q}, nil
+					hq, err := ch.QueueDeclare(
+						"heartbeat_events", // name
+						true,               // durable
+						false,
+						false,
+						false,
+						nil,
+					)
+					if err == nil {
+						log.Println("Connected to RabbitMQ successfully")
+						return &RabbitMQClient{conn: conn, channel: ch, sensorQueue: q, heartbeatQueue: hq}, nil
+					}
 				}
 				ch.Close()
 			}
@@ -63,10 +74,33 @@ func (r *RabbitMQClient) PublishSensorEvent(body []byte) error {
 	defer cancel()
 
 	return r.channel.PublishWithContext(ctx,
-		"",           // exchange
-		r.queue.Name, // routing key
-		false,        // mandatory
-		false,        // immediate
+		"",                  // exchange
+		r.sensorQueue.Name,  // routing key
+		false,               // mandatory
+		false,               // immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        body,
+		})
+}
+
+// PublishHeartbeat sends heartbeat data asynchronously
+func (r *RabbitMQClient) PublishHeartbeat(body []byte) error {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if r.channel == nil || r.conn == nil || r.conn.IsClosed() {
+		return amqp.ErrClosed
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return r.channel.PublishWithContext(ctx,
+		"",                     // exchange
+		r.heartbeatQueue.Name,  // routing key
+		false,                  // mandatory
+		false,                  // immediate
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        body,
@@ -85,10 +119,10 @@ func (r *RabbitMQClient) PublishRequestMFA() error {
 	defer cancel()
 
 	return r.channel.PublishWithContext(ctx,
-		"",           // exchange
-		r.queue.Name, // routing key
-		false,        // mandatory
-		false,        // immediate
+		"",                  // exchange
+		r.sensorQueue.Name,  // routing key
+		false,               // mandatory
+		false,               // immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte("request_mfa"),
@@ -139,9 +173,67 @@ func (r *RabbitMQClient) Reconnect(url string) error {
 		return err
 	}
 
+	hq, err := ch.QueueDeclare(
+		"heartbeat_events",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		_ = ch.Close()
+		_ = conn.Close()
+		return err
+	}
+
 	r.conn = conn
 	r.channel = ch
-	r.queue = q
+	r.sensorQueue = q
+	r.heartbeatQueue = hq
+	return nil
+}
+
+// ConsumeHeartbeats consumes heartbeat messages and runs the handler asynchronously
+func (r *RabbitMQClient) ConsumeHeartbeats(ctx context.Context, handler func([]byte) error) error {
+	r.mu.RLock()
+	ch := r.channel
+	r.mu.RUnlock()
+
+	if ch == nil {
+		return amqp.ErrClosed
+	}
+
+	msgs, err := ch.Consume(
+		"heartbeat_events",              // queue
+		"go_backend_heartbeat_consumer", // consumer tag
+		true,                            // auto-ack
+		false,                           // exclusive
+		false,                           // no-local
+		false,                           // no-wait
+		nil,                             // args
+	)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg, ok := <-msgs:
+				if !ok {
+					log.Println("RabbitMQ heartbeat channel closed")
+					return
+				}
+				if err := handler(msg.Body); err != nil {
+					log.Printf("Error handling background heartbeat message: %v\n", err)
+				}
+			}
+		}
+	}()
+
 	return nil
 }
 
