@@ -47,6 +47,11 @@ class AIServiceStub(object):
                 request_serializer=lock__pb2.RetrainModelRequest.SerializeToString,
                 response_deserializer=lock__pb2.RetrainModelResponse.FromString,
                 _registered_method=True)
+        self.EvaluateModel = channel.unary_unary(
+                '/lock.AIService/EvaluateModel',
+                request_serializer=lock__pb2.EvaluateModelRequest.SerializeToString,
+                response_deserializer=lock__pb2.EvaluateModelResponse.FromString,
+                _registered_method=True)
 
 
 class AIServiceServicer(object):
@@ -69,6 +74,13 @@ class AIServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def EvaluateModel(self, request, context):
+        """Evaluate AI models on a labeled dataset
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AIServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -81,6 +93,11 @@ def add_AIServiceServicer_to_server(servicer, server):
                     servicer.RetrainModel,
                     request_deserializer=lock__pb2.RetrainModelRequest.FromString,
                     response_serializer=lock__pb2.RetrainModelResponse.SerializeToString,
+            ),
+            'EvaluateModel': grpc.unary_unary_rpc_method_handler(
+                    servicer.EvaluateModel,
+                    request_deserializer=lock__pb2.EvaluateModelRequest.FromString,
+                    response_serializer=lock__pb2.EvaluateModelResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -140,6 +157,33 @@ class AIService(object):
             '/lock.AIService/RetrainModel',
             lock__pb2.RetrainModelRequest.SerializeToString,
             lock__pb2.RetrainModelResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def EvaluateModel(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/lock.AIService/EvaluateModel',
+            lock__pb2.EvaluateModelRequest.SerializeToString,
+            lock__pb2.EvaluateModelResponse.FromString,
             options,
             channel_credentials,
             insecure,

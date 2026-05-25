@@ -153,9 +153,72 @@ func main() {
 		json.NewEncoder(w).Encode(statuses)
 	})
 
+	r.Get("/api/metrics/health", func(w http.ResponseWriter, r *http.Request) {
+		timeRange := r.URL.Query().Get("range")
+		if timeRange == "" {
+			timeRange = "24h"
+		}
+		interval := r.URL.Query().Get("interval")
+		if interval == "" {
+			interval = "1m"
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		series, err := influxClient.QueryHealth(ctx, cfg.InfluxDBOrg, cfg.InfluxDBBucket, timeRange, interval)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+
+		if series == nil {
+			series = []models.ServiceHealthSeries{}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"series": series,
+		})
+	})
+
 	// Register domain routes
 	userHandler.RegisterRoutes(r)
 	telemetryHandler.RegisterRoutes(r)
+
+	// AI evaluate endpoint
+	r.Post("/api/ai/evaluate", func(w http.ResponseWriter, r *http.Request) {
+		type EvaluateRequest struct {
+			DatasetPath string `json:"dataset_path"`
+		}
+
+		var req EvaluateRequest
+		_ = json.NewDecoder(r.Body).Decode(&req)
+
+		if req.DatasetPath == "" {
+			req.DatasetPath = "data/sensor_events.csv"
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		result, err := aiService.EvaluateModel(ctx, req.DatasetPath)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"error": fmt.Sprintf("AI evaluation error: %v", err),
+			})
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(result)
+	})
 
 	// AI retrain endpoint
 	r.Post("/api/ai/retrain", func(w http.ResponseWriter, r *http.Request) {

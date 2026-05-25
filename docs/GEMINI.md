@@ -2,6 +2,23 @@
 
 This document tracks structural changes made to the repository code.
 
+## 2026-05-24: Backend API and Integration Surface Updates
+
+### API Contract (`/api`)
+- **[Protobuf Extension]**: Extended [lock.proto](file:///Users/rubenalves/Documents/repos/_school/iot/final/api/proto/lock.proto) to include `EvaluateModel` RPC method under `AIService` along with `EvaluateModelRequest`, `EvaluateModelResponse`, `ConfusionMatrixRow`, `EvaluationMetrics`, and `BinaryEvaluationMetrics` messages.
+
+### Go Backend (`/backend`)
+- **[Model Definitions]**: Added data structures for AI evaluation results and InfluxDB time-series series health to [models.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/models/models.go).
+- **[InfluxDB Integration]**: Added `QueryHealth` method to [influx.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/core/influx.go) to run parameterized Flux queries for service uptime.
+- **[AI Domain Client]**: Updated [service.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/ai/service.go) and [grpc_client.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/ai/grpc_client.go) to declare and implement the gRPC client wrapper for `EvaluateModel`.
+- **[Users Filtering]**: Added support for filtering incomplete profiles (`?incomplete=true`) in user list handler in [handler.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/user/handler.go).
+- **[Telemetry and Lock Control]**:
+  - Implemented `GetLatest` db query in [repository.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/repository.go).
+  - Implemented `GetLatestTelemetry` and `UnlockDoor` methods in [service.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/service.go).
+  - Added REST routes `GET /api/telemetry/latest` and `POST /api/door/unlock` in [handler.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/handler.go).
+- **[Web Routing Setup]**: Registered new HTTP endpoints `/api/metrics/health` and `/api/ai/evaluate` inside [main.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/cmd/api/main.go).
+- **[Mocks Update]**: Updated unit test mocks in [service_test.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/service_test.go) to satisfy the extended interfaces.
+
 ## 2026-05-22: AI Service Improvements and Backend Health Monitoring
 
 ### Python AI Service (`/ai-service`)

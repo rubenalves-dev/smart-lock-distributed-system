@@ -30,6 +30,17 @@ func (h *Handler) ListUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isIncomplete := r.URL.Query().Get("incomplete") == "true"
+	if isIncomplete {
+		filtered := []User{}
+		for _, u := range users {
+			if u.Name == nil || *u.Name == "" || u.Email == nil || *u.Email == "" {
+				filtered = append(filtered, u)
+			}
+		}
+		users = filtered
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(users)

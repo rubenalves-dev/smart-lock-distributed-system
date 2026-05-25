@@ -3,6 +3,7 @@ package telemetry
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/core"
@@ -10,6 +11,7 @@ import (
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/user"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/models"
 )
+
 
 type Service struct {
 	repo         Repository
@@ -107,3 +109,15 @@ func (s *Service) Ingest(ctx context.Context, payload models.SensorPayload) erro
 
 	return nil
 }
+
+func (s *Service) GetLatestTelemetry(ctx context.Context, deviceID string) (*models.SensorPayload, error) {
+	return s.repo.GetLatest(ctx, deviceID)
+}
+
+func (s *Service) UnlockDoor(ctx context.Context) error {
+	if s.mqttClient == nil {
+		return fmt.Errorf("MQTT client is nil")
+	}
+	return s.mqttClient.PublishOpenDoor()
+}
+
