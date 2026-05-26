@@ -1,5 +1,3 @@
-version: '3.8'
-
 x-influx-env: &influx_env
   INFLUXDB_URL: http://influxdb:8086
   INFLUXDB_TOKEN: "ZYPGu_Lu6NaP8M4iT5_TLx1xSZag9sAbR9i2vH8zr7P253VcxIMuXHbbkYagn2bOzfVZCRpsrIH5_77r3G1Mag=="
@@ -60,7 +58,7 @@ services:
     networks:
       - smart-lock-net
     ports:
-      - "3000:5173"
+      - "3000:8080"
     environment:
       - NODE_ENV=development
     depends_on:

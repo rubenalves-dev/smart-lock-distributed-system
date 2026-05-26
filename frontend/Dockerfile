@@ -1,8 +1,17 @@
 FROM node:22-alpine
+
+RUN npm install -g http-server
+
 WORKDIR /app
+
 COPY package*.json ./
+
 RUN npm install
+
 COPY . .
-#RODRIGO DPS TENS DE ARRANJAR O BUILD PARA PRODUÇÃO, MAS PARA TESTAR LOCALMENTE VOU USAR O DEV
-EXPOSE 5173
-CMD ["npm", "run", "dev", "--", "--host"]
+
+RUN npm run build
+
+EXPOSE 8080
+
+CMD ["http-server", "dist"]
