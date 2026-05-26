@@ -989,3 +989,157 @@
 1779564294: New connection from 172.19.0.8:44192 on port 1883.
 1779564294: New client connected from 172.19.0.8:44192 as go_backend_subscriber (p4, c1, k30).
 1779568990: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779729810: mosquitto version 2.1.2 starting
+1779729810: Config loaded from /mosquitto/config/mosquitto.conf.
+1779729810: Bridge support available.
+1779729810: Persistence support available.
+1779729810: TLS support available.
+1779729810: TLS-PSK support available.
+1779729810: Websockets support available.
+1779729810: Opening ipv4 listen socket on port 1883.
+1779729810: Opening ipv4 listen socket on port 9001.
+1779729810: mosquitto version 2.1.2 running
+1779729811: New connection from 192.168.65.1:60605 on port 1883.
+1779729811: New client connected from 192.168.65.1:60605 as smartlock_esp32 (p4, c1, k15).
+1779729811: New connection from 172.18.0.8:42560 on port 1883.
+1779729811: New client connected from 172.18.0.8:42560 as go_backend_subscriber (p4, c1, k30).
+1779729841: New connection from 192.168.65.1:47686 on port 1883.
+1779729841: Client smartlock_esp32 [192.168.65.1:60605] disconnected: session taken over.
+1779729841: New client connected from 192.168.65.1:47686 as smartlock_esp32 (p4, c1, k15).
+1779730852: New connection from 192.168.65.1:46175 on port 1883.
+1779730852: Client smartlock_esp32 [192.168.65.1:47686] disconnected: session taken over.
+1779730852: New client connected from 192.168.65.1:46175 as smartlock_esp32 (p4, c1, k15).
+1779731178: New connection from 192.168.65.1:38994 on port 1883.
+1779731178: Client smartlock_esp32 [192.168.65.1:46175] disconnected: session taken over.
+1779731178: New client connected from 192.168.65.1:38994 as smartlock_esp32 (p4, c1, k15).
+1779731244: New connection from 192.168.65.1:32918 on port 1883.
+1779731244: Client smartlock_esp32 [192.168.65.1:38994] disconnected: session taken over.
+1779731244: New client connected from 192.168.65.1:32918 as smartlock_esp32 (p4, c1, k15).
+1779731394: New connection from 192.168.65.1:20273 on port 1883.
+1779731394: Client smartlock_esp32 [192.168.65.1:32918] disconnected: session taken over.
+1779731394: New client connected from 192.168.65.1:20273 as smartlock_esp32 (p4, c1, k15).
+1779731611: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779731611: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1779731680: New connection from 192.168.65.1:60971 on port 1883.
+1779731680: Client smartlock_esp32 [192.168.65.1:20273] disconnected: session taken over.
+1779731680: New client connected from 192.168.65.1:60971 as smartlock_esp32 (p4, c1, k15).
+1779732077: New connection from 192.168.65.1:22526 on port 1883.
+1779732077: Client smartlock_esp32 [192.168.65.1:60971] disconnected: session taken over.
+1779732077: New client connected from 192.168.65.1:22526 as smartlock_esp32 (p4, c1, k15).
+1779733412: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779733412: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1779733878: Client smartlock_esp32 [192.168.65.1:22526] disconnected: exceeded timeout.
+1779734402: New connection from 192.168.65.1:60319 on port 1883.
+1779734402: New client connected from 192.168.65.1:60319 as smartlock_esp32 (p4, c1, k15).
+1779734849: Client smartlock_esp32 [192.168.65.1:60319] disconnected: exceeded timeout.
+1779735213: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779735213: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1779735667: mosquitto version 2.1.2 terminating
+1779735667: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779735667: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1779736089: mosquitto version 2.1.2 starting
+1779736089: Config loaded from /mosquitto/config/mosquitto.conf.
+1779736089: Bridge support available.
+1779736089: Persistence support available.
+1779736089: TLS support available.
+1779736089: TLS-PSK support available.
+1779736089: Websockets support available.
+1779736089: Opening ipv4 listen socket on port 1883.
+1779736089: Opening ipv4 listen socket on port 9001.
+1779736089: mosquitto version 2.1.2 running
+1779744721: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779744721: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1779746405: New connection from 172.18.0.8:49990 on port 1883.
+1779746405: New client connected from 172.18.0.8:49990 as go_backend_subscriber (p4, c1, k30).
+1779746522: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779746522: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1779746905: New connection from 172.18.0.1:58260 on port 1883.
+1779746905: New client connected from 172.18.0.1:58260 as smartlock_esp32 (p4, c1, k15).
+1779746917: New connection from 172.18.0.1:63290 on port 1883.
+1779746917: Client smartlock_esp32 [172.18.0.1:58260] disconnected: session taken over.
+1779746917: New client connected from 172.18.0.1:63290 as smartlock_esp32 (p4, c1, k15).
+1779747258: New connection from 172.18.0.1:62028 on port 1883.
+1779747258: Protocol error from 172.18.0.1:62028: First packet not CONNECT (47).
+1779747258: Client 172.18.0.1 [172.18.0.1:62028] disconnected: protocol error.
+1779747260: New connection from 172.18.0.1:62038 on port 1883.
+1779747260: Protocol error from 172.18.0.1:62038: First packet not CONNECT (47).
+1779747260: Client 172.18.0.1 [172.18.0.1:62038] disconnected: protocol error.
+1779747505: Client smartlock_esp32 [172.18.0.1:63290] disconnected: exceeded timeout.
+1779747510: Client go_backend_subscriber [172.18.0.8:49990] disconnected: connection closed by client.
+1779747510: mosquitto version 2.1.2 terminating
+1779747510: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779747510: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1779748016: mosquitto version 2.1.2 starting
+1779748016: Config loaded from /mosquitto/config/mosquitto.conf.
+1779748016: Bridge support available.
+1779748016: Persistence support available.
+1779748016: TLS support available.
+1779748016: TLS-PSK support available.
+1779748016: Websockets support available.
+1779748016: Opening ipv4 listen socket on port 1883.
+1779748016: Opening ipv4 listen socket on port 9001.
+1779748016: mosquitto version 2.1.2 running
+1779748017: New connection from 172.18.0.8:59806 on port 1883.
+1779748017: New client connected from 172.18.0.8:59806 as go_backend_subscriber (p4, c1, k30).
+1779748316: mosquitto version 2.1.2 terminating
+1779748316: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779748316: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1779750321: mosquitto version 2.1.2 starting
+1779750321: Config loaded from /mosquitto/config/mosquitto.conf.
+1779750321: Bridge support available.
+1779750321: Persistence support available.
+1779750321: TLS support available.
+1779750321: TLS-PSK support available.
+1779750321: Websockets support available.
+1779750321: Opening ipv4 listen socket on port 1883.
+1779750321: Opening ipv4 listen socket on port 9001.
+1779750321: mosquitto version 2.1.2 running
+1779750322: New connection from 172.18.0.8:59930 on port 1883.
+1779750322: New client connected from 172.18.0.8:59930 as go_backend_subscriber (p4, c1, k30).
+1779750546: New connection from 192.168.65.1:33376 on port 1883.
+1779750546: New client connected from 192.168.65.1:33376 as smartlock_esp32 (p4, c1, k15).
+1779750665: Client smartlock_esp32 [192.168.65.1:33376] disconnected: exceeded timeout.
+1779751120: mosquitto version 2.1.2 terminating
+1779751120: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779751120: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+
+1779751157: mosquitto version 2.1.2 starting
+1779751157: Config loaded from /mosquitto/config/mosquitto.conf.
+1779751157: Bridge support available.
+1779751157: Persistence support available.
+1779751157: TLS support available.
+1779751157: TLS-PSK support available.
+1779751157: Websockets support available.
+1779751157: Opening ipv4 listen socket on port 1883.
+1779751157: Opening ipv4 listen socket on port 9001.
+1779751157: mosquitto version 2.1.2 running
+1779751168: New connection from 172.18.0.8:39300 on port 1883.
+1779751168: New client connected from 172.18.0.8:39300 as go_backend_subscriber (p4, c1, k30).
+1779751453: New connection from 192.168.65.1:51107 on port 1883.
+1779751453: New client connected from 192.168.65.1:51107 as smartlock_esp32 (p4, c1, k15).
+1779751457: New connection from 192.168.65.1:36972 on port 1883.
+1779751457: Client smartlock_esp32 [192.168.65.1:51107] disconnected: session taken over.
+1779751457: New client connected from 192.168.65.1:36972 as smartlock_esp32 (p4, c1, k15).
+1779751494: Client smartlock_esp32 [192.168.65.1:36972] disconnected: exceeded timeout.
+1779752012: mosquitto version 2.1.2 terminating
+1779752012: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1779752012: Warning: File /mosquitto/data//mosquitto.db.new has world readable permissions. Future versions will refuse to load this file.
+To fix this, use `chmod 0700 /mosquitto/data//mosquitto.db.new`.
+

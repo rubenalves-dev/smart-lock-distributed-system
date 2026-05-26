@@ -92,4 +92,15 @@ This document tracks structural changes made to the repository code.
   - Updated [main.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/backend/cmd/api/main.go) to launch an asynchronous heartbeat queue consumer that writes heartbeat events to the database in the background.
 - **[Tests]**: Added `TestTelemetryIngestHeartbeat` to [service_test.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/backend/internal/domain/telemetry/service_test.go) to validate the new heartbeat offloading flow.
 
+## 2026-05-26: Frontend Build Fixes
+
+### Vue Frontend (`/frontend`)
+- **[Aesthetics & Styles]**: Fixed CSS syntax warnings in [main.css](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/assets/main.css) by removing Tailwind v4 `dark:bg-gray-700` `@apply` from the nested `&::-webkit-scrollbar-thumb` pseudo-element selector and defining it explicitly for both `.custom-scrollbar` and `.fc-view-harness` classes.
+- **[Refactoring & Compilation]**:
+  - Removed unused variable declarations (`dropdownOpen`, `notifying`) and the `toggleDropdown` method in [AppHeader.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/layout/AppHeader.vue).
+  - Removed unused `computed` import and the unused `const props =` assignment in [Alert.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/ui/Alert.vue).
+  - Removed unused `const props =` assignment in [Avatar.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/ui/Avatar.vue).
+  - Removed unused `computed` import in [Button.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/ui/Button.vue).
+  - Prefixed unused `to` and `from` route parameters with underscores in [index.ts](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/router/index.ts) to satisfy TypeScript `noUnusedLocals` linting.
+
 

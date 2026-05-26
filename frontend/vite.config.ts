@@ -7,6 +7,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/',
   plugins: [
     vue(),
     vueJsx(),
@@ -17,4 +18,15 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://main-server:8080', // Nome do serviço no docker-compose
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
 })
+
