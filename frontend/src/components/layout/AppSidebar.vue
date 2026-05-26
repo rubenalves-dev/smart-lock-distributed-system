@@ -245,6 +245,21 @@ const menuGroups = [
         path: "/calendar",
       },
       {
+        icon: UserCircleIcon, 
+        name: "RFID Users",
+        path: "/users",
+      },
+      {
+        icon: PlugInIcon, 
+        name: "Device Control",
+        path: "/device/control",
+      },
+      {
+        icon: GridIcon, 
+        name: "AI Evaluation",
+        path: "/ai/evaluation",
+      },
+      {
         icon: UserCircleIcon,
         name: "Perfil",
         path: "/profile",

@@ -1,3 +1,5 @@
+version: '3.8'
+
 x-influx-env: &influx_env
   INFLUXDB_URL: http://influxdb:8086
   INFLUXDB_TOKEN: "ZYPGu_Lu6NaP8M4iT5_TLx1xSZag9sAbR9i2vH8zr7P253VcxIMuXHbbkYagn2bOzfVZCRpsrIH5_77r3G1Mag=="
@@ -13,32 +15,33 @@ x-influx-init-env: &influx_init_env
   DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: MinhaTokenMuitoSegura123
 
 services:
-  # Message Broker for Asynchronous calls
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq_broker
+    networks:
+      - smart-lock-net
     ports:
-      - "5672:5672" # RabbitMQ port
-      - "15672:15672" # Management UI (Username/Pass: guest/guest)
+      - "5672:5672"
+      - "15672:15672"
 
-  # Python AI Service
   ai-service:
     build: ../ai-service
     container_name: ai_service
+    networks:
+      - smart-lock-net
     environment:
       - PYTHONUNBUFFERED=1
-    ports:
-      - "50051:50051"
     depends_on:
       - rabbitmq
 
-  # Go Main Server
   main-server:
     build: ../backend
     container_name: main_server
+    networks:
+      - smart-lock-net
     ports:
-      - "8080:8080" # REST API for Web App
-      - "50052:50052" # gRPC port
+      - "8080:8080"
+      - "50052:50052"
     environment:
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
       AI_SERVICE_ADDR: ai-service:50051
@@ -51,17 +54,23 @@ services:
       - postgres
       - influxdb
 
-  # Frontend
   frontend:
     build: ../frontend
     container_name: frontend
+    networks:
+      - smart-lock-net
     ports:
-      - "3000:8080"
+      - "3000:5173"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - main-server
 
-  # Database for the Go Service
   postgres:
     image: postgres:15-alpine
     container_name: postgres_db
+    networks:
+      - smart-lock-net
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -72,18 +81,18 @@ services:
   mosquitto:
     image: eclipse-mosquitto:latest
     container_name: mosquitto_broker
+    networks:
+      - smart-lock-net
     ports:
       - "1883:1883"
       - "9001:9001"
-    volumes:
-      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - ./mosquitto/data:/mosquitto/data
-      - ./mosquitto/log:/mosquitto/log
     restart: always
 
   influxdb:
     image: influxdb:2.7
     container_name: influx_db
+    networks:
+      - smart-lock-net
     ports:
       - "8086:8086"
     volumes:
@@ -92,6 +101,10 @@ services:
     environment:
       <<: *influx_init_env
     restart: unless-stopped
+
+networks:
+  smart-lock-net:
+    driver: bridge
 
 volumes:
   influxdb-data:

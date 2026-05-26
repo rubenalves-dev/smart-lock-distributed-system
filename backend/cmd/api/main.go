@@ -186,7 +186,33 @@ func main() {
 	})
 
 	// Register domain routes
+	// Endpoint para controlar a porta via MQTT
+	r.Post("/api/device/door", func(w http.ResponseWriter, r *http.Request) {
+
+		err := mqttClient.PublishOpenDoor()
+		if err != nil {
+			http.Error(w, "Falha ao enviar comando via MQTT", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "success", "message": "Comando enviado"})
+	})
 	userHandler.RegisterRoutes(r)
+	r.Get("/api/users", func(w http.ResponseWriter, r *http.Request) {
+		users, err := userService.GetAllUsers(r.Context())
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Erro ao obter utilizadores"})
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(users)
+	})
+
+	telemetryHandler.RegisterRoutes(r)
 	telemetryHandler.RegisterRoutes(r)
 
 	// AI evaluate endpoint

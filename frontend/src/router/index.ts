@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory('/'),
   scrollBehavior(to, from, savedPosition) {
     return savedPosition || { left: 0, top: 0 }
   },
@@ -13,6 +13,30 @@ const router = createRouter({
       meta: {
         title: 'eCommerce Dashboard',
         fullWidth: true,
+      },
+    },
+    {
+      path: '/users',
+      name: 'Users',
+      component: () => import('../views/Tables/UsersView.vue'),
+      meta: {
+        title: 'RFID Users List',
+      },
+    },
+    {
+      path: '/device/control',
+      name: 'DeviceControl',
+      component: () => import('../views/Pages/DeviceControlView.vue'),
+      meta: {
+        title: 'Remote Unlock Control',
+      },
+    },
+    {
+      path: '/ai/evaluation',
+      name: 'AiEvaluation',
+      component: () => import('../views/Pages/AiEvaluationView.vue'),
+      meta: {
+        title: 'AI Evaluation Metrics',
       },
     },
     {
@@ -52,7 +76,7 @@ const router = createRouter({
     {
       path: '/alerts',
       name: 'Alerts',
-      component: () => import('../views/UiElements/Alerts.vue'),
+      component: () => import('../views/UiElements/AlertPage.vue'),
       meta: {
         title: 'Alerts',
       },
@@ -73,7 +97,6 @@ const router = createRouter({
         title: 'Badge',
       },
     },
-
     {
       path: '/buttons',
       name: 'Buttons',
@@ -82,7 +105,6 @@ const router = createRouter({
         title: 'Buttons',
       },
     },
-
     {
       path: '/images',
       name: 'Images',
@@ -107,7 +129,6 @@ const router = createRouter({
         title: 'Blank',
       },
     },
-
     {
       path: '/error-404',
       name: '404 Error',
@@ -116,7 +137,6 @@ const router = createRouter({
         title: '404 Error',
       },
     },
-
     {
       path: '/signin',
       name: 'Signin',
