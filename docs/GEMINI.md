@@ -90,7 +90,7 @@ This document tracks structural changes made to the repository code.
 - **[Refactoring & Pipeline]**:
   - Updated `Ingest()` in [service.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/backend/internal/domain/telemetry/service.go) to publish heartbeat messages to RabbitMQ and return immediately, bypassing synchronous database saves and AI service evaluations.
   - Updated [main.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/backend/cmd/api/main.go) to launch an asynchronous heartbeat queue consumer that writes heartbeat events to the database in the background.
-- **[Tests]**: Added `TestTelemetryIngestHeartbeat` to [service_test.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/integrate-web-server-features/backend/internal/domain/telemetry/service_test.go) to validate the new heartbeat offloading flow.
+- **[Tests]**: Added `TestTelemetryIngestHeartbeat` to [service_test.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/integrate-web-server-features/backend/internal/domain/telemetry/service_test.go) to validate the new heartbeat offloading flow.
 
 ## 2026-05-26: Frontend Build Fixes
 
@@ -103,4 +103,7 @@ This document tracks structural changes made to the repository code.
   - Removed unused `computed` import in [Button.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/ui/Button.vue).
   - Prefixed unused `to` and `from` route parameters with underscores in [index.ts](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/router/index.ts) to satisfy TypeScript `noUnusedLocals` linting.
 
+## 2026-05-27: Fixed ESPAsyncWebServer / AsyncTCP const compatibility in Arduino IDE
 
+### Arduino IDE Vendored Libraries (`/arduino-ide/libraries`)
+- **[Const Correctness Patch]**: Modified [ESPAsyncWebServer.h](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/libraries/ESP_Async_WebServer/src/ESPAsyncWebServer.h) to cast away constness from `this` when calling `_server.status()` inside `state() const`. This fixes the `passing 'const AsyncServer' as 'this' argument discards qualifiers` compilation error when building the Arduino sketch with ESP32 support.

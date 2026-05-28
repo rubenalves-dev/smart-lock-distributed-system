@@ -14,6 +14,7 @@ public:
     RFID(int sdaPin, int rstPin);
     void setup(int sckPin, int misoPin, int mosiPin);
     bool check(byte uid[4]);
+    bool is_new_uid_present();
     void update();
     void halt();
 

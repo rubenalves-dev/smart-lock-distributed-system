@@ -57,6 +57,13 @@ bool RFID::check(byte uid[4])
     {
         failCount_++;
         Serial.println("UID does not match authorized UID");
+        Serial.println("Fail count: " + String(failCount_));
+        Serial.print("Last read UID: ");
+        for (byte i = 0; i < mfrc522_.uid.size; i++)
+        {
+            Serial.print(String(mfrc522_.uid.uidByte[i], HEX) + " ");
+        }
+        Serial.println();
     }
     else
     {
