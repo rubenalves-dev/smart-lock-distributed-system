@@ -36,7 +36,7 @@ Ultrassonic ultrassonic(TRIGGER_PIN, ECHO_PIN, DISTANCE_THRESHOLD_CM);
 Photoresistor ldr(LDR_PIN, 5000);
 
 // --- MQTT
-const char *MQTT_SERVER = "host.wokwi.internal";
+const char *MQTT_SERVER = "api.smartlock.raiiaa.dev";
 const uint16_t MQTT_PORT = 1883;
 MQTT mqtt(MQTT_SERVER, MQTT_PORT);
 
@@ -170,7 +170,7 @@ void setupWebServer()
       return;
     }
     HTTPClient http;
-    http.begin("http://host.wokwi.internal:8080/api/users");
+    http.begin("https://api.smartlock.raiiaa.dev/api/users");
     int httpCode = http.GET();
     if (httpCode > 0) {
       String payload = http.getString();
@@ -191,7 +191,7 @@ void setupWebServer()
     }
     String uid = server.arg("uid");
     HTTPClient http;
-    http.begin("http://host.wokwi.internal:8080/api/users/" + uid);
+    http.begin("https://api.smartlock.raiiaa.dev/api/users/" + uid);
     int httpCode = http.GET();
     if (httpCode > 0) {
       String payload = http.getString();
@@ -205,7 +205,7 @@ void setupWebServer()
     String backendStatus = "{}";
     if (WiFi.status() == WL_CONNECTED) {
       HTTPClient http;
-      http.begin("http://host.wokwi.internal:8080/api/health");
+      http.begin("https://api.smartlock.raiiaa.dev/api/health");
       int httpCode = http.GET();
       if (httpCode > 0) {
         backendStatus = http.getString();
