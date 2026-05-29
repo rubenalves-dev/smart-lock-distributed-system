@@ -165,7 +165,8 @@ This document tracks structural changes made to the repository code.
 ### CI/CD Deployment Configuration (`/.github/workflows`, `/`)
 - **[Docker Compose Integration]**: Modified [.github/workflows/main.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/.github/workflows/main.yml) and [Makefile](file:///Users/rubenalves/Documents/repos/_school/iot/final/Makefile) to replace legacy `docker-compose` (hyphenated v1 command) with modern `docker compose` (v2 plugin).
   - Added a self-contained fallback installer block in [.github/workflows/main.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/.github/workflows/main.yml): If `docker compose` is not globally installed or active as a Docker CLI plugin on the VPS, it auto-detects architecture (`x86_64` vs `aarch64`), downloads the latest stable Compose V2 binary, and sets it up locally in `~/.docker/cli-plugins/docker-compose`.
-  - This solves both `'ContainerConfig'` key errors (from legacy v1 compatibility) and `unknown shorthand flag: -f` errors (when the V2 plugin is missing from the VPS Docker installation).
+  - Added a force-remove container step (`docker rm -f`) in [.github/workflows/main.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/.github/workflows/main.yml) targeting the conflicting container ID `45d697b020602e7a04049c406bf768092fcea206f3861db4a00ad30d90612164` and any duplicate `ai_service` container names.
+  - This solves both `'ContainerConfig'` key errors (from legacy v1 compatibility), `unknown shorthand flag: -f` errors (when the V2 plugin is missing from the VPS Docker installation), and naming conflicts from previous crashed deployments.
 
 
 

@@ -69,5 +69,8 @@ jobs:
             fi
             cd ~/smart-lock-distributed-system
             git pull origin main
+            # Force-remove the conflicting orphaned container and any duplicates from the previous crashed legacy run
+            docker rm -f 45d697b020602e7a04049c406bf768092fcea206f3861db4a00ad30d90612164 || true
+            docker rm -f $(docker ps -a -q -f "name=ai_service") 2>/dev/null || true
             docker compose -f deployments/docker-compose.prod.yml up -d --build
             docker image prune -f
