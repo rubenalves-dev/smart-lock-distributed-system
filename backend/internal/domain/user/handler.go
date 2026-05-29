@@ -56,8 +56,10 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type UpdateRequest struct {
-		Name  *string `json:"name"`
-		Email *string `json:"email"`
+		Name       *string `json:"name"`
+		Email      *string `json:"email"`
+		IsAccepted *bool   `json:"is_accepted"`
+		IsBlocked  *bool   `json:"is_blocked"`
 	}
 
 	var req UpdateRequest
@@ -68,7 +70,7 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updated, err := h.service.UpdateUser(r.Context(), uid, req.Name, req.Email)
+	updated, err := h.service.UpdateUser(r.Context(), uid, req.Name, req.Email, req.IsAccepted, req.IsBlocked)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)

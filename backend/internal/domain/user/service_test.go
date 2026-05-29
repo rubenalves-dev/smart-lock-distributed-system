@@ -70,7 +70,7 @@ func TestUpdateUser(t *testing.T) {
 	// First, update a non-existent user (should register it)
 	name := "Alice"
 	email := "alice@example.com"
-	u1, err := svc.UpdateUser(context.Background(), "11:22:33:44", &name, &email)
+	u1, err := svc.UpdateUser(context.Background(), "11:22:33:44", &name, &email, nil, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -80,7 +80,7 @@ func TestUpdateUser(t *testing.T) {
 
 	// Next, update details for the same user
 	newName := "Bob"
-	u2, err := svc.UpdateUser(context.Background(), "11:22:33:44", &newName, &email)
+	u2, err := svc.UpdateUser(context.Background(), "11:22:33:44", &newName, &email, nil, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

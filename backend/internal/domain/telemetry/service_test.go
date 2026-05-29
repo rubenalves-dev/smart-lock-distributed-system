@@ -143,3 +143,105 @@ func TestTelemetryIngestHeartbeat(t *testing.T) {
 	}
 }
 
+func TestTelemetryIngestRFIDAccessControl(t *testing.T) {
+	telemetryRepo := &mockTelemetryRepository{}
+	uRepo := &fakeUserRepo{users: make(map[string]*user.User)}
+	uSvc := user.NewService(uRepo)
+	aiSvc := &fakeAIService{}
+
+	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc)
+
+	// 1. Scanned for the first time
+	payload := models.SensorPayload{
+		DeviceID: "lock_test",
+		Event:    "access_denied", // firmware sent denied
+		RfidUID:  "12:34:56:78",
+	}
+
+	err := svc.Ingest(context.Background(), payload)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Should be saved as new_card and pending
+	if len(telemetryRepo.payloads) != 1 {
+		t.Fatalf("expected 1 saved payload, got %d", len(telemetryRepo.payloads))
+	}
+	if telemetryRepo.payloads[0].Event != "new_card" || telemetryRepo.payloads[0].Status != "Pending" {
+		t.Errorf("expected Event='new_card' and Status='Pending', got Event='%s' and Status='%s'", 
+			telemetryRepo.payloads[0].Event, telemetryRepo.payloads[0].Status)
+	}
+
+	// Verify user is in DB as not accepted and not blocked
+	u, err := uSvc.GetUserByUID(context.Background(), "12:34:56:78")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if u == nil {
+		t.Fatalf("expected user to be created")
+	}
+	if u.IsAccepted || u.IsBlocked {
+		t.Errorf("expected is_accepted=false and is_blocked=false, got is_accepted=%v and is_blocked=%v", 
+			u.IsAccepted, u.IsBlocked)
+	}
+
+	// 2. Scan again when still pending
+	telemetryRepo.payloads = nil
+	err = svc.Ingest(context.Background(), payload)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// Should be saved as access_denied and pending
+	if len(telemetryRepo.payloads) != 1 {
+		t.Fatalf("expected 1 saved payload, got %d", len(telemetryRepo.payloads))
+	}
+	if telemetryRepo.payloads[0].Event != "access_denied" || telemetryRepo.payloads[0].Status != "Pending" {
+		t.Errorf("expected Event='access_denied' and Status='Pending', got Event='%s' and Status='%s'", 
+			telemetryRepo.payloads[0].Event, telemetryRepo.payloads[0].Status)
+	}
+
+	// 3. Accept user in DB
+	isAccepted := true
+	_, err = uSvc.UpdateUser(context.Background(), "12:34:56:78", nil, nil, &isAccepted, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Scan again when accepted
+	telemetryRepo.payloads = nil
+	err = svc.Ingest(context.Background(), payload)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// Should be saved as access_granted and Success
+	if len(telemetryRepo.payloads) != 1 {
+		t.Fatalf("expected 1 saved payload, got %d", len(telemetryRepo.payloads))
+	}
+	if telemetryRepo.payloads[0].Event != "access_granted" || telemetryRepo.payloads[0].Status != "Success" {
+		t.Errorf("expected Event='access_granted' and Status='Success', got Event='%s' and Status='%s'", 
+			telemetryRepo.payloads[0].Event, telemetryRepo.payloads[0].Status)
+	}
+
+	// 4. Block user in DB
+	isBlocked := true
+	_, err = uSvc.UpdateUser(context.Background(), "12:34:56:78", nil, nil, nil, &isBlocked)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Scan again when blocked
+	telemetryRepo.payloads = nil
+	err = svc.Ingest(context.Background(), payload)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// Should be saved as access_denied and Blocked
+	if len(telemetryRepo.payloads) != 1 {
+		t.Fatalf("expected 1 saved payload, got %d", len(telemetryRepo.payloads))
+	}
+	if telemetryRepo.payloads[0].Event != "access_denied" || telemetryRepo.payloads[0].Status != "Blocked" {
+		t.Errorf("expected Event='access_denied' and Status='Blocked', got Event='%s' and Status='%s'", 
+			telemetryRepo.payloads[0].Event, telemetryRepo.payloads[0].Status)
+	}
+}
+

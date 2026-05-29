@@ -10,7 +10,7 @@ RFID::RFID(int sdaPin, int rstPin)
 }
 
 void RFID::setup(int sckPin, int misoPin, int mosiPin) {
-  SPI.begin(sckPin, misoPin, mosiPin);
+  SPI.begin(sckPin, misoPin, mosiPin, sdaPin_);
   delay(100);
   mfrc522_.PCD_Init();
   delay(50);
@@ -74,4 +74,18 @@ void RFID::update() {
 void RFID::halt() {
   mfrc522_.PICC_HaltA();
   mfrc522_.PCD_StopCrypto1();
+}
+
+bool RFID::readCard() {
+  if (!is_new_uid_present()) {
+    return false;
+  }
+
+  buffer_[0] = mfrc522_.uid.uidByte[0];
+  buffer_[1] = mfrc522_.uid.uidByte[1];
+  buffer_[2] = mfrc522_.uid.uidByte[2];
+  buffer_[3] = mfrc522_.uid.uidByte[3];
+
+  halt();
+  return true;
 }

@@ -71,6 +71,14 @@ func (p *PostgresClient) initSchema() error {
 		return fmt.Errorf("failed creating users table: %w", err)
 	}
 
+	alterUsersTableQuery := `
+	ALTER TABLE users ADD COLUMN IF NOT EXISTS is_accepted BOOLEAN DEFAULT FALSE;
+	ALTER TABLE users ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN DEFAULT FALSE;
+	`
+	if _, err := p.DB.Exec(alterUsersTableQuery); err != nil {
+		return fmt.Errorf("failed altering users table: %w", err)
+	}
+
 	if _, err := p.DB.Exec(telemetryTableQuery); err != nil {
 		return fmt.Errorf("failed creating telemetry table: %w", err)
 	}

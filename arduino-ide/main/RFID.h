@@ -15,6 +15,7 @@ public:
     void setup(int sckPin, int misoPin, int mosiPin);
     bool check(byte uid[4]);
     bool is_new_uid_present();
+    bool readCard();
     void update();
     void halt();
 
