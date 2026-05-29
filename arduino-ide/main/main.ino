@@ -59,14 +59,20 @@ Preferences preferences;
 void sendTelemetry(String eventType, String details, String rfidUid = "");
 
 // --- Timers
-Timer autoCloseTimer(5000, []() { updateLockState(true, "auto_close"); }, Timer::Mode::OneShot);
-Timer telemetryTimer(5000, []() { sendTelemetry("heartbeat", "Periodic status update"); }, Timer::Mode::Periodic);
+Timer autoCloseTimer(
+  5000, []() {
+    updateLockState(true, "auto_close");
+  },
+  Timer::Mode::OneShot);
+Timer telemetryTimer(
+  5000, []() {
+    sendTelemetry("heartbeat", "Periodic status update");
+  },
+  Timer::Mode::Periodic);
 
 // --- Functions
-void sendTelemetry(String eventType, String details, String rfidUid)
-{
-  if (WiFi.status() != WL_CONNECTED)
-  {
+void sendTelemetry(String eventType, String details, String rfidUid) {
+  if (WiFi.status() != WL_CONNECTED) {
     return;
   }
   StaticJsonDocument<300> doc;
@@ -74,8 +80,7 @@ void sendTelemetry(String eventType, String details, String rfidUid)
   doc["event"] = eventType;
   doc["details"] = details;
 
-  if (rfidUid != "")
-  {
+  if (rfidUid != "") {
     doc["rfid_uid"] = rfidUid;
   }
 
@@ -83,47 +88,39 @@ void sendTelemetry(String eventType, String details, String rfidUid)
   doc["distance_cm"] = ultrassonic.distance();
   doc["light_level"] = ldr.lightLevel();
   doc["fails"] = rfid.failCount();
-  if (rfid.failCount() > 0)
-  {
+  if (rfid.failCount() > 0) {
     doc["user"] = lastUser;
   }
 
   doc["rssi"] = WiFi.RSSI();
-  doc["uptime"] = millis() / 1000; // Uptime in seconds
+  doc["uptime"] = millis() / 1000;  // Uptime in seconds
 
   char buffer[300];
   serializeJson(doc, buffer);
   mqtt.publish("lock/telemetry", buffer);
 }
 
-void updateLockState(bool lock, String user)
-{
+void updateLockState(bool lock, String user) {
   isLocked = lock;
   sendTelemetry("status_change", isLocked ? "LOCKED" : "UNLOCKED");
 }
 
-void callback(char *topic, byte *payload, unsigned int length)
-{
+void callback(char *topic, byte *payload, unsigned int length) {
   String msg = "";
-  for (int i = 0; i < length; i++)
-  {
+  for (int i = 0; i < length; i++) {
     msg += (char)payload[i];
   }
   Serial.print("Received MQTT message: ");
   Serial.println(msg);
 
-  if (msg == "UNLOCK")
-  {
+  if (msg == "UNLOCK") {
     updateLockState(false);
-  }
-  else if (msg == "LOCK")
-  {
+  } else if (msg == "LOCK") {
     updateLockState(true);
   }
 }
 
-void setupWebServer()
-{
+void setupWebServer() {
   server.on("/", HTTP_GET, []() {
     server.send(200, "text/html", INDEX_HTML);
   });
@@ -213,8 +210,7 @@ void setupWebServer()
       http.end();
     }
 
-    String response = "{\"local_mqtt\":" + String(mqtt.connected() ? "true" : "false") +
-                      ",\"backend_services\":" + backendStatus + "}";
+    String response = "{\"local_mqtt\":" + String(mqtt.connected() ? "true" : "false") + ",\"backend_services\":" + backendStatus + "}";
     server.send(200, "application/json", response);
   });
   server.begin();
@@ -237,22 +233,18 @@ void setup() {
   int attempts = 0;
 
   WiFi.begin(storedSSID.c_str(), storedPassword.c_str());
-  while (WiFi.status() != WL_CONNECTED && attempts < 20)
-  {
+  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
     delay(500);
     Serial.print(".");
     attempts++;
   }
-  if (WiFi.status() != WL_CONNECTED)
-  {
+  if (WiFi.status() != WL_CONNECTED) {
     Serial.println("\nWiFi connection failed! Starting Access Point (AP mode)...");
     WiFi.softAP("SmartLock-Setup", "12345678");
     Serial.println("AP Mode started. SSID: SmartLock-Setup, Password: 12345678");
     Serial.print("Access the setup page at: http://");
     Serial.println(WiFi.softAPIP());
-  }
-  else
-  {
+  } else {
     Serial.println("\nWifi connected, IP: " + WiFi.localIP().toString());
   }
 
@@ -283,6 +275,152 @@ void loop() {
   telemetryTimer.update();
   autoCloseTimer.update();
 
+  // --- Proximity State Transition Logging (non-flooding)
+  static bool wasObjectClose = false;
+  bool isClose = ultrassonic.isObjectClose();
+  if (isClose != wasObjectClose)
+  {
+    wasObjectClose = isClose;
+    Serial.print("[Sensor] Proximity state changed. Object is close: ");
+    Serial.print(isClose ? "YES" : "NO");
+    Serial.print(" (Distance: ");
+    Serial.print(ultrassonic.distance());
+    Serial.println(" cm)");
+  }
+
+  // --- 3. RFID Check (polled on every cycle for responsive scan detection)
+  if (isClose)
+  {
+    if (rfid.readCard())
+    {
+      // Format UID as string (e.g. "DE:AD:BE:EF")
+      char uidStrBuf[20];
+      sprintf(uidStrBuf, "%02X:%02X:%02X:%02X", rfid.buffer()[0], rfid.buffer()[1], rfid.buffer()[2], rfid.buffer()[3]);
+      String uidStr = String(uidStrBuf);
+
+      Serial.print("[RFID] Card scanned! UID: ");
+      Serial.println(uidStr);
+
+      bool shouldUnlock = false;
+      int newStatus = 0; // default to pending if we register it
+      bool statusFetched = false;
+
+      // Try to communicate with server if WiFi is connected
+      if (WiFi.status() == WL_CONNECTED)
+      {
+        HTTPClient http;
+        String url = "https://api.smartlock.raiiaa.dev/api/users/" + uidStr;
+        http.begin(url);
+        int httpCode = http.GET();
+
+        if (httpCode == 200)
+        {
+          String response = http.getString();
+          StaticJsonDocument<300> doc;
+          DeserializationError error = deserializeJson(doc, response);
+          if (!error)
+          {
+            bool isAccepted = doc["is_accepted"] | false;
+            bool isBlocked = doc["is_blocked"] | false;
+
+            if (isBlocked)
+            {
+              newStatus = 2; // Blocked
+              shouldUnlock = false;
+            }
+            else if (isAccepted)
+            {
+              newStatus = 1; // Accepted
+              shouldUnlock = true;
+            }
+            else
+            {
+              newStatus = 0; // Pending
+              shouldUnlock = false;
+            }
+            statusFetched = true;
+          }
+        }
+        else if (httpCode == 404)
+        {
+          // Card not in database yet. Ingest event to trigger auto-registration!
+          sendTelemetry("access_denied", "New card detected on reader", uidStr);
+          newStatus = 0; // Pending
+          shouldUnlock = false;
+          statusFetched = true;
+        }
+        http.end();
+      }
+
+      if (statusFetched)
+      {
+        // Update local preferences cache
+        preferences.begin("cards", false);
+        preferences.putInt(uidStr.c_str(), newStatus);
+        preferences.end();
+
+        if (shouldUnlock)
+        {
+          lastUser = uidStr;
+          updateLockState(false, lastUser);
+          sendTelemetry("access_granted", "Valid RFID (online)", uidStr);
+        }
+        else
+        {
+          lastUser = "unknown";
+          if (newStatus == 2) {
+            sendTelemetry("access_denied", "Blocked RFID card (online)", uidStr);
+          } else {
+            sendTelemetry("access_denied", "Pending RFID card (online)", uidStr);
+          }
+        }
+      }
+      else
+      {
+        // FALLBACK: Offline or server error. Read from local preferences.
+        preferences.begin("cards", true);
+        int localStatus = preferences.getInt(uidStr.c_str(), -1);
+        preferences.end();
+
+        if (localStatus == -1)
+        {
+          // First time this card is seen and we are offline. Store it as pending.
+          preferences.begin("cards", false);
+          preferences.putInt(uidStr.c_str(), 0); // Store as pending
+          preferences.end();
+
+          Serial.println("Offline: New card detected. Cached locally as pending.");
+          shouldUnlock = false;
+        }
+        else if (localStatus == 1)
+        {
+          // Accepted card from local cache
+          Serial.println("Offline: Accepted card matched from local cache.");
+          shouldUnlock = true;
+        }
+        else
+        {
+          // Blocked or Pending card
+          Serial.print("Offline: Card not authorized. Local status: ");
+          Serial.println(localStatus);
+          shouldUnlock = false;
+        }
+
+        if (shouldUnlock)
+        {
+          lastUser = uidStr;
+          updateLockState(false, lastUser);
+          sendTelemetry("access_granted", "Valid RFID (offline cache)", uidStr);
+        }
+        else
+        {
+          lastUser = "unknown";
+          sendTelemetry("access_denied", "Unauthorized RFID (offline cache)", uidStr);
+        }
+      }
+    }
+  }
+
   unsigned long currentMillis = millis();
   if (currentMillis - lastSensorCheck >= 1000) {
     lastSensorCheck = currentMillis;
@@ -292,137 +430,14 @@ void loop() {
     ldr.update();
     rfid.update();
 
-    Serial.print(".");
-
-    // --- 3. RFID Check
-    if (ultrassonic.isObjectClose())
-    {
-      if (rfid.readCard())
-      {
-        // Format UID as string (e.g. "DE:AD:BE:EF")
-        char uidStrBuf[20];
-        sprintf(uidStrBuf, "%02X:%02X:%02X:%02X", rfid.buffer()[0], rfid.buffer()[1], rfid.buffer()[2], rfid.buffer()[3]);
-        String uidStr = String(uidStrBuf);
-
-        bool shouldUnlock = false;
-        int newStatus = 0; // default to pending if we register it
-        bool statusFetched = false;
-
-        // Try to communicate with server if WiFi is connected
-        if (WiFi.status() == WL_CONNECTED)
-        {
-          HTTPClient http;
-          String url = "https://api.smartlock.raiiaa.dev/api/users/" + uidStr;
-          http.begin(url);
-          int httpCode = http.GET();
-
-          if (httpCode == 200)
-          {
-            String response = http.getString();
-            StaticJsonDocument<300> doc;
-            DeserializationError error = deserializeJson(doc, response);
-            if (!error)
-            {
-              bool isAccepted = doc["is_accepted"] | false;
-              bool isBlocked = doc["is_blocked"] | false;
-
-              if (isBlocked)
-              {
-                newStatus = 2; // Blocked
-                shouldUnlock = false;
-              }
-              else if (isAccepted)
-              {
-                newStatus = 1; // Accepted
-                shouldUnlock = true;
-              }
-              else
-              {
-                newStatus = 0; // Pending
-                shouldUnlock = false;
-              }
-              statusFetched = true;
-            }
-          }
-          else if (httpCode == 404)
-          {
-            // Card not in database yet. Ingest event to trigger auto-registration!
-            sendTelemetry("access_denied", "New card detected on reader", uidStr);
-            newStatus = 0; // Pending
-            shouldUnlock = false;
-            statusFetched = true;
-          }
-          http.end();
-        }
-
-        if (statusFetched)
-        {
-          // Update local preferences cache
-          preferences.begin("cards", false);
-          preferences.putInt(uidStr.c_str(), newStatus);
-          preferences.end();
-
-          if (shouldUnlock)
-          {
-            lastUser = uidStr;
-            updateLockState(false, lastUser);
-            sendTelemetry("access_granted", "Valid RFID (online)", uidStr);
-          }
-          else
-          {
-            lastUser = "unknown";
-            if (newStatus == 2) {
-              sendTelemetry("access_denied", "Blocked RFID card (online)", uidStr);
-            } else {
-              sendTelemetry("access_denied", "Pending RFID card (online)", uidStr);
-            }
-          }
-        }
-        else
-        {
-          // FALLBACK: Offline or server error. Read from local preferences.
-          preferences.begin("cards", true);
-          int localStatus = preferences.getInt(uidStr.c_str(), -1);
-          preferences.end();
-
-          if (localStatus == -1)
-          {
-            // First time this card is seen and we are offline. Store it as pending.
-            preferences.begin("cards", false);
-            preferences.putInt(uidStr.c_str(), 0); // Store as pending
-            preferences.end();
-
-            Serial.println("Offline: New card detected. Cached locally as pending.");
-            shouldUnlock = false;
-          }
-          else if (localStatus == 1)
-          {
-            // Accepted card from local cache
-            Serial.println("Offline: Accepted card matched from local cache.");
-            shouldUnlock = true;
-          }
-          else
-          {
-            // Blocked or Pending card
-            Serial.print("Offline: Card not authorized. Local status: ");
-            Serial.println(localStatus);
-            shouldUnlock = false;
-          }
-
-          if (shouldUnlock)
-          {
-            lastUser = uidStr;
-            updateLockState(false, lastUser);
-            sendTelemetry("access_granted", "Valid RFID (offline cache)", uidStr);
-          }
-          else
-          {
-            lastUser = "unknown";
-            sendTelemetry("access_denied", "Unauthorized RFID (offline cache)", uidStr);
-          }
-        }
-      }
-    }
+    Serial.print("[Status] Uptime: ");
+    Serial.print(millis() / 1000);
+    Serial.print("s | Distance: ");
+    Serial.print(ultrassonic.distance());
+    Serial.print(" cm | Light: ");
+    Serial.print(ldr.lightLevel());
+    Serial.print(" | Lock: ");
+    Serial.println(isLocked ? "LOCKED" : "UNLOCKED");
   }
 
   delay(1);

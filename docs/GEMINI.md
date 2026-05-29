@@ -144,3 +144,9 @@ This document tracks structural changes made to the repository code.
   - Rewrote the card scanning loop in [main.ino](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/rfid-access-control-system/arduino-ide/main/main.ino) to implement dynamic HTTP query calls. During active connection, it requests card state (`is_accepted` / `is_blocked`) from `/api/users/{uid}` and stores it locally under ESP32 `Preferences` namespace `"cards"`.
   - Implemented the offline fallback: if internet connection fails or server is unreachable, the system queries the local `Preferences` cards cache to grant access (matches active state) or deny access (pending/blocked).
 
+## 2026-05-29: Optimized RFID Scanning and Decoupled Polling in Arduino IDE
+
+### Arduino IDE Sketch (`/arduino-ide`)
+- **[RFID Polling Optimization]**: Modified [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) to move the card reading logic (`rfid.readCard()`) out of the slow 1-second sensor update block. The RFID reader is now polled continuously on every loop cycle, ensuring instantaneous swipe detection.
+- **[Gating Optimization]**: Gated the continuous RFID polling by `ultrassonic.isObjectClose()` (which checks the cached distance state). This preserves the proximity requirement without calling blocking ultrasonic routines on every loop iteration.
+- **[Silenced Verbose Logs]**: Modified [RFID.cpp](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/RFID.cpp) to remove the `"No card present"` and `"No card present or failed to read the card!"` print statements, avoiding console flooding when the card reader is queried rapidly.

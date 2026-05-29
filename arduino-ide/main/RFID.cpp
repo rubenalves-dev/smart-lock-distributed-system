@@ -19,7 +19,6 @@ void RFID::setup(int sckPin, int misoPin, int mosiPin) {
 
 bool RFID::is_new_uid_present() {
   if (!mfrc522_.PICC_IsNewCardPresent()) {
-    Serial.println("No card present");
     return false;
   }
 
@@ -33,7 +32,6 @@ bool RFID::is_new_uid_present() {
 
 bool RFID::check(byte uid[4]) {
   if (!is_new_uid_present()) {
-    Serial.println("No card present or failed to read the card!");
     return false;
   }
 
