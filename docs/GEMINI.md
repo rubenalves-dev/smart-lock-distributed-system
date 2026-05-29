@@ -160,3 +160,9 @@ This document tracks structural changes made to the repository code.
   - Logs generated JSON telemetry payloads and MQTT publications.
   - Logs lock state transitions and the triggering user/reason.
 
+## 2026-05-29: Migrated to Docker Compose v2 in CI/CD Workflow and Makefile
+
+### CI/CD Deployment Configuration (`/.github/workflows`, `/`)
+- **[Docker Compose Integration]**: Modified [.github/workflows/main.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/.github/workflows/main.yml) and [Makefile](file:///Users/rubenalves/Documents/repos/_school/iot/final/Makefile) to replace legacy `docker-compose` (hyphenated v1 command) with modern `docker compose` (v2 plugin). This resolves the `'ContainerConfig'` key error and container deployment failure caused by incompatibilities between legacy v1 docker-compose and modern Docker Engine (v25+) on the VPS.
+
+

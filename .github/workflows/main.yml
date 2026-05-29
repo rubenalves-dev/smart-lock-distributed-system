@@ -50,5 +50,5 @@ jobs:
           script: |
             cd ~/smart-lock-distributed-system
             git pull origin main
-            docker-compose -f deployments/docker-compose.prod.yml up -d --build
+            docker compose -f deployments/docker-compose.prod.yml up -d --build
             docker image prune -f
