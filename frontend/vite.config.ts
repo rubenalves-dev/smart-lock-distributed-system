@@ -19,10 +19,12 @@ export default defineConfig({
     },
   },
   server: {
+    host: true,
+    port: 3000,
     proxy: {
       '/api': {
         target: 'http://main-server:8080', // Nome do serviço no docker-compose
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        //rewrite: (path) => path.replace(/^\/api/, ''),
         changeOrigin: true,
         secure: false,
       }
