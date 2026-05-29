@@ -163,6 +163,9 @@ This document tracks structural changes made to the repository code.
 ## 2026-05-29: Migrated to Docker Compose v2 in CI/CD Workflow and Makefile
 
 ### CI/CD Deployment Configuration (`/.github/workflows`, `/`)
-- **[Docker Compose Integration]**: Modified [.github/workflows/main.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/.github/workflows/main.yml) and [Makefile](file:///Users/rubenalves/Documents/repos/_school/iot/final/Makefile) to replace legacy `docker-compose` (hyphenated v1 command) with modern `docker compose` (v2 plugin). This resolves the `'ContainerConfig'` key error and container deployment failure caused by incompatibilities between legacy v1 docker-compose and modern Docker Engine (v25+) on the VPS.
+- **[Docker Compose Integration]**: Modified [.github/workflows/main.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/.github/workflows/main.yml) and [Makefile](file:///Users/rubenalves/Documents/repos/_school/iot/final/Makefile) to replace legacy `docker-compose` (hyphenated v1 command) with modern `docker compose` (v2 plugin).
+  - Added a self-contained fallback installer block in [.github/workflows/main.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/.github/workflows/main.yml): If `docker compose` is not globally installed or active as a Docker CLI plugin on the VPS, it auto-detects architecture (`x86_64` vs `aarch64`), downloads the latest stable Compose V2 binary, and sets it up locally in `~/.docker/cli-plugins/docker-compose`.
+  - This solves both `'ContainerConfig'` key errors (from legacy v1 compatibility) and `unknown shorthand flag: -f` errors (when the V2 plugin is missing from the VPS Docker installation).
+
 
 

@@ -48,6 +48,25 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 2222
           script: |
+            if ! docker compose version >/dev/null 2>&1; then
+              echo "Docker Compose V2 plugin not found. Installing locally..."
+              mkdir -p ~/.docker/cli-plugins
+              ARCH=$(uname -m)
+              if [ "$ARCH" = "x86_64" ]; then
+                CLI_ARCH="linux-x86_64"
+              elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+                CLI_ARCH="linux-aarch64"
+              else
+                CLI_ARCH="linux-x86_64"
+              fi
+              URL="https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-${CLI_ARCH}"
+              if command -v curl >/dev/null 2>&1; then
+                curl -SL "$URL" -o ~/.docker/cli-plugins/docker-compose
+              else
+                wget -O ~/.docker/cli-plugins/docker-compose "$URL"
+              fi
+              chmod +x ~/.docker/cli-plugins/docker-compose
+            fi
             cd ~/smart-lock-distributed-system
             git pull origin main
             docker compose -f deployments/docker-compose.prod.yml up -d --build
