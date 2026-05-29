@@ -150,3 +150,13 @@ This document tracks structural changes made to the repository code.
 - **[RFID Polling Optimization]**: Modified [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) to move the card reading logic (`rfid.readCard()`) out of the slow 1-second sensor update block. The RFID reader is now polled continuously on every loop cycle, ensuring instantaneous swipe detection.
 - **[Gating Optimization]**: Gated the continuous RFID polling by `ultrassonic.isObjectClose()` (which checks the cached distance state). This preserves the proximity requirement without calling blocking ultrasonic routines on every loop iteration.
 - **[Silenced Verbose Logs]**: Modified [RFID.cpp](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/RFID.cpp) to remove the `"No card present"` and `"No card present or failed to read the card!"` print statements, avoiding console flooding when the card reader is queried rapidly.
+
+## 2026-05-29: Added Serial Diagnostics to RFID Reading and Telemetry Ingestion
+
+### Arduino IDE Sketch (`/arduino-ide`)
+- **[Diagnostics & Features]**: Modified [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) to add comprehensive serial print logs when an RFID card is scanned:
+  - Prints the target URL and status/response of the backend API requests during online card checks.
+  - Logs local preferences cache reads, writes, and offline fallbacks.
+  - Logs generated JSON telemetry payloads and MQTT publications.
+  - Logs lock state transitions and the triggering user/reason.
+

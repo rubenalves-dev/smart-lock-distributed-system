@@ -73,6 +73,7 @@ Timer telemetryTimer(
 // --- Functions
 void sendTelemetry(String eventType, String details, String rfidUid) {
   if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("[Telemetry] WiFi not connected. Telemetry not sent.");
     return;
   }
   StaticJsonDocument<300> doc;
@@ -97,12 +98,18 @@ void sendTelemetry(String eventType, String details, String rfidUid) {
 
   char buffer[300];
   serializeJson(doc, buffer);
+  Serial.print("[Telemetry] Publishing to lock/telemetry: ");
+  Serial.println(buffer);
   mqtt.publish("lock/telemetry", buffer);
 }
 
 void updateLockState(bool lock, String user) {
   isLocked = lock;
-  sendTelemetry("status_change", isLocked ? "LOCKED" : "UNLOCKED");
+  Serial.print("[Lock] State updated to: ");
+  Serial.print(isLocked ? "LOCKED" : "UNLOCKED");
+  Serial.print(" by: ");
+  Serial.println(user);
+  sendTelemetry("status_change", isLocked ? "LOCKED" : "UNLOCKED", user);
 }
 
 void callback(char *topic, byte *payload, unsigned int length) {
@@ -308,20 +315,30 @@ void loop() {
       // Try to communicate with server if WiFi is connected
       if (WiFi.status() == WL_CONNECTED)
       {
+        Serial.print("[RFID] WiFi connected. Sending API request to check card UID: ");
+        Serial.println(uidStr);
+
         HTTPClient http;
         String url = "https://api.smartlock.raiiaa.dev/api/users/" + uidStr;
         http.begin(url);
         int httpCode = http.GET();
 
+        Serial.print("[RFID] API Request returned HTTP code: ");
+        Serial.println(httpCode);
+
         if (httpCode == 200)
         {
           String response = http.getString();
+          Serial.print("[RFID] API Response received: ");
+          Serial.println(response);
+
           StaticJsonDocument<300> doc;
           DeserializationError error = deserializeJson(doc, response);
           if (!error)
           {
             bool isAccepted = doc["is_accepted"] | false;
             bool isBlocked = doc["is_blocked"] | false;
+            Serial.printf("[RFID] Parsed states - is_accepted: %s, is_blocked: %s\n", isAccepted ? "true" : "false", isBlocked ? "true" : "false");
 
             if (isBlocked)
             {
@@ -340,20 +357,35 @@ void loop() {
             }
             statusFetched = true;
           }
+          else
+          {
+            Serial.print("[RFID] JSON deserialization failed: ");
+            Serial.println(error.c_str());
+          }
         }
         else if (httpCode == 404)
         {
+          Serial.println("[RFID] Card not found on backend (404). Initiating auto-registration telemetry...");
           // Card not in database yet. Ingest event to trigger auto-registration!
           sendTelemetry("access_denied", "New card detected on reader", uidStr);
           newStatus = 0; // Pending
           shouldUnlock = false;
           statusFetched = true;
         }
+        else
+        {
+          Serial.println("[RFID] Server check failed with unexpected HTTP code. Falling back to cache.");
+        }
         http.end();
+      }
+      else
+      {
+        Serial.println("[RFID] WiFi not connected. Skipping API server check.");
       }
 
       if (statusFetched)
       {
+        Serial.printf("[RFID] Saving card status to Preferences cache 'cards': UID=%s, status=%d\n", uidStr.c_str(), newStatus);
         // Update local preferences cache
         preferences.begin("cards", false);
         preferences.putInt(uidStr.c_str(), newStatus);
@@ -377,13 +409,16 @@ void loop() {
       }
       else
       {
+        Serial.println("[RFID] API status not fetched. Querying local Preferences cache...");
         // FALLBACK: Offline or server error. Read from local preferences.
         preferences.begin("cards", true);
         int localStatus = preferences.getInt(uidStr.c_str(), -1);
         preferences.end();
+        Serial.printf("[RFID] Loaded cache for UID=%s: status=%d\n", uidStr.c_str(), localStatus);
 
         if (localStatus == -1)
         {
+          Serial.println("[RFID] Card never seen offline. Saving local status as Pending (0).");
           // First time this card is seen and we are offline. Store it as pending.
           preferences.begin("cards", false);
           preferences.putInt(uidStr.c_str(), 0); // Store as pending
