@@ -32,7 +32,7 @@ func (s *Service) RegisterTagIfNotExists(ctx context.Context, rfidUID string) (*
 	return u, nil
 }
 
-func (s *Service) UpdateUser(ctx context.Context, rfidUID string, name, email *string) (*User, error) {
+func (s *Service) UpdateUser(ctx context.Context, rfidUID string, name, email *string, isAccepted, isBlocked *bool) (*User, error) {
 	u, err := s.repo.FindByUID(ctx, rfidUID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch user: %w", err)
@@ -41,16 +41,36 @@ func (s *Service) UpdateUser(ctx context.Context, rfidUID string, name, email *s
 		u = &User{
 			RfidUID: rfidUID,
 		}
-		u.Name = name
-		u.Email = email
+		if name != nil {
+			u.Name = name
+		}
+		if email != nil {
+			u.Email = email
+		}
+		if isAccepted != nil {
+			u.IsAccepted = *isAccepted
+		}
+		if isBlocked != nil {
+			u.IsBlocked = *isBlocked
+		}
 		if err := s.repo.Create(ctx, u); err != nil {
 			return nil, fmt.Errorf("failed to register and update user: %w", err)
 		}
 		return u, nil
 	}
 
-	u.Name = name
-	u.Email = email
+	if name != nil {
+		u.Name = name
+	}
+	if email != nil {
+		u.Email = email
+	}
+	if isAccepted != nil {
+		u.IsAccepted = *isAccepted
+	}
+	if isBlocked != nil {
+		u.IsBlocked = *isBlocked
+	}
 	if err := s.repo.Update(ctx, u); err != nil {
 		return nil, fmt.Errorf("failed to update user details: %w", err)
 	}
