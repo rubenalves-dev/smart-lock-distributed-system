@@ -13,6 +13,17 @@ import model as model_lib
 import numpy as np
 import pika
 import tensorflow as tf
+import io
+import pandas as pd
+
+from sklearn.metrics import (
+    confusion_matrix,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score
+)
+
 
 # Paths
 MODEL_PATH = "severity_model.keras"
@@ -180,7 +191,8 @@ class AIService(smartlock_grpc.AIServiceServicer):
         try:
             import io
             import pandas as pd
-            import os
+            
+            df = pd.read_csv(io.StringIO(data_content))
 
             # 1. Tenta ler o conteúdo recebido (a string CSV do Go)
             data_content = request.dataset_path
@@ -203,15 +215,80 @@ class AIService(smartlock_grpc.AIServiceServicer):
             
             # 3. Extrair dados para o modelo
             X = df[['fails', 'distance_cm', 'is_denied']].values
+
+            # Verificar se o dataset tem labels
+            if "severity" not in df.columns:
+                raise Exception(
+            "O dataset deve conter a coluna 'severity' para avaliação."
+            )
+            # Normalizar como no treino
+            X = np.array([
+                model_lib.normalize_features(
+                row["fails"],
+                row["distance_cm"],
+                row["is_denied"]
+                )
+                for _, row in df.iterrows()
+                ])
+            y_true = df["severity"].values
+            # Previsões do modelo
+            with self.model_lock:
+                predictions = self.model.predict(X, verbose=0)
+
+            # Classe prevista (0,1,2,3)
+            y_pred = np.argmax(predictions, axis=1)
+
+            # Métricas
+            cm = confusion_matrix(y_true, y_pred)
+
+            accuracy = accuracy_score(y_true, y_pred)
+
+            precision = precision_score(
+            y_true,
+            y_pred,
+            average="macro",
+            zero_division=0
+            )
+
+            recall = recall_score(
+            y_true,
+            y_pred,
+            average="macro",
+            zero_division=0
+            )
+
+            f1 = f1_score(
+                y_true,
+                y_pred,
+                average="macro",
+                zero_division=0
+            )
+            rows = []
+
+            for row in cm:
+                rows.append(
+                smartlock.ConfusionMatrixRow(
+                values=[int(x) for x in row]
+            )
+                )
             
             # ... (o resto da tua lógica de predict e retorno continua igual)
             # 4. Cálculo simples para teste
-            accuracy = 100.0 
-            
-            return smartlock.EvaluateModelResponse(
-                metrics=smartlock.EvaluationMetrics(accuracy=accuracy, precision_macro=accuracy, recall_macro=0.0, f1_macro=0.0),
-                binary_metrics=smartlock.BinaryEvaluationMetrics(accuracy=accuracy, precision=accuracy, recall=0.0, f1=0.0)
+                return smartlock.EvaluateModelResponse(
+            confusion_matrix=rows,
+            metrics=smartlock.EvaluationMetrics(
+                accuracy=float(accuracy),
+                precision_macro=float(precision),
+                recall_macro=float(recall),
+                f1_macro=float(f1),
+            ),
+            binary_metrics=smartlock.BinaryEvaluationMetrics(
+                accuracy=float(accuracy),
+                precision=float(precision),
+                recall=float(recall),
+                f1=float(f1),
             )
+)
 
         except Exception as e:
             print(f"Erro detalhado na avaliação: {str(e)}")

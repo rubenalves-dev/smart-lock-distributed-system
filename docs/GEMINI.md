@@ -168,5 +168,31 @@ This document tracks structural changes made to the repository code.
   - Added a force-remove container step (`docker rm -f`) in [.github/workflows/main.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/.github/workflows/main.yml) targeting the conflicting container ID `45d697b020602e7a04049c406bf768092fcea206f3861db4a00ad30d90612164` and any duplicate `ai_service` container names.
   - This solves both `'ContainerConfig'` key errors (from legacy v1 compatibility), `unknown shorthand flag: -f` errors (when the V2 plugin is missing from the VPS Docker installation), and naming conflicts from previous crashed deployments.
 
+## 2026-05-30: Unified Domain and Subdomain Migration for Cloudflare
+
+### Nginx Routing Configuration (`/deployments/nginx`)
+- **[Unified Route Proxy]**: Modified [smartlock.conf](file:///Users/rubenalves/Documents/repos/_school/iot/final/deployments/nginx/smartlock.conf) to append a `location /api/` routing block forwarding requests to the Go backend (`localhost:8080`).
+- **[Old Subdomain Deletion]**: Deleted [api.conf](file:///Users/rubenalves/Documents/repos/_school/iot/final/deployments/nginx/api.conf) as we consolidated the API onto `smartlock.raiiaa.dev/api`.
+
+### ESP32 Firmware (`/arduino-ide`)
+- **[Endpoints Migration]**: Modified [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) to replace all HTTP requests to the old `api.smartlock.raiiaa.dev` second-level subdomain with `smartlock.raiiaa.dev`.
+- **[MQTT Server Route]**: Changed `MQTT_SERVER` variable in [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) to `mqtt.raiiaa.dev` (to be set up as a Cloudflare DNS-only record resolving directly to the DigitalOcean VPS to allow raw TCP connection on port 1883).
+
+## 2026-05-30: Prettified AI Model Evaluation View with File Upload Support
+
+### Go Backend (`/backend`)
+- **[Direct CSV Evaluation]**: Modified [main.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/cmd/api/main.go) to import `"strings"` and update the `POST /api/ai/evaluate` endpoint. If the target dataset path does not exist on disk, it checks whether the string parameter contains CSV column headers (like `feature1` or `fails`). If it does, it forwards the content directly to the gRPC AI Service evaluator instead of falling back to default synthetic content.
+
+### Vue Frontend (`/frontend`)
+- **[Aesthetics & Layout Integration]**: Refactored [AiEvaluationView.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/views/Pages/AiEvaluationView.vue) to wrap its contents in `<AdminLayout>`, utilize `<PageBreadcrumb>`, and group configuration controls and outputs into `<ComponentCard>` containers.
+- **[Local File Upload Toggle]**: Implemented a toggle button switcher to select between **Ficheiro Local (Local CSV upload)** and **Caminho no Servidor (Server Path)**.
+- **[Drag-and-Drop & FileReader]**: Built a custom drag-and-drop file selector in [AiEvaluationView.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/views/Pages/AiEvaluationView.vue) that parses selected local `.csv` files via `FileReader.readAsText()` and submits their raw string contents directly to the backend.
+- **[Evaluation Metrics & Heatmap]**: Expanded metric displays to separately showcase **Binary Metrics** (Anomaly threat detection) and **Macro Metrics** (multi-class severity levels) side-by-side. Designed a heatmapped confusion matrix visualization grid dynamically matching predicted and actual classes.
+- **[Evaluation Composable Typings]**: Updated [useAiEvaluation.ts](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/composables/useAiEvaluation.ts) to define full metrics interface typing mapping the backend `EvaluationResult` model fields (`metrics`, `binary_metrics`, and `confusion_matrix`). Shifted the fetch route to a relative path `/api/ai/evaluate` to align with the Nginx reverse proxy configuration.
+- **[History Table Formatting]**: Patched [EvaluationHistoryTable.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/common/EvaluationHistoryTable.vue) to resolve self-import syntax errors. Styled the history logs with standard premium Tailwind classes matching the style of `UsersView.vue` and supporting dark-mode.
+- **[Local Dev Proxy Target]**: Modified proxy settings in [vite.config.ts](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/vite.config.ts) from `http://main-server:8080` (resolvable only inside Docker) to `http://localhost:8080` to support standard local development on the host system without routing failures.
+- **[Container Proxy Route]**: Configured `http-server` in [Dockerfile](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/Dockerfile) with the proxy flag `-P http://main-server:8080` to forward unresolved `/api` requests to the Go backend container inside the Docker network.
+
+
 
 

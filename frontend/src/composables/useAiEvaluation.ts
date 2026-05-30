@@ -1,10 +1,23 @@
 import { ref } from 'vue';
 
+export interface EvaluationMetrics {
+  accuracy: number;
+  precision_macro: number;
+  recall_macro: number;
+  f1_macro: number;
+}
+
+export interface BinaryEvaluationMetrics {
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1: number;
+}
+
 export interface EvaluationResponse {
-  binary_metrics: {
-    accuracy: number;
-    precision: number;
-  };
+  confusion_matrix: number[][];
+  metrics: EvaluationMetrics;
+  binary_metrics: BinaryEvaluationMetrics;
 }
 
 export function useAiEvaluation() {
@@ -13,7 +26,7 @@ export function useAiEvaluation() {
   const evaluate = async (path: string): Promise<EvaluationResponse | null> => {
     loading.value = true;
     try {
-  const response = await fetch('http://localhost:8080/api/ai/evaluate', {        
+      const response = await fetch('/api/ai/evaluate', {        
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dataset_path: path })
