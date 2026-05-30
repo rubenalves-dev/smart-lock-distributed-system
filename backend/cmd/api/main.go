@@ -82,7 +82,10 @@ func main() {
 	defer mqttClient.Close()
 
 	rawAIClient := smartlock.NewAIServiceClient(grpcConn)
-	aiService := ai.NewGRPCClient(rawAIClient)
+	grpcClient := ai.NewGRPCClient(rawAIClient)
+
+	aiRepo := ai.NewRepository(dbClient.DB)
+	aiService := ai.NewService(aiRepo, grpcClient)
 
 	userRepo := user.NewRepository(dbClient.DB)
 	userService := user.NewService(userRepo)
