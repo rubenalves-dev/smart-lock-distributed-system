@@ -17,7 +17,7 @@
 
 <script>
 import AdminLayout from '../components/layout/AdminLayout.vue'
-import DashboardMetrics from '../components/ecommerce/DashboardMetrics.vue'
+import DashboardMetrics from '../components/dashboard/DashboardMetrics.vue'
 
 export default {
   components: {
