@@ -16,6 +16,6 @@ public:
     double distance() const { return distance_; }
     bool isObjectClose() const
     {
-        return distance_ > 0 && distance_ < tresholdCm_;
+        return distance_ >= 0 && distance_ < tresholdCm_;
     }
 };
