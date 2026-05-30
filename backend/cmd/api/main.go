@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -137,11 +138,16 @@ func main() {
 			pathToEvaluate = "/test_data.csv"
 		}
 
-		// 2. Se o ficheiro não existir, gera dados sintéticos na memória
+		// 2. Se o ficheiro não existir, verifica se o input contém dados CSV diretamente
 		if _, err := os.Stat(pathToEvaluate); os.IsNotExist(err) {
-			log.Println("Ficheiro não encontrado, a gerar dados sintéticos na memória...")
-			// Cria um buffer em memória para simular o ficheiro
-			content := "feature1,feature2\n0.5,0.2"
+			content := pathToEvaluate
+			// Se o input não parecer conteúdo CSV (não tem cabeçalho/dados), gera o fallback sintético
+			if !strings.Contains(pathToEvaluate, "feature1") && !strings.Contains(pathToEvaluate, "fails") {
+				log.Println("Ficheiro não encontrado e input não é CSV, a gerar dados sintéticos na memória...")
+				content = "feature1,feature2\n0.5,0.2"
+			} else {
+				log.Println("A processar CSV recebido diretamente no input...")
+			}
 
 			// Enviamos a string 'content' diretamente para o gRPC
 			result, err := aiService.EvaluateModel(ctx, content)

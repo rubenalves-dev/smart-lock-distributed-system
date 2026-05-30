@@ -23,7 +23,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://main-server:8080', // Nome do serviço no docker-compose
+        target: 'http://localhost:8080', // Redireciona para o backend local no porto 8080
         //rewrite: (path) => path.replace(/^\/api/, ''),
         changeOrigin: true,
         secure: false,

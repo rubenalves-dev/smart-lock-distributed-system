@@ -13,6 +13,10 @@ import model as model_lib
 import numpy as np
 import pika
 import tensorflow as tf
+import io
+import pandas as pd
+
+
 
 # Paths
 MODEL_PATH = "severity_model.keras"
@@ -178,10 +182,7 @@ class AIService(smartlock_grpc.AIServiceServicer):
 
     def EvaluateModel(self, request, context):
         try:
-            import io
-            import pandas as pd
-            import os
-
+            
             # 1. Tenta ler o conteúdo recebido (a string CSV do Go)
             data_content = request.dataset_path
             
