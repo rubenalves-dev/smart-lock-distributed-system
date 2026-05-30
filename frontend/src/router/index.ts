@@ -105,14 +105,25 @@ const router = createRouter({
         title: 'Videos',
       },
     },
+    // Rota corrigida para a tua BlankView.vue baseada na pasta correta
     {
       path: '/blank',
       name: 'Blank',
-      component: () => import('../views/Pages/BlankPage.vue'),
+      component: () => import('../views/Errors/BlankPage.vue'),
       meta: {
-        title: 'Blank',
+        title: 'Página Base',
       },
     },
+    // Rota corrigida e limpa para o Erro 501
+    {
+      path: '/501',
+      name: 'not-implemented',
+      component: () => import('../views/Errors/FiveZeroOne.vue'),
+      meta: { 
+        title: '501 Not Implemented' 
+      }
+    },
+    // O Catch-all do 404 deve ficar SEMPRE no fundo da lista
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
@@ -120,7 +131,7 @@ const router = createRouter({
       meta: {
         title: '404 Not Found',
       },
-    }
+    },
   ],
 })
 
