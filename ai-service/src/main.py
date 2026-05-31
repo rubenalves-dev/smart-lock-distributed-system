@@ -174,30 +174,30 @@ class AIService(smartlock_grpc.AIServiceServicer):
                 model = model_lib.create_model()
 
             # Treinar e guardar histórico
-                history = model_lib.train_model(
-                    model,
-                    X,
-                    y,
-                    epochs=epochs
+            history = model_lib.train_model(
+                model,
+                X,
+                y,
+                epochs=epochs
                 )
 
             # Métricas finais
-                train_acc = history.history["accuracy"][-1]
-                val_acc = history.history["val_accuracy"][-1]
-                train_loss = history.history["loss"][-1]
-                val_loss = history.history["val_loss"][-1]
+            train_acc = history.history["accuracy"][-1]
+            val_acc = history.history["val_accuracy"][-1]
+            train_loss = history.history["loss"][-1]
+            val_loss = history.history["val_loss"][-1]
 
             # Heurísticas simples
-                overfitting = (train_acc - val_acc) > 0.10
+            overfitting = (train_acc - val_acc) > 0.10
 
-                underfitting = (
+            underfitting = (
                 train_acc < 0.70 and
                 val_acc < 0.70
             )
 
             # Guardar modelo
-                model.save(MODEL_PATH)
-                self.model = tf.keras.models.load_model(MODEL_PATH)
+            model.save(MODEL_PATH)
+            self.model = tf.keras.models.load_model(MODEL_PATH)
 
             msg = (
             f"Model retrained successfully on {len(X)} samples. "
