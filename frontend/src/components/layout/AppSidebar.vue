@@ -258,11 +258,6 @@ const menuGroups = [
         name: "AI Retraining",
         path: "/ai/retrain",
       },
-      {
-        name: "Adicionar Utilizadores",
-        icon: ListIcon,
-        path: "/add-users", 
-      },
     ],
   },
 ];
