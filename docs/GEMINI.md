@@ -235,3 +235,10 @@ This document tracks structural changes made to the repository code.
 
 ### Go Backend (`/backend`)
 - **[Configuration Default Update]**: Modified [config.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/config/config.go) to update the `envDefault` value for `InfluxDBToken` to align with the same token string (`"ZYPGu_Lu6NaP8M4iT5_TLx1xSZag9sAbR9i2vH8zr7P253VcxIMuXHbbkYagn2bOzfVZCRpsrIH5_77r3G1Mag=="`).
+
+## 2026-05-31: System Architecture Documentation
+
+### Docs (`/docs`)
+- **[NEW] [AI Service Documentation]**: Created [IIA.md](file:///Users/rubenalves/Documents/repos/_school/iot/final/docs/IIA.md) to document the neural network architecture, data pre-processing, training procedures, and gRPC/RabbitMQ communication loops across Theoretical, Technical, and Pedagogical dimensions.
+- **[NEW] [IoT Firmware Documentation]**: Created [IOT.md](file:///Users/rubenalves/Documents/repos/_school/iot/final/docs/IOT.md) to document sensors/actuators integration, local NVRAM caching strategies, physical polling optimization, and web setup configurations in both simulated PlatformIO and production Arduino IDE sketches.
+- **[NEW] [Concurrency and Distribution Documentation]**: Created [PCD.md](file:///Users/rubenalves/Documents/repos/_school/iot/final/docs/PCD.md) to document the concurrent patterns implemented in the Go backend (Goroutines, channels, mutexes) and the end-to-end data flow trajectory across REST, gRPC, MQTT, and RabbitMQ protocols.
