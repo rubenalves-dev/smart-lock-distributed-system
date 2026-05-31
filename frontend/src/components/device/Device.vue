@@ -111,7 +111,7 @@ const isLoading = ref(false)
 
 const toggleDoor = async () => {
   isLoading.value = true
-  const API_URL = `${API_BASE_URL}/device/door`
+  const API_URL = `${API_BASE_URL}/door/unlock`
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 10000)
 
