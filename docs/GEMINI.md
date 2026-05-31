@@ -252,3 +252,11 @@ This document tracks structural changes made to the repository code.
 
 ### Simulated ESP32 Firmware (`/firmware`)
 - **[Endpoints Migration]**: Modified [main.cpp](file:///Users/rubenalves/Documents/repos/_school/iot/final/firmware/src/main.cpp) to point its simulated HTTP client API destinations (`/api/users`, `/api/users/{uid}`, `/api/health`) and the remote MQTT server broker targets to the production subdomains `smartlock-api.raiiaa.dev` and `mqtt.raiiaa.dev`.
+
+## 2026-05-31: Fixed Production Backend /api/health and Frontend SPA Fallback
+
+### Go Backend (`/backend`)
+- **[Health Route Registration]**: Modified [main.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/cmd/api/main.go) to restore both `r.Get("/api/health")` (returning real-time backing service connectivity status and latency from the monitor loop) and `r.Get("/api/metrics/health")` (querying time-series historical status pings from InfluxDB).
+
+### Vue Frontend (`/frontend`)
+- **[Production Server Upgrade]**: Modified the [Dockerfile](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/Dockerfile) to replace the `http-server` package with Vercel's standard `serve` package. Configured it to run `serve -s dist -l 8080` in the entrypoint command. The `-s` / `--single` flag ensures history API routing works natively in production, redirecting missing page refresh paths (such as `/ai/evaluation`) back to `index.html`.

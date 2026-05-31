@@ -1,6 +1,6 @@
 FROM node:22-alpine
 
-RUN npm install -g http-server
+RUN npm install -g serve
 
 WORKDIR /app
 
@@ -14,4 +14,4 @@ RUN npm run build
 
 EXPOSE 8080
 
-CMD ["http-server", "dist", "-s", "-P", "http://main-server:8080"]
+CMD ["serve", "-s", "dist", "-l", "8080"]

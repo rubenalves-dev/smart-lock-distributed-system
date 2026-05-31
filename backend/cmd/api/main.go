@@ -127,6 +127,44 @@ func main() {
 	})
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(`{"status":"OK"}`)) })
 
+	r.Get("/api/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		statuses := healthMonitor.GetLatestStatuses()
+		json.NewEncoder(w).Encode(statuses)
+	})
+
+	r.Get("/api/metrics/health", func(w http.ResponseWriter, r *http.Request) {
+		timeRange := r.URL.Query().Get("range")
+		if timeRange == "" {
+			timeRange = "24h"
+		}
+		interval := r.URL.Query().Get("interval")
+		if interval == "" {
+			interval = "1m"
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		series, err := influxClient.QueryHealth(ctx, cfg.InfluxDBOrg, cfg.InfluxDBBucket, timeRange, interval)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+
+		if series == nil {
+			series = []models.ServiceHealthSeries{}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"series": series,
+		})
+	})
+
 	r.Post("/api/ai/evaluate", func(w http.ResponseWriter, r *http.Request) {
 		var req EvaluateRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
