@@ -2,6 +2,23 @@
 
 This document tracks structural changes made to the repository code.
 
+## 2026-05-31: AI Model Retraining Page and Diagnostics
+
+### Python AI Service (`/ai-service`)
+- **[Diagnostics Response]**: Modified `RetrainModel` method in [main.py](file:///Users/rubenalves/Documents/repos/_school/iot/final/ai-service/src/main.py) to extract training history losses (`loss` and `val_loss`) and populate the gRPC `TrainingDiagnostics` message inside `RetrainModelResponse`.
+
+### Go Backend (`/backend`)
+- **[Model Structures]**: Added `TrainingDiagnostics` and `RetrainResult` data structures to [models.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/models/models.go).
+- **[AI Client Integration]**: Updated `RetrainModel` interface definition in [interfaces.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/ai/interfaces.go), client implementation in [grpc_client.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/ai/grpc_client.go), and domain delegation in [service.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/ai/service.go) to return the parsed training diagnostics results.
+- **[Mocks Update]**: Modified mock `fakeAIService` definition in [service_test.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/service_test.go) to satisfy the new interface.
+- **[Web Routing Setup]**: Registered HTTP endpoint `POST /api/ai/retrain` inside [main.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/cmd/api/main.go) for triggering models retraining.
+
+### Vue Frontend (`/frontend`)
+- **[Retrain Composable]**: Created [useAiRetrain.ts](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/composables/useAiRetrain.ts) helper composable wrapping API fetches to the backend retrain router route.
+- **[Aesthetics & UI Pages]**: Created [AiRetrainView.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/views/Pages/AiRetrainView.vue) view page displaying epochs/dataset input controls, visual accuracy/loss progress meters, fitting analysis warning alerts (overfitting vs underfitting vs balanced model), and a session retraining log table.
+- **[Router Config]**: Registered the `/ai/retrain` SPA view route inside [index.ts](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/router/index.ts).
+- **[Sidebar Navigation]**: Added "AI Retraining" link config entry in [AppSidebar.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/layout/AppSidebar.vue).
+
 ## 2026-05-24: Backend API and Integration Surface Updates
 
 ### API Contract (`/api`)

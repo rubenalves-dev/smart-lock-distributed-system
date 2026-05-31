@@ -40,6 +40,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/ai/retrain',
+      name: 'AiRetrain',
+      component: () => import('../views/Pages/AiRetrainView.vue'),
+      meta: {
+        title: 'AI Model Retraining',
+      },
+    },
+    {
       path: '/calendar',
       name: 'Calendar',
       component: () => import('../views/Others/Calendar.vue'),

@@ -260,6 +260,11 @@ const menuGroups = [
         path: "/ai/evaluation",
       },
       {
+        icon: GridIcon, 
+        name: "AI Retraining",
+        path: "/ai/retrain",
+      },
+      {
         icon: UserCircleIcon,
         name: "Perfil",
         path: "/profile",

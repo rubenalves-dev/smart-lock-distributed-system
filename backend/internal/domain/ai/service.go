@@ -23,7 +23,7 @@ func (s *service) PredictSeverity(ctx context.Context, event models.SensorPayloa
 	return s.grpcClient.PredictSeverity(ctx, event)
 }
 
-func (s *service) RetrainModel(ctx context.Context, epochs int32, datasetPath string) (bool, string, error) {
+func (s *service) RetrainModel(ctx context.Context, epochs int32, datasetPath string) (*models.RetrainResult, error) {
 	return s.grpcClient.RetrainModel(ctx, epochs, datasetPath)
 }
 

@@ -48,3 +48,18 @@ type EvaluationResult struct {
 	BinaryMetrics   BinaryEvaluationMetrics `json:"binary_metrics"`
 }
 
+type TrainingDiagnostics struct {
+	TrainAccuracy        float32 `json:"train_accuracy"`
+	ValidationAccuracy   float32 `json:"validation_accuracy"`
+	TrainLoss            float32 `json:"train_loss"`
+	ValidationLoss       float32 `json:"validation_loss"`
+	UnderfittingDetected bool    `json:"underfitting_detected"`
+	OverfittingDetected  bool    `json:"overfitting_detected"`
+}
+
+type RetrainResult struct {
+	Success     bool                 `json:"success"`
+	Message     string               `json:"message"`
+	Diagnostics *TrainingDiagnostics `json:"diagnostics,omitempty"`
+}
+

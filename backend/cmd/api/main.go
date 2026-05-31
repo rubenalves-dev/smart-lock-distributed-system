@@ -184,6 +184,31 @@ func main() {
 		json.NewEncoder(w).Encode(result)
 	})
 
+	r.Post("/api/ai/retrain", func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			DatasetPath string `json:"dataset_path"`
+			Epochs      int32  `json:"epochs"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Erro ao decodificar pedido", http.StatusBadRequest)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		defer cancel()
+
+		result, err := aiService.RetrainModel(ctx, req.Epochs, req.DatasetPath)
+		if err != nil {
+			log.Printf("Erro ao treinar modelo: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"error": err.Error()})
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(result)
+	})
+
 	userHandler.RegisterRoutes(r)
 	telemetryHandler.RegisterRoutes(r)
 

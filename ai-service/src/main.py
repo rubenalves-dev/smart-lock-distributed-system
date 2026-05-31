@@ -184,6 +184,8 @@ class AIService(smartlock_grpc.AIServiceServicer):
             # Métricas finais
                 train_acc = history.history["accuracy"][-1]
                 val_acc = history.history["val_accuracy"][-1]
+                train_loss = history.history["loss"][-1]
+                val_loss = history.history["val_loss"][-1]
 
             # Heurísticas simples
                 overfitting = (train_acc - val_acc) > 0.10
@@ -207,9 +209,19 @@ class AIService(smartlock_grpc.AIServiceServicer):
 
             print(msg)
 
+            diagnostics = smartlock.TrainingDiagnostics(
+                train_accuracy=float(train_acc),
+                validation_accuracy=float(val_acc),
+                train_loss=float(train_loss),
+                validation_loss=float(val_loss),
+                underfitting_detected=bool(underfitting),
+                overfitting_detected=bool(overfitting)
+            )
+
             return smartlock.RetrainModelResponse(
                 success=True,
-                message=msg
+                message=msg,
+                diagnostics=diagnostics
             )
 
         except Exception as e:
