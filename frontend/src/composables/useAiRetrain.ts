@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { API_BASE_URL } from '@/config';
 
 export interface TrainingDiagnostics {
   train_accuracy: number;
@@ -21,7 +22,7 @@ export function useAiRetrain() {
   const retrain = async (epochs: number, datasetPath: string): Promise<RetrainResponse | null> => {
     loading.value = true;
     try {
-      const response = await fetch('https://smartlock-api.raiiaa.dev/api/ai/retrain', {
+      const response = await fetch(`${API_BASE_URL}/ai/retrain`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

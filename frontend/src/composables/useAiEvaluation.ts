@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { API_BASE_URL } from '@/config';
 
 export interface EvaluationMetrics {
   accuracy: number;
@@ -26,7 +27,7 @@ export function useAiEvaluation() {
   const evaluate = async (path: string): Promise<EvaluationResponse | null> => {
     loading.value = true;
     try {
-      const response = await fetch('https://smartlock-api.raiiaa.dev/api/ai/evaluate', {
+      const response = await fetch(`${API_BASE_URL}/ai/evaluate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dataset_path: path }),

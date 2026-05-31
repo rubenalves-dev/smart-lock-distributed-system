@@ -235,3 +235,20 @@ This document tracks structural changes made to the repository code.
 
 ### Go Backend (`/backend`)
 - **[Configuration Default Update]**: Modified [config.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/config/config.go) to update the `envDefault` value for `InfluxDBToken` to align with the same token string (`"ZYPGu_Lu6NaP8M4iT5_TLx1xSZag9sAbR9i2vH8zr7P253VcxIMuXHbbkYagn2bOzfVZCRpsrIH5_77r3G1Mag=="`).
+
+## 2026-05-31: System Architecture Documentation
+
+### Docs (`/docs`)
+- **[NEW] [AI Service Documentation]**: Created [IIA.md](file:///Users/rubenalves/Documents/repos/_school/iot/final/docs/IIA.md) to document the neural network architecture, data pre-processing, training procedures, and gRPC/RabbitMQ communication loops across Theoretical, Technical, and Pedagogical dimensions.
+- **[NEW] [IoT Firmware Documentation]**: Created [IOT.md](file:///Users/rubenalves/Documents/repos/_school/iot/final/docs/IOT.md) to document sensors/actuators integration, local NVRAM caching strategies, physical polling optimization, and web setup configurations in both simulated PlatformIO and production Arduino IDE sketches.
+- **[NEW] [Concurrency and Distribution Documentation]**: Created [PCD.md](file:///Users/rubenalves/Documents/repos/_school/iot/final/docs/PCD.md) to document the concurrent patterns implemented in the Go backend (Goroutines, channels, mutexes) and the end-to-end data flow trajectory across REST, gRPC, MQTT, and RabbitMQ protocols.
+
+## 2026-05-31: Alignment of API Endpoints to Production Domain
+
+### Vue Frontend (`/frontend`)
+- **[Config Prefix Fix]**: Modified [config.ts](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/config.ts) to append the `/api` prefix to the production `API_BASE_URL` value (`https://smartlock-api.raiiaa.dev/api`).
+- **[Composables Refactor]**: Refactored [useAiEvaluation.ts](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/composables/useAiEvaluation.ts) and [useAiRetrain.ts](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/composables/useAiRetrain.ts) to dynamically load the backend target via `API_BASE_URL` instead of relying on hardcoded URL string patterns.
+- **[Door Control Fix]**: Modified [Device.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/device/Device.vue) to update the HTTP POST target for remote door control actions from the invalid path `${API_BASE_URL}/device/door` to the correct backend route path `${API_BASE_URL}/door/unlock`.
+
+### Simulated ESP32 Firmware (`/firmware`)
+- **[Endpoints Migration]**: Modified [main.cpp](file:///Users/rubenalves/Documents/repos/_school/iot/final/firmware/src/main.cpp) to point its simulated HTTP client API destinations (`/api/users`, `/api/users/{uid}`, `/api/health`) and the remote MQTT server broker targets to the production subdomains `smartlock-api.raiiaa.dev` and `mqtt.raiiaa.dev`.

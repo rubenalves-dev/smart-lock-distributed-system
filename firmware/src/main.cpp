@@ -38,7 +38,7 @@ Photoresistor ldr(LDR_PIN);
 byte authorizedUID[4] = {0xDE, 0xAD, 0xBE, 0xEF}; // Example UID, replace with actual
 
 // --- MQTT
-const char *MQTT_SERVER = "host.wokwi.internal";
+const char *MQTT_SERVER = "mqtt.raiiaa.dev";
 const uint16_t MQTT_PORT = 1883;
 MQTT mqtt(MQTT_SERVER, MQTT_PORT);
 
@@ -211,7 +211,7 @@ void setup()
   });
   server.on("/users", HTTP_GET, [](AsyncWebServerRequest *request) {
     HTTPClient http;
-    http.begin("http://host.wokwi.internal:8080/api/users");
+    http.begin("https://smartlock-api.raiiaa.dev/api/users");
     int httpCode = http.GET();
     if (httpCode > 0) {
       String payload = http.getString();
@@ -228,7 +228,7 @@ void setup()
     }
     String uid = request->getParam("uid")->value();
     HTTPClient http;
-    http.begin("http://host.wokwi.internal:8080/api/users/" + uid);
+    http.begin("https://smartlock-api.raiiaa.dev/api/users/" + uid);
     int httpCode = http.GET();
     if (httpCode > 0) {
       String payload = http.getString();
@@ -240,7 +240,7 @@ void setup()
   });
   server.on("/check-services", HTTP_GET, [](AsyncWebServerRequest *request) {
     HTTPClient http;
-    http.begin("http://host.wokwi.internal:8080/api/health");
+    http.begin("https://smartlock-api.raiiaa.dev/api/health");
     int httpCode = http.GET();
     String backendStatus = "{}";
     if (httpCode > 0) {
