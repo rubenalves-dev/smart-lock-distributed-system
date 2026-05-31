@@ -196,6 +196,10 @@ This document tracks structural changes made to the repository code.
 ### ESP32 Firmware (`/arduino-ide`)
 - **[Endpoints Migration]**: Modified [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) to update the HTTP requests host from `smartlock.raiiaa.dev` to the new dedicated backend subdomain `smartlock-api.raiiaa.dev`.
 
+## 2026-05-31: InfluxDB Token Alignment
 
+### Deployments (`/deployments`)
+- **[Token Mismatch Fix]**: Modified [docker-compose.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/deployments/docker-compose.yml) and [docker-compose.prod.yml](file:///Users/rubenalves/Documents/repos/_school/iot/final/deployments/docker-compose.prod.yml) to set the `DOCKER_INFLUXDB_INIT_ADMIN_TOKEN` variable to match the client `INFLUXDB_TOKEN` value (`"ZYPGu_Lu6NaP8M4iT5_TLx1xSZag9sAbR9i2vH8zr7P253VcxIMuXHbbkYagn2bOzfVZCRpsrIH5_77r3G1Mag=="`). This resolves 401 unauthorized errors on first-time initialization of database volumes.
 
-
+### Go Backend (`/backend`)
+- **[Configuration Default Update]**: Modified [config.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/config/config.go) to update the `envDefault` value for `InfluxDBToken` to align with the same token string (`"ZYPGu_Lu6NaP8M4iT5_TLx1xSZag9sAbR9i2vH8zr7P253VcxIMuXHbbkYagn2bOzfVZCRpsrIH5_77r3G1Mag=="`).
