@@ -8,10 +8,10 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'Ecommerce',
-      component: () => import('../views/Ecommerce.vue'),
+      name: 'Dashboard',
+      component: () => import('../views/Dashboard.vue'),
       meta: {
-        title: 'eCommerce Dashboard',
+        title: 'Dashboard',
         fullWidth: true,
       },
     },
@@ -45,30 +45,6 @@ const router = createRouter({
       component: () => import('../views/Pages/AiRetrainView.vue'),
       meta: {
         title: 'AI Model Retraining',
-      },
-    },
-    {
-      path: '/calendar',
-      name: 'Calendar',
-      component: () => import('../views/Others/Calendar.vue'),
-      meta: {
-        title: 'Calendar',
-      },
-    },
-    {
-      path: '/profile',
-      name: 'Profile',
-      component: () => import('../views/Others/UserProfile.vue'),
-      meta: {
-        title: 'Profile',
-      },
-    },
-    {
-      path: '/form-elements',
-      name: 'Form Elements',
-      component: () => import('../views/Forms/FormElements.vue'),
-      meta: {
-        title: 'Form Elements',
       },
     },
     {
@@ -129,36 +105,31 @@ const router = createRouter({
         title: 'Videos',
       },
     },
+    // Rota corrigida para a tua BlankView.vue baseada na pasta correta
     {
       path: '/blank',
       name: 'Blank',
-      component: () => import('../views/Pages/BlankPage.vue'),
+      component: () => import('../views/Errors/BlankPage.vue'),
       meta: {
-        title: 'Blank',
+        title: 'Página Base',
       },
     },
+    // Rota corrigida e limpa para o Erro 501
     {
-      path: '/error-404',
-      name: '404 Error',
+      path: '/501',
+      name: 'not-implemented',
+      component: () => import('../views/Errors/FiveZeroOne.vue'),
+      meta: { 
+        title: '501 Not Implemented' 
+      }
+    },
+    // O Catch-all do 404 deve ficar SEMPRE no fundo da lista
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
       component: () => import('../views/Errors/FourZeroFour.vue'),
       meta: {
-        title: '404 Error',
-      },
-    },
-    {
-      path: '/signin',
-      name: 'Signin',
-      component: () => import('../views/Auth/Signin.vue'),
-      meta: {
-        title: 'Signin',
-      },
-    },
-    {
-      path: '/signup',
-      name: 'Signup',
-      component: () => import('../views/Auth/Signup.vue'),
-      meta: {
-        title: 'Signup',
+        title: '404 Not Found',
       },
     },
   ],

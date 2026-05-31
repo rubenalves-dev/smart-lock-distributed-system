@@ -216,7 +216,6 @@ import { useRoute } from "vue-router";
 
 import {
   GridIcon,
-  CalenderIcon,
   UserCircleIcon,
   HorizontalDots,
   PageIcon,
@@ -236,13 +235,8 @@ const menuGroups = [
     items: [
       {
         icon: GridIcon,
-        name: "Dashboard",
-        subItems: [{ name: "Painel de Controlo", path: "/", pro: false }],
-      },
-      {
-        icon: CalenderIcon,
-        name: "Calendar",
-        path: "/calendar",
+        name: "Painel de Controlo",
+        path: "/",
       },
       {
         icon: UserCircleIcon, 
@@ -265,52 +259,10 @@ const menuGroups = [
         path: "/ai/retrain",
       },
       {
-        icon: UserCircleIcon,
-        name: "Perfil",
-        path: "/profile",
-      },
-
-      {
         name: "Adicionar Utilizadores",
         icon: ListIcon,
-        subItems: [
-          { name: "Form Elements", path: "/form-elements", pro: false },
-        ],
+        path: "/add-users", 
       },
-      {
-        name: "Pages",
-        icon: PageIcon,
-        subItems: [
-          { name: "Black Page", path: "/blank", pro: false },
-          { name: "404 Page", path: "/error-404", pro: false },
-        ],
-      },
-    ],
-  },
-  {
-    title: "Others",
-    items: [
-      {
-        icon: BoxCubeIcon,
-        name: "Ui Elements",
-        subItems: [
-          { name: "Alerts", path: "/alerts", pro: false },
-          { name: "Avatars", path: "/avatars", pro: false },
-          { name: "Badge", path: "/badge", pro: false },
-          { name: "Buttons", path: "/buttons", pro: false },
-          { name: "Images", path: "/images", pro: false },
-          { name: "Videos", path: "/videos", pro: false },
-        ],
-      },
-      {
-        icon: PlugInIcon,
-        name: "Authentication",
-        subItems: [
-          { name: "Signin", path: "/signin", pro: false },
-          { name: "Signup", path: "/signup", pro: false },
-        ],
-      },
-      // ... Add other menu items here
     ],
   },
 ];
