@@ -10,16 +10,22 @@
             <table class="w-full table-auto">
               <thead>
                 <tr class="border-b border-gray-200 dark:border-gray-700">
+                  <th class="px-5 py-4 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">Id</th>
                   <th class="px-5 py-4 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">RFID UID</th>
                   <th class="px-5 py-4 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">User Details</th>
                   <th class="px-5 py-4 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">Created At</th>
+                  <th class="px-5 py-4 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">Updated At</th>
                   <th class="px-5 py-4 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">Status</th>
                   <th class="px-5 py-4 text-right font-medium text-gray-500 text-theme-xs dark:text-gray-400">Actions</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                 <tr v-for="user in users" :key="user.rfid_uid" class="hover:bg-gray-50/50 dark:hover:bg-white/[0.01] transition-colors">
-                  <!-- RFID UID -->
+                  
+                  <td class="px-5 py-4 whitespace-nowrap text-theme-sm font-mono text-gray-600 dark:text-gray-400">
+                    #{{ user.id }}
+                  </td>
+
                   <td class="px-5 py-4 whitespace-nowrap">
                     <div class="flex items-center gap-2">
                       <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -34,7 +40,7 @@
                       </span>
                     </div>
                   </td>
-                  <!-- User Details (Name & Email) -->
+
                   <td class="px-5 py-4 whitespace-nowrap">
                     <div class="flex flex-col">
                       <span class="font-medium text-gray-800 text-theme-sm dark:text-white/90">
@@ -45,41 +51,41 @@
                       </span>
                     </div>
                   </td>
-                  <!-- Created At -->
+
                   <td class="px-5 py-4 whitespace-nowrap text-gray-500 text-theme-sm dark:text-gray-400">
                     {{ formatDate(user.created_at) }}
                   </td>
-                  <!-- Status -->
+
+                  <td class="px-5 py-4 whitespace-nowrap text-gray-500 text-theme-sm dark:text-gray-400">
+                    {{ formatDate(user.updated_at) }}
+                  </td>
+
                   <td class="px-5 py-4 whitespace-nowrap">
                     <span v-if="user.is_blocked" class="rounded-full px-3 py-1 text-theme-xs font-medium inline-block bg-error-50 text-error-700 dark:bg-error-500/15 dark:text-error-400">
                       Blocked
                     </span>
-                    <span v-else-if="user.is_accepted" class="rounded-full px-3 py-1 text-theme-xs font-medium inline-block bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-400">
+                    <span v-else-if="user.name && user.email" class="rounded-full px-3 py-1 text-theme-xs font-medium inline-block bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-400">
                       Active
                     </span>
                     <span v-else class="rounded-full px-3 py-1 text-theme-xs font-medium inline-block bg-warning-50 text-warning-700 dark:bg-warning-500/15 dark:text-orange-400">
                       Pending Activation
                     </span>
                   </td>
-                  <!-- Actions -->
+
                   <td class="px-5 py-4 whitespace-nowrap text-right text-theme-sm">
                     <div class="flex justify-end items-center gap-2">
-                      <!-- Accept Button -->
-                      <button v-if="!user.is_accepted" @click="openEditModal(user, true)" class="px-3 py-1.5 text-xs font-medium rounded-md bg-brand-500 text-white hover:bg-brand-600 transition shadow-sm">
+                      <button v-if="!user.name || !user.email" @click="openEditModal(user, true)" class="px-3 py-1.5 text-xs font-medium rounded-md bg-brand-500 text-white hover:bg-brand-600 transition shadow-sm">
                         Accept & Edit
                       </button>
                       
-                      <!-- Edit Button -->
-                      <button v-if="user.is_accepted" @click="openEditModal(user, false)" class="px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03] transition">
+                      <button v-else @click="openEditModal(user, false)" class="px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03] transition">
                         Edit
                       </button>
 
-                      <!-- Block Button -->
-                      <button v-if="user.is_accepted && !user.is_blocked" @click="toggleBlock(user)" class="px-3 py-1.5 text-xs font-medium rounded-md bg-error-50 text-error-600 hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400 dark:hover:bg-error-500/20 transition">
+                      <button v-if="user.name && user.email && !user.is_blocked" @click="toggleBlock(user)" class="px-3 py-1.5 text-xs font-medium rounded-md bg-error-50 text-error-600 hover:bg-error-100 dark:bg-error-500/10 dark:text-error-400 dark:hover:bg-error-500/20 transition">
                         Block
                       </button>
 
-                      <!-- Unblock Button -->
                       <button v-if="user.is_blocked" @click="toggleBlock(user)" class="px-3 py-1.5 text-xs font-medium rounded-md bg-success-50 text-success-600 hover:bg-success-100 dark:bg-success-500/10 dark:text-success-400 dark:hover:bg-success-500/20 transition">
                         Unblock
                       </button>
@@ -87,7 +93,7 @@
                   </td>
                 </tr>
                 <tr v-if="users.length === 0">
-                  <td colspan="5" class="px-5 py-8 text-center text-gray-500 dark:text-gray-400 text-theme-sm">
+                  <td colspan="7" class="px-5 py-8 text-center text-gray-500 dark:text-gray-400 text-theme-sm">
                     No RFID users registered yet. Scan a card near the reader to see it here.
                   </td>
                 </tr>
@@ -99,7 +105,6 @@
       </ComponentCard>
     </div>
 
-    <!-- Edit/Accept Modal -->
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div class="w-full max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl overflow-hidden p-6 space-y-4">
         <h3 class="text-lg font-medium text-gray-800 dark:text-white/90">
@@ -110,25 +115,21 @@
         </p>
 
         <form @submit.prevent="saveUser" class="space-y-4">
-          <!-- RFID UID (readonly) -->
           <div>
             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">RFID UID</label>
             <input type="text" :value="modalData.rfid_uid" disabled class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg text-sm font-mono focus:outline-none" />
           </div>
 
-          <!-- Name -->
           <div>
             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Name</label>
             <input type="text" v-model="modalData.name" required placeholder="John Doe" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white/90 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand-500" />
           </div>
 
-          <!-- Email -->
           <div>
             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">E-mail</label>
             <input type="email" v-model="modalData.email" required placeholder="john.doe@example.com" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-white/90 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand-500" />
           </div>
 
-          <!-- Footer Buttons -->
           <div class="flex justify-end items-center gap-2 pt-2">
             <button type="button" @click="closeModal" class="px-4 py-2 text-sm font-medium border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.03] rounded-lg transition">
               Cancel
@@ -149,7 +150,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { API_BASE_URL } from '@/config'
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
@@ -157,12 +157,13 @@ import ComponentCard from "@/components/common/ComponentCard.vue";
 const currentPageTitle = ref("RFID Users List");
 
 interface User {
+  id: number;
   rfid_uid: string;
   name: string | null;
   email: string | null;
-  is_accepted: boolean;
   is_blocked: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 const users = ref<User[]>([])
@@ -178,7 +179,7 @@ const modalData = ref({
 
 const fetchUsers = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/users`)
+    const response = await fetch('https://smartlock-api.raiiaa.dev/api/users')
     if (!response.ok) throw new Error('Error fetching users')
     users.value = await response.json()
   } catch (err) {
@@ -215,16 +216,12 @@ const closeModal = () => {
 const saveUser = async () => {
   isSaving.value = true
   try {
-    const payload: any = {
+    const payload = {
       name: modalData.value.name,
       email: modalData.value.email,
     }
-    if (isAccepting.value) {
-      payload.is_accepted = true
-      payload.is_blocked = false
-    }
 
-    const response = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(modalData.value.rfid_uid)}`, {
+    const response = await fetch(`https://smartlock-api.raiiaa.dev/api/users/${encodeURIComponent(modalData.value.rfid_uid)}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -246,13 +243,16 @@ const saveUser = async () => {
 
 const toggleBlock = async (user: User) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(user.rfid_uid)}`, {
+    // Mantemos uma flag local invertida ou gerida se o vosso back-end em Go estender o suporte a isto futuramente através do mesmo endpoint PUT
+    const response = await fetch(`https://smartlock-api.raiiaa.dev/api/users/${encodeURIComponent(user.rfid_uid)}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        is_blocked: !user.is_blocked,
+        name: user.name,
+        email: user.email,
+        is_blocked: !user.is_blocked, 
       }),
     })
 
