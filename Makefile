@@ -38,6 +38,10 @@ clean:
 up:
 	docker compose -f ./deployments/docker-compose.yml -p smartlock up --build
 
+# Watch and hot-rebuild changed containers
+watch:
+	docker compose -f ./deployments/docker-compose.yml -p smartlock up --build --watch
+
 # Stop the system
 down:
 	docker compose -f ./deployments/docker-compose.yml -p smartlock down
