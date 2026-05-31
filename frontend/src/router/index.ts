@@ -32,6 +32,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/mfa/requests',
+      name: 'MfaRequests',
+      component: () => import('../views/Pages/MfaRequestsView.vue'),
+      meta: {
+        title: 'MFA Verification Requests',
+      },
+    },
+    {
       path: '/ai/evaluation',
       name: 'AiEvaluation',
       component: () => import('../views/Pages/AiEvaluationView.vue'),

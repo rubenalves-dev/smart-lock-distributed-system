@@ -17,6 +17,7 @@ import (
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/config"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/core"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/ai"
+	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/mfa"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/telemetry"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/user"
 	smartlock "github.com/rubenalves-dev/smart-lock-distributed-system/internal/gen"
@@ -82,6 +83,8 @@ func main() {
 	}
 	defer mqttClient.Close()
 
+	wsHub := core.NewHub()
+
 	rawAIClient := smartlock.NewAIServiceClient(grpcConn)
 	grpcClient := ai.NewGRPCClient(rawAIClient)
 
@@ -92,8 +95,12 @@ func main() {
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService)
 
+	mfaRepo := mfa.NewRepository(dbClient.DB)
+	mfaService := mfa.NewService(mfaRepo, userService, mqttClient, wsHub)
+	mfaHandler := mfa.NewHandler(mfaService)
+
 	telemetryRepo := telemetry.NewRepository(dbClient.DB)
-	telemetryService := telemetry.NewService(telemetryRepo, userService, rabbitClient, mqttClient, aiService)
+	telemetryService := telemetry.NewService(telemetryRepo, userService, rabbitClient, mqttClient, aiService, mfaService)
 	telemetryHandler := telemetry.NewHandler(telemetryService)
 
 	healthMonitor := monitor.NewMonitor(dbClient, mqttClient, influxClient, rabbitClient, cfg.RabbitMQURL, cfg.InfluxDBOrg, cfg.InfluxDBBucket)
@@ -247,6 +254,9 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(result)
 	})
+
+	r.Get("/api/ws", wsHub.ServeWebSocket)
+	mfaHandler.RegisterRoutes(r)
 
 	userHandler.RegisterRoutes(r)
 	telemetryHandler.RegisterRoutes(r)

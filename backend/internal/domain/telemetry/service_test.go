@@ -2,8 +2,10 @@ package telemetry
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
+	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/mfa"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/user"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/models"
 )
@@ -82,7 +84,7 @@ func TestTelemetryIngest(t *testing.T) {
 	uSvc := user.NewService(uRepo)
 	aiSvc := &fakeAIService{}
 
-	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc)
+	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc, nil)
 
 	// Ingest access_granted telemetry
 	payload := models.SensorPayload{
@@ -119,7 +121,7 @@ func TestTelemetryIngestHeartbeat(t *testing.T) {
 	uSvc := user.NewService(uRepo)
 	aiSvc := &fakeAIService{}
 
-	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc)
+	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc, nil)
 
 	// Ingest heartbeat telemetry
 	payload := models.SensorPayload{
@@ -149,7 +151,7 @@ func TestTelemetryIngestRFIDAccessControl(t *testing.T) {
 	uSvc := user.NewService(uRepo)
 	aiSvc := &fakeAIService{}
 
-	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc)
+	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc, nil)
 
 	// 1. Scanned for the first time
 	payload := models.SensorPayload{
@@ -242,6 +244,94 @@ func TestTelemetryIngestRFIDAccessControl(t *testing.T) {
 	if telemetryRepo.payloads[0].Event != "access_denied" || telemetryRepo.payloads[0].Status != "Blocked" {
 		t.Errorf("expected Event='access_denied' and Status='Blocked', got Event='%s' and Status='%s'", 
 			telemetryRepo.payloads[0].Event, telemetryRepo.payloads[0].Status)
+	}
+}
+
+type mockMFARepository struct {
+	requests []mfa.MFARequest
+}
+
+func (m *mockMFARepository) Create(ctx context.Context, req *mfa.MFARequest) error {
+	req.ID = len(m.requests) + 1
+	m.requests = append(m.requests, *req)
+	return nil
+}
+
+func (m *mockMFARepository) UpdateStatus(ctx context.Context, id int, status string) error {
+	for i := range m.requests {
+		if m.requests[i].ID == id {
+			m.requests[i].Status = status
+			return nil
+		}
+	}
+	return fmt.Errorf("not found")
+}
+
+func (m *mockMFARepository) FindByID(ctx context.Context, id int) (*mfa.MFARequest, error) {
+	for i := range m.requests {
+		if m.requests[i].ID == id {
+			return &m.requests[i], nil
+		}
+	}
+	return nil, nil
+}
+
+func (m *mockMFARepository) ListAll(ctx context.Context) ([]mfa.MFARequest, error) {
+	return m.requests, nil
+}
+
+type fakeAIServiceSuspicious struct {
+	fakeAIService
+}
+
+func (f *fakeAIServiceSuspicious) PredictSeverity(ctx context.Context, event models.SensorPayload) (int32, float32, string, error) {
+	return 2, 0.88, "AI predicts SUSPICIOUS access attempt.", nil
+}
+
+func TestTelemetryIngestRFIDAIMFA(t *testing.T) {
+	telemetryRepo := &mockTelemetryRepository{}
+	uRepo := &fakeUserRepo{users: make(map[string]*user.User)}
+	uSvc := user.NewService(uRepo)
+	aiSvc := &fakeAIServiceSuspicious{}
+	mfaRepo := &mockMFARepository{}
+	mfaSvc := mfa.NewService(mfaRepo, uSvc, nil, nil)
+
+	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc, mfaSvc)
+
+	// Create user in DB and accept it
+	isAccepted := true
+	_, err := uSvc.UpdateUser(context.Background(), "88:77:66:55", nil, nil, &isAccepted, nil)
+	if err != nil {
+		t.Fatalf("failed to setup user: %v", err)
+	}
+
+	payload := models.SensorPayload{
+		DeviceID: "lock_test",
+		Event:    "access_request",
+		RfidUID:  "88:77:66:55",
+	}
+
+	err = svc.Ingest(context.Background(), payload)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Should be saved as mfa_pending and status Pending
+	if len(telemetryRepo.payloads) != 1 {
+		t.Fatalf("expected 1 saved payload, got %d", len(telemetryRepo.payloads))
+	}
+	if telemetryRepo.payloads[0].Event != "mfa_pending" || telemetryRepo.payloads[0].Status != "Pending" {
+		t.Errorf("expected Event='mfa_pending' and Status='Pending', got Event='%s' and Status='%s'", 
+			telemetryRepo.payloads[0].Event, telemetryRepo.payloads[0].Status)
+	}
+
+	// Verify MFA request was created in repository
+	if len(mfaRepo.requests) != 1 {
+		t.Fatalf("expected 1 MFA request in mock repository, got %d", len(mfaRepo.requests))
+	}
+	req := mfaRepo.requests[0]
+	if req.RfidUID != "88:77:66:55" || req.Classification != 2 || req.Status != "pending" {
+		t.Errorf("unexpected MFA request details: %+v", req)
 	}
 }
 
