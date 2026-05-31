@@ -105,6 +105,8 @@ services:
     volumes:
       - influxdb-data:/var/lib/influxdb2
       - influxdb-config:/etc/influxdb2
+    ports:
+      - "8086:8086" # Exposed for Nginx proxy
     environment:
       <<: *influx_init_env
     restart: always
