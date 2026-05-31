@@ -1,7 +1,7 @@
 <template>
   <admin-layout>
     <div class="mb-6 w-full">
-      <ecommerce-metrics />
+      <dashboard-metrics />
     </div>
 
     <div class="grid grid-cols-12 gap-4 md:gap-6">
@@ -17,13 +17,13 @@
 
 <script>
 import AdminLayout from '../components/layout/AdminLayout.vue'
-import EcommerceMetrics from '../components/ecommerce/EcommerceMetrics.vue'
+import DashboardMetrics from '../components/dashboard/DashboardMetrics.vue'
 
 export default {
   components: {
     AdminLayout,
-    EcommerceMetrics,
+    DashboardMetrics,
   },
-  name: 'Ecommerce',
+  name: 'Dashboard',
 }
 </script>
