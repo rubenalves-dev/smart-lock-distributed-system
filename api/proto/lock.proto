@@ -90,9 +90,19 @@ message RemoteUnlockResponse {
     string message = 2;
 }
 
+message TrainingDiagnostics {
+    float train_accuracy = 1;
+    float validation_accuracy = 2;
+    float train_loss = 3;
+    float validation_loss = 4;
+    bool underfitting_detected = 5;
+    bool overfitting_detected = 6;
+}
+
 message RetrainModelResponse {
     bool success = 1;
     string message = 2;
+    TrainingDiagnostics diagnostics = 3;
 }
 
 message GetSystemHealthResponse {
@@ -134,4 +144,3 @@ message EvaluateModelResponse {
     EvaluationMetrics metrics = 2;
     BinaryEvaluationMetrics binary_metrics = 3;
 }
-
