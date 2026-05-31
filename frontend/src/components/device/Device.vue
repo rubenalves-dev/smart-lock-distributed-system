@@ -104,13 +104,14 @@
 
 <script setup>
 import { ref } from 'vue'
+import { API_BASE_URL } from '@/config'
 
 const isUnlocked = ref(false)
 const isLoading = ref(false)
 
 const toggleDoor = async () => {
   isLoading.value = true
-  const API_URL = '/api/device/door'
+  const API_URL = `${API_BASE_URL}/device/door`
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 10000)
 

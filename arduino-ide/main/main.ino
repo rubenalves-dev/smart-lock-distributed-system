@@ -174,7 +174,7 @@ void setupWebServer() {
       return;
     }
     HTTPClient http;
-    http.begin("https://smartlock.raiiaa.dev/api/users");
+    http.begin("https://smartlock-api.raiiaa.dev/api/users");
     int httpCode = http.GET();
     if (httpCode > 0) {
       String payload = http.getString();
@@ -195,7 +195,7 @@ void setupWebServer() {
     }
     String uid = server.arg("uid");
     HTTPClient http;
-    http.begin("https://smartlock.raiiaa.dev/api/users/" + uid);
+    http.begin("https://smartlock-api.raiiaa.dev/api/users/" + uid);
     int httpCode = http.GET();
     if (httpCode > 0) {
       String payload = http.getString();
@@ -209,7 +209,7 @@ void setupWebServer() {
     String backendStatus = "{}";
     if (WiFi.status() == WL_CONNECTED) {
       HTTPClient http;
-      http.begin("https://smartlock.raiiaa.dev/api/health");
+      http.begin("https://smartlock-api.raiiaa.dev/api/health");
       int httpCode = http.GET();
       if (httpCode > 0) {
         backendStatus = http.getString();
@@ -319,7 +319,7 @@ void loop() {
         Serial.println(uidStr);
 
         HTTPClient http;
-        String url = "https://smartlock.raiiaa.dev/api/users/" + uidStr;
+        String url = "https://smartlock-api.raiiaa.dev/api/users/" + uidStr;
         http.begin(url);
         int httpCode = http.GET();
 

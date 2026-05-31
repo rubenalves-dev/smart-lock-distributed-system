@@ -149,6 +149,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { API_BASE_URL } from '@/config'
 import PageBreadcrumb from "@/components/common/PageBreadcrumb.vue";
 import AdminLayout from "@/components/layout/AdminLayout.vue";
 import ComponentCard from "@/components/common/ComponentCard.vue";
@@ -177,7 +178,7 @@ const modalData = ref({
 
 const fetchUsers = async () => {
   try {
-    const response = await fetch('/api/users')
+    const response = await fetch(`${API_BASE_URL}/users`)
     if (!response.ok) throw new Error('Error fetching users')
     users.value = await response.json()
   } catch (err) {
@@ -223,7 +224,7 @@ const saveUser = async () => {
       payload.is_blocked = false
     }
 
-    const response = await fetch(`/api/users/${encodeURIComponent(modalData.value.rfid_uid)}`, {
+    const response = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(modalData.value.rfid_uid)}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -245,7 +246,7 @@ const saveUser = async () => {
 
 const toggleBlock = async (user: User) => {
   try {
-    const response = await fetch(`/api/users/${encodeURIComponent(user.rfid_uid)}`, {
+    const response = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(user.rfid_uid)}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

@@ -178,6 +178,24 @@ This document tracks structural changes made to the repository code.
 - **[Endpoints Migration]**: Modified [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) to replace all HTTP requests to the old `api.smartlock.raiiaa.dev` second-level subdomain with `smartlock.raiiaa.dev`.
 - **[MQTT Server Route]**: Changed `MQTT_SERVER` variable in [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) to `mqtt.raiiaa.dev` (to be set up as a Cloudflare DNS-only record resolving directly to the DigitalOcean VPS to allow raw TCP connection on port 1883).
 
+## 2026-05-31: Subdomain Routing Split and CORS Integration
+
+### Nginx Routing Configuration (`/deployments/nginx`)
+- **[Subdomains Split]**: Modified [smartlock.conf](file:///Users/rubenalves/Documents/repos/_school/iot/final/deployments/nginx/smartlock.conf) to split the single server block into three separate subdomains:
+  - `smartlock.raiiaa.dev` -> Frontend (port 3000)
+  - `smartlock-api.raiiaa.dev` -> Backend REST API (port 8080)
+  - `smartlock-influx.raiiaa.dev` -> InfluxDB UI (port 8086)
+
+### Go Backend (`/backend`)
+- **[CORS Middleware]**: Registered and implemented a custom CORS middleware in [main.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/cmd/api/main.go) to allow cross-origin requests from the frontend subdomain (`smartlock.raiiaa.dev`) and handles OPTIONS preflight requests.
+
+### Vue Frontend (`/frontend`)
+- **[NEW] [Dynamic Endpoint Config]**: Created [config.ts](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/config.ts) to define a dynamic `API_BASE_URL` (resolving to `/api` in development, and defaulting to `https://smartlock-api.raiiaa.dev/api` in production).
+- **[API Endpoint Migration]**: Updated [Device.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/device/Device.vue) and [UsersView.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/views/Tables/UsersView.vue) to query `API_BASE_URL` instead of hardcoded relative `/api/` paths.
+
+### ESP32 Firmware (`/arduino-ide`)
+- **[Endpoints Migration]**: Modified [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) to update the HTTP requests host from `smartlock.raiiaa.dev` to the new dedicated backend subdomain `smartlock-api.raiiaa.dev`.
+
 
 
 
