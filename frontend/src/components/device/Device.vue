@@ -4,32 +4,34 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 w-full">
       
       <div class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
-        <p class="text-sm font-medium text-gray-500 text-theme-xs dark:text-gray-400">Door Status</p>
+        <p class="text-sm font-medium text-gray-500 text-theme-xs dark:text-gray-400">Estado do Trinco</p>
         <div class="mt-2 flex items-center">
           <span :class="[
             'rounded-full px-3 py-1 text-theme-xs font-semibold inline-block',
-            isUnlocked ? 'bg-success-50 text-success-700 dark:bg-success-500/15' : 'bg-error-50 text-error-700 dark:bg-error-500/15'
+            isUnlocked ? 'bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-400' : 'bg-error-50 text-error-700 dark:bg-error-500/15 dark:text-error-400'
           ]">
-            {{ isUnlocked ? 'Unlocked / Aberta' : 'Locked / Fechada' }}
+            {{ isUnlocked ? 'Destrancada (Acesso Livre)' : 'Trancada / Segura' }}
           </span>
         </div>
       </div>
 
       <div class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
-        <p class="text-sm font-medium text-gray-500 text-theme-xs dark:text-gray-400">ESP32 Status</p>
+        <p class="text-sm font-medium text-gray-500 text-theme-xs dark:text-gray-400">Conetividade Hardware</p>
         <div class="mt-2 flex items-center">
-          <span class="rounded-full bg-success-50 px-3 py-1 text-theme-xs font-semibold text-success-700 dark:bg-success-500/15 inline-block">
-            Online
+          <span :class="[
+            'rounded-full px-3 py-1 text-theme-xs font-semibold inline-block',
+            deviceData?.status === 'online' ? 'bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-400' : 'bg-error-50 text-error-700 dark:bg-error-500/15 dark:text-error-400'
+          ]">
+            {{ deviceData?.status ? deviceData.status.toUpperCase() : 'A VERIFICAR...' }}
           </span>
         </div>
       </div>
 
       <div class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
-        <p class="text-sm font-medium text-gray-500 text-theme-xs dark:text-gray-400">MQTT Broker</p>
-        <div class="mt-2 flex items-center">
-          <span class="rounded-full bg-success-50 px-3 py-1 text-theme-xs font-semibold text-success-700 dark:bg-success-500/15 inline-block">
-            Connected
-          </span>
+        <p class="text-sm font-medium text-gray-500 text-theme-xs dark:text-gray-400">Intensidade do Sinal (RSSI)</p>
+        <div class="mt-2 flex items-center font-mono text-sm font-semibold text-gray-800 dark:text-white">
+          <span v-if="deviceData?.rssi">{{ deviceData.rssi }} dBm</span>
+          <span v-else class="text-gray-400 font-sans font-normal text-xs">Sem dados</span>
         </div>
       </div>
 
@@ -38,46 +40,47 @@
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-2 w-full">
       
       <div class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-        <h3 class="text-base font-semibold text-gray-800 dark:text-white/90 mb-4">Remote Door Control</h3>
+        <h3 class="text-base font-semibold text-gray-800 dark:text-white/90 mb-4">Abertura Remota via API Gateway</h3>
         
         <div class="space-y-5">
           <p class="text-theme-sm text-gray-500 dark:text-gray-400">
-            Current State: 
-            <span class="font-bold ml-1" :class="isUnlocked ? 'text-success-700 dark:text-success-500' : 'text-error-700 dark:text-error-500'">
-              {{ isUnlocked ? 'LOCKED' : 'UNLOCKED' }}
+            Último Evento de Rede: 
+            <span class="font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-xs ml-1 text-primary-500">
+              {{ deviceData?.event || 'Nenhum' }}
             </span>
           </p>
 
           <button
-            @click="toggleDoor"
-            :disabled="isLoading"
-            class="w-full sm:w-auto px-5 py-2.5 rounded-lg text-white font-medium text-theme-sm transition-all shadow-sm focus:outline-none disabled:opacity-50"
-            :class="isUnlocked ? 'bg-error-600 hover:bg-error-700' : 'bg-success-600 hover:bg-success-700'"
+            @click="remoteUnlock"
+            :disabled="isLoading || deviceData?.status !== 'online'"
+            class="w-full sm:w-auto px-5 py-2.5 rounded-lg text-white font-medium text-theme-sm transition-all shadow-sm focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed bg-brand-500 hover:bg-brand-600"
           >
-            {{ isLoading ? 'A processar...' : isUnlocked ? 'Trancar Porta' : 'Destrancar Porta' }}
+            {{ isLoading ? 'A enviar comando MQTT...' : 'Enviar Comando de Abertura' }}
           </button>
         </div>
       </div>
 
       <div class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-        <h3 class="text-base font-semibold text-gray-800 dark:text-white/90 mb-4">Device Information</h3>
+        <h3 class="text-base font-semibold text-gray-800 dark:text-white/90 mb-4">Informação de Diagnóstico do Dispositivo</h3>
         
         <div class="space-y-3 text-theme-sm">
           <div class="flex justify-between border-b border-gray-100 pb-2 dark:border-gray-800">
-            <span class="text-gray-500 dark:text-gray-400">Device ID:</span>
-            <span class="font-mono text-gray-800 dark:text-white/90">ESP32-SmartLock-01</span>
+            <span class="text-gray-500 dark:text-gray-400">Device ID Associado:</span>
+            <span class="font-mono text-gray-800 dark:text-white/90">{{ deviceData?.device_id || 'lock-1' }}</span>
           </div>
           <div class="flex justify-between border-b border-gray-100 pb-2 dark:border-gray-800">
-            <span class="text-gray-500 dark:text-gray-400">Firmware Version:</span>
-            <span class="text-gray-800 dark:text-white/90">v1.0.4 (Stable)</span>
+            <span class="text-gray-500 dark:text-gray-400">Sensor de Proximidade:</span>
+            <span class="text-gray-800 dark:text-white/90 font-mono">{{ deviceData?.distance_cm ? `${deviceData.distance_cm} cm` : '—' }}</span>
           </div>
           <div class="flex justify-between border-b border-gray-100 pb-2 dark:border-gray-800">
-            <span class="text-gray-500 dark:text-gray-400">Uptime:</span>
-            <span class="text-gray-800 dark:text-white/90">4 days, 12 hours</span>
+            <span class="text-gray-500 dark:text-gray-400">Uptime do Hardware:</span>
+            <span class="text-gray-800 dark:text-white/90 font-mono">{{ deviceData?.uptime ? `${deviceData.uptime}s` : '—' }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-500 dark:text-gray-400">IP Address:</span>
-            <a href="http://smartlock.local/" target="_blank" class="text-primary-600 hover:underline dark:text-primary-400">smartlock.local</a>
+            <span class="text-gray-500 dark:text-gray-400">Tentativas Falhadas Seguidas:</span>
+            <span :class="['font-bold font-mono', deviceData?.fails > 0 ? 'text-error-500 animate-pulse' : 'text-success-500']">
+              {{ deviceData?.fails ?? 0 }}
+            </span>
           </div>
         </div>
       </div>
@@ -86,7 +89,7 @@
 
     <div class="w-full flex flex-col items-start">
       <div class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-        <h3 class="text-base font-semibold text-gray-800 dark:text-white/90 mb-4">ESP32 Native Web Interface</h3>
+        <h3 class="text-base font-semibold text-gray-800 dark:text-white/90 mb-4">ESP32 Native Web Interface (Local Network UI)</h3>
         
         <div class="w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
           <iframe 
@@ -103,43 +106,64 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { API_BASE_URL } from '@/config'
+import { ref, onMounted, onUnmounted } from 'vue'
 
+const deviceData = ref(null)
 const isUnlocked = ref(false)
 const isLoading = ref(false)
+let telemetryInterval = null
 
-const toggleDoor = async () => {
-  isLoading.value = true
-  const API_URL = `${API_BASE_URL}/device/door`
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 10000)
-
+// Consulta o estado mais recente de telemetria da fechadura do Postgres
+const fetchDeviceTelemetry = async () => {
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch('https://smartlock-api.raiiaa.dev/api/telemetry/latest?device_id=lock-1')
+    if (response.ok) {
+      deviceData.value = await response.json()
+    }
+  } catch (error) {
+    console.error('Erro ao recolher telemetria do gateway:', error)
+  }
+}
+
+// Dispara a ordem assíncrona POST de abertura remota para o broker MQTT
+const remoteUnlock = async () => {
+  isLoading.value = true
+  try {
+    const response = await fetch('https://smartlock-api.raiiaa.dev/api/door/unlock', {
       method: 'POST',
       mode: 'cors',
-      signal: controller.signal,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: isUnlocked.value ? 'lock' : 'unlock',
-        timestamp: new Date().toISOString(),
-      }),
+      headers: { 'Content-Type': 'application/json' }
     })
 
-    if (!response.ok) {
-      throw new Error('Falha na comunicação')
+    if (response.ok) {
+      const data = await response.json()
+      if (data.success) {
+        isUnlocked.value = true
+        // Mantém a indicação de aberta temporariamente por 5 segundos (UX de simulação física)
+        setTimeout(() => {
+          isUnlocked.value = false
+        }, 5000)
+      }
+    } else {
+      throw new Error('Erro na resposta do Servidor Go')
     }
-
-    isUnlocked.value = !isUnlocked.value
   } catch (error) {
-    console.error('Erro:', error)
-    alert('Erro ao comunicar com o dispositivo.')
+    console.error('Erro de rede ao destrancar:', error)
+    alert('Não foi possível enviar o comando de abertura remota.')
   } finally {
-    clearTimeout(timeoutId)
     isLoading.value = false
   }
 }
+
+onMounted(() => {
+  fetchDeviceTelemetry()
+  // Atualiza as métricas e o sinal Wi-Fi a cada 3 segundos automaticamente
+  telemetryInterval = setInterval(fetchDeviceTelemetry, 3000)
+})
+
+onUnmounted(() => {
+  if (telemetryInterval) clearInterval(telemetryInterval)
+})
 </script>
 
 <style scoped>
