@@ -31,6 +31,10 @@ services:
       - PYTHONUNBUFFERED=1
     depends_on:
       - rabbitmq
+    develop:
+      watch:
+        - path: ../ai-service
+          action: rebuild
 
   main-server:
     build: ../backend
@@ -51,6 +55,10 @@ services:
       - ai-service
       - postgres
       - influxdb
+    develop:
+      watch:
+        - path: ../backend
+          action: rebuild
 
   frontend:
     build: ../frontend
@@ -63,6 +71,10 @@ services:
       - NODE_ENV=development
     depends_on:
       - main-server
+    develop:
+      watch:
+        - path: ../frontend
+          action: rebuild
 
   postgres:
     image: postgres:15-alpine
