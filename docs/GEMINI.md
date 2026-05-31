@@ -29,6 +29,9 @@ This document tracks structural changes made to the repository code.
 ### ESP32 Firmware (`/arduino-ide`)
 - **[Remote Auth Delegation]**: Modified [main.ino](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/arduino-ide/main/main.ino) to change RFID check behavior. When online, accepted card scans publish an `access_request` telemetry payload and await the backend MQTT command instead of unlocking locally. Offline cache lookup fallbacks remain active.
 
+### Development Configuration (`/deployments`, `/`)
+- **[Hot-reloading watch target]**: Added `develop.watch` configuration for `ai-service`, `main-server`, and `frontend` services to [docker-compose.yml](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/deployments/docker-compose.yml), and defined the `make watch` target in [Makefile](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/Makefile) to automatically trigger hot-rebuilding of modified containers on host file changes.
+
 ## 2026-05-31: AI Model Retraining Page and Diagnostics
 
 ### Python AI Service (`/ai-service`)
