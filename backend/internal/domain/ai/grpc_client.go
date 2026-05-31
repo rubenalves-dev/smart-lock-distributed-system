@@ -44,9 +44,9 @@ func (g *grpcClient) PredictSeverity(ctx context.Context, event models.SensorPay
 	return int32(resp.Classification), resp.Confidence, resp.Recommendation, nil
 }
 
-func (g *grpcClient) RetrainModel(ctx context.Context, epochs int32, datasetPath string) (bool, string, error) {
+func (g *grpcClient) RetrainModel(ctx context.Context, epochs int32, datasetPath string) (*models.RetrainResult, error) {
 	if g.client == nil {
-		return false, "gRPC AI Service client is nil", fmt.Errorf("gRPC AI Service client is nil")
+		return nil, fmt.Errorf("gRPC AI Service client is nil")
 	}
 
 	req := &smartlock.RetrainModelRequest{
@@ -56,10 +56,26 @@ func (g *grpcClient) RetrainModel(ctx context.Context, epochs int32, datasetPath
 
 	resp, err := g.client.RetrainModel(ctx, req)
 	if err != nil {
-		return false, "", err
+		return nil, err
 	}
 
-	return resp.Success, resp.Message, nil
+	var diagnostics *models.TrainingDiagnostics
+	if resp.Diagnostics != nil {
+		diagnostics = &models.TrainingDiagnostics{
+			TrainAccuracy:        resp.Diagnostics.TrainAccuracy,
+			ValidationAccuracy:   resp.Diagnostics.ValidationAccuracy,
+			TrainLoss:            resp.Diagnostics.TrainLoss,
+			ValidationLoss:       resp.Diagnostics.ValidationLoss,
+			UnderfittingDetected: resp.Diagnostics.UnderfittingDetected,
+			OverfittingDetected:  resp.Diagnostics.OverfittingDetected,
+		}
+	}
+
+	return &models.RetrainResult{
+		Success:     resp.Success,
+		Message:     resp.Message,
+		Diagnostics: diagnostics,
+	}, nil
 }
 
 func (g *grpcClient) EvaluateModel(ctx context.Context, datasetPath string) (*models.EvaluationResult, error) {

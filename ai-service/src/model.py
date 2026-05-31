@@ -98,9 +98,11 @@ def load_dataset(filepath):
 def train_model(model, X, y, epochs=10):
     """Trains the model on the provided data and returns the training history."""
     history = model.fit(
-        X, y,
+        X,
+        y,
         epochs=epochs,
         batch_size=32,
+        validation_split=0.2,
         verbose=1
     )
     return history
