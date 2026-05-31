@@ -24,7 +24,6 @@ from sklearn.metrics import (
     f1_score
 )
 
-
 # Paths
 MODEL_PATH = "severity_model.keras"
 DATASET_PATH = "data/sensor_events.csv"
@@ -170,29 +169,63 @@ class AIService(smartlock_grpc.AIServiceServicer):
             # Load the dataset
             X, y = model_lib.load_dataset(dataset_path)
 
-            # Thread-safe retraining and swap
             with self.model_lock:
-                # Compile a new model to train fresh or load and fit
+            # Criar novo modelo
                 model = model_lib.create_model()
-                model_lib.train_model(model, X, y, epochs=epochs)
+
+            # Treinar e guardar histórico
+                history = model_lib.train_model(
+                    model,
+                    X,
+                    y,
+                    epochs=epochs
+                )
+
+            # Métricas finais
+                train_acc = history.history["accuracy"][-1]
+                val_acc = history.history["val_accuracy"][-1]
+
+            # Heurísticas simples
+                overfitting = (train_acc - val_acc) > 0.10
+
+                underfitting = (
+                train_acc < 0.70 and
+                val_acc < 0.70
+            )
+
+            # Guardar modelo
                 model.save(MODEL_PATH)
                 self.model = tf.keras.models.load_model(MODEL_PATH)
 
-            msg = f"Model retrained successfully on {len(X)} samples and updated in memory."
+            msg = (
+            f"Model retrained successfully on {len(X)} samples. "
+            f"Train Acc={train_acc:.3f}, "
+            f"Val Acc={val_acc:.3f}, "
+            f"Overfitting={overfitting}, "
+            f"Underfitting={underfitting}"
+            )
+
             print(msg)
-            return smartlock.RetrainModelResponse(success=True, message=msg)
+
+            return smartlock.RetrainModelResponse(
+                success=True,
+                message=msg
+            )
 
         except Exception as e:
             error_msg = f"Retraining failed: {str(e)}"
             print(error_msg)
-            return smartlock.RetrainModelResponse(success=False, message=error_msg)
+
+            return smartlock.RetrainModelResponse(
+            success=False,
+            message=error_msg
+            )
+
 
     def EvaluateModel(self, request, context):
         try:
             import io
             import pandas as pd
-            
-            df = pd.read_csv(io.StringIO(data_content))
 
             # 1. Tenta ler o conteúdo recebido (a string CSV do Go)
             data_content = request.dataset_path
@@ -212,15 +245,11 @@ class AIService(smartlock_grpc.AIServiceServicer):
             # 2. Mapeamento de colunas (para o modelo funcionar)
             df = df.rename(columns={'feature1': 'fails', 'feature2': 'distance_cm'})
             if 'is_denied' not in df.columns: df['is_denied'] = 0.0
-            
-            # 3. Extrair dados para o modelo
-            X = df[['fails', 'distance_cm', 'is_denied']].values
 
             # Verificar se o dataset tem labels
             if "severity" not in df.columns:
                 raise Exception(
-            "O dataset deve conter a coluna 'severity' para avaliação."
-            )
+            "O dataset deve conter a coluna 'severity' para avaliação.")
             # Normalizar como no treino
             X = np.array([
                 model_lib.normalize_features(
@@ -270,11 +299,11 @@ class AIService(smartlock_grpc.AIServiceServicer):
                 smartlock.ConfusionMatrixRow(
                 values=[int(x) for x in row]
             )
-                )
+            )
             
             # ... (o resto da tua lógica de predict e retorno continua igual)
             # 4. Cálculo simples para teste
-                return smartlock.EvaluateModelResponse(
+            return smartlock.EvaluateModelResponse(
             confusion_matrix=rows,
             metrics=smartlock.EvaluationMetrics(
                 accuracy=float(accuracy),
