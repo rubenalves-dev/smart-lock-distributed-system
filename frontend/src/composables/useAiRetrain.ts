@@ -21,13 +21,13 @@ export function useAiRetrain() {
   const retrain = async (epochs: number, datasetPath: string): Promise<RetrainResponse | null> => {
     loading.value = true;
     try {
-      const response = await fetch('/api/ai/retrain', {
+      const response = await fetch('https://smartlock-api.raiiaa.dev/api/ai/retrain', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           epochs: epochs,
-          dataset_path: datasetPath
-        })
+          dataset_path: datasetPath,
+        }),
       });
 
       if (!response.ok) {
