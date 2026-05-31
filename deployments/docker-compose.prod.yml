@@ -10,7 +10,7 @@ x-influx-init-env: &influx_init_env
   DOCKER_INFLUXDB_INIT_PASSWORD: UmaSenhaMuitoSegura123
   DOCKER_INFLUXDB_INIT_ORG: "A MinhaOrganizacao"
   DOCKER_INFLUXDB_INIT_BUCKET: esp32_pings
-  DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: MinhaTokenMuitoSegura123
+  DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "ZYPGu_Lu6NaP8M4iT5_TLx1xSZag9sAbR9i2vH8zr7P253VcxIMuXHbbkYagn2bOzfVZCRpsrIH5_77r3G1Mag=="
 
 services:
   rabbitmq:
@@ -105,6 +105,8 @@ services:
     volumes:
       - influxdb-data:/var/lib/influxdb2
       - influxdb-config:/etc/influxdb2
+    ports:
+      - "8086:8086" # Exposed for Nginx proxy
     environment:
       <<: *influx_init_env
     restart: always
