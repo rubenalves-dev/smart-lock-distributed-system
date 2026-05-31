@@ -249,6 +249,11 @@ const menuGroups = [
         path: "/device/control",
       },
       {
+        icon: PlugInIcon, 
+        name: "Aprovações MFA",
+        path: "/mfa/requests",
+      },
+      {
         icon: GridIcon, 
         name: "AI Evaluation",
         path: "/ai/evaluation",

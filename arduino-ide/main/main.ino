@@ -394,8 +394,9 @@ void loop() {
         if (shouldUnlock)
         {
           lastUser = uidStr;
-          updateLockState(false, lastUser);
-          sendTelemetry("access_granted", "Valid RFID (online)", uidStr);
+          // Online: do NOT unlock immediately. Request access telemetry, and await MQTT command.
+          Serial.println("[RFID] Authorized card scanned. Delegating access authorization to AI/MFA...");
+          sendTelemetry("access_request", "Valid RFID (online) - awaiting authorization", uidStr);
         }
         else
         {

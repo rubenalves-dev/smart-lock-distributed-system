@@ -2,6 +2,33 @@
 
 This document tracks structural changes made to the repository code.
 
+## 2026-05-31: Multi-Factor Authentication (MFA) and Real-time Notifications
+
+### Database Schema (`/backend`)
+- **[NEW] [MFA Table Migration]**: Modified [postgres.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/backend/internal/core/postgres.go) to initialize the `mfa_requests` table on startup, tracking card scans flagged by the AI service.
+
+### Go Backend (`/backend`)
+- **[NEW] [WebSocket Hub]**: Created [websocket.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/backend/internal/core/websocket.go) implementing connection management and JSON payload broadcasting to frontend clients.
+- **[NEW] [MFA Domain Components]**: Created `internal/domain/mfa` package to define:
+  - [entity.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/backend/internal/domain/mfa/entity.go): Request data structure.
+  - [repository.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/backend/internal/domain/mfa/repository.go): PostgreSQL Create, ListAll, and UpdateStatus commands.
+  - [service.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/backend/internal/domain/mfa/service.go): Approval (MQTT unlock broadcast) and rejection (permanent card block in user domain) business flows.
+  - [handler.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/backend/internal/domain/mfa/handler.go): HTTP controllers for lists, approval, and rejection.
+- **[Lock Command Bugfix]**: Modified [mqtt.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/backend/internal/core/mqtt.go) to publish `"UNLOCK"` commands to topic `"lock/commands"`, resolving a mismatch where the backend was publishing to an unmonitored topic.
+- **[Telemetry Ingest Pipeline]**: Refactored `Ingest` in [service.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/backend/internal/domain/telemetry/service.go) to handle `"access_request"` online check events. Suspicious/critical attempts (AI classification >= 2) hold the lock and trigger MFA request creation; normal attempts (classification < 2) unlock immediately.
+- **[Routing Registration]**: Updated [main.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/backend/cmd/api/main.go) to map websocket connection upgrades to `/api/ws` and register mfa routing blocks.
+- **[Unit Tests Verification]**: Modified mock integrations and appended `TestTelemetryIngestRFIDAIMFA` in [service_test.go](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/backend/internal/domain/telemetry/service_test.go) to assert telemetry-to-MFA transitions.
+
+### Vue Frontend (`/frontend`)
+- **[NEW] [MFA Composable]**: Created [useMfa.ts](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/frontend/src/composables/useMfa.ts) to manage state, fetch requests, call approve/reject endpoints, and handle real-time updates over WebSocket streams.
+- **[NEW] [MFA Approvals View]**: Created [MfaRequestsView.vue](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/frontend/src/views/Pages/MfaRequestsView.vue) displaying pending access requests, sensor details, AI classification confidence levels, and quick approve/block actions.
+- **[Sidebar Navigation]**: Added "Aprovações MFA" link to [AppSidebar.vue](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/frontend/src/components/layout/AppSidebar.vue).
+- **[Notification Dropdown Alerts]**: Integrated live alerts into [NotificationMenu.vue](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/frontend/src/components/layout/header/NotificationMenu.vue) to display dynamic indicators and click-to-redirect shortcuts when new MFA requests are broadcast.
+- **[Router Config]**: Registered path `/mfa/requests` in [index.ts](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/frontend/src/router/index.ts).
+
+### ESP32 Firmware (`/arduino-ide`)
+- **[Remote Auth Delegation]**: Modified [main.ino](file:///Users/rubenalves/.gemini/antigravity/worktrees/final/mfa-door-notification-ui/arduino-ide/main/main.ino) to change RFID check behavior. When online, accepted card scans publish an `access_request` telemetry payload and await the backend MQTT command instead of unlocking locally. Offline cache lookup fallbacks remain active.
+
 ## 2026-05-31: AI Model Retraining Page and Diagnostics
 
 ### Python AI Service (`/ai-service`)

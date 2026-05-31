@@ -49,7 +49,7 @@ func NewMQTTClient(brokerIp string, dataChan chan<- models.SensorPayload) (*MQTT
 }
 
 func (m *MQTTClient) PublishOpenDoor() error {
-	token := m.Client.Publish("lock/control", 0, false, "open_door")
+	token := m.Client.Publish("lock/commands", 0, false, "UNLOCK")
 	token.Wait()
 	return token.Error()
 }

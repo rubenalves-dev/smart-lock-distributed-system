@@ -94,62 +94,48 @@
       </ul>
 
       <router-link
-        to="#"
+        to="/mfa/requests"
         class="mt-3 flex justify-center rounded-lg border border-gray-300 bg-white p-3 text-theme-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-        @click="handleViewAllClick"
+        @click="closeDropdown"
       >
-        Limpar Alertas
+        Ver Todos os Pedidos
       </router-link>
     </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useMfa } from '@/composables/useMfa'
+
+const router = useRouter()
+const { requests, connectWebSocket } = useMfa()
 
 const dropdownOpen = ref(false)
-const notifying = ref(true) // Ativa a bolinha a piscar no início
 const dropdownRef = ref(null)
 
-// Mock do sistema adaptado à vossa Smart Lock distribuída
-const notifications = ref([
-  {
-    id: 1,
-    title: 'Acesso Recusado',
-    message: 'Cartão RFID desconhecido tentou autenticação na porta principal.',
-    category: 'Segurança',
-    time: 'Há 2 min',
+const pendingMfaRequests = computed(() => {
+  return requests.value.filter(r => r.status === 'pending')
+})
+
+const notifying = computed(() => {
+  return pendingMfaRequests.value.length > 0
+})
+
+const notifications = computed(() => {
+  return pendingMfaRequests.value.map(req => ({
+    id: req.id,
+    title: req.classification === 3 ? 'Aviso Crítico (MFA)' : 'Alerta Suspeito (MFA)',
+    message: `Cartão ${req.rfid_uid} (fails=${req.fails}, dist=${req.distance_cm.toFixed(0)}cm) requer autorização.`,
+    category: 'Segurança AI',
+    time: formatDate(req.created_at),
     status: 'danger',
-  },
-  {
-    id: 2,
-    title: 'Desbloqueio Remoto',
-    message: 'Porta aberta com sucesso via Web Interface.',
-    category: 'Ação Remota',
-    time: 'Há 15 min',
-    status: 'success',
-  },
-  {
-    id: 3,
-    title: 'Perfil Incompleto Detetado',
-    message: 'UID detetado sem Nome/Email associado na base de dados.',
-    category: 'Sistema',
-    time: 'Há 1 hora',
-    status: 'danger',
-  },
-  {
-    id: 4,
-    title: 'ESP32 Conectado',
-    message: 'Ligação bem sucedida ao Broker MQTT (smartlock.local).',
-    category: 'Broker MQTT',
-    time: 'Há 2 horas',
-    status: 'success',
-  }
-])
+  }))
+})
 
 const toggleDropdown = () => {
   dropdownOpen.value = !dropdownOpen.value
-  notifying.value = false // Limpa o aviso de "não lidas" ao abrir
 }
 
 const closeDropdown = () => {
@@ -164,19 +150,22 @@ const handleClickOutside = (event) => {
 
 const handleItemClick = (event) => {
   event.preventDefault()
-  console.log('Notificação clicada')
+  router.push('/mfa/requests')
   closeDropdown()
 }
 
-const handleViewAllClick = (event) => {
-  event.preventDefault()
-  notifications.value = [] // Limpa a lista local para teste visual
-  console.log('Alertas limpos')
-  closeDropdown()
+const formatDate = (dateStr) => {
+  try {
+    const d = new Date(dateStr)
+    return d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })
+  } catch {
+    return 'Agora'
+  }
 }
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  connectWebSocket()
 })
 
 onUnmounted(() => {

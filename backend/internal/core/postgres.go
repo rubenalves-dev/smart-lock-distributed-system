@@ -83,6 +83,25 @@ func (p *PostgresClient) initSchema() error {
 		return fmt.Errorf("failed creating telemetry table: %w", err)
 	}
 
+	mfaRequestsTableQuery := `
+	CREATE TABLE IF NOT EXISTS mfa_requests (
+		id SERIAL PRIMARY KEY,
+		rfid_uid VARCHAR(50) NOT NULL,
+		device_id VARCHAR(50) NOT NULL,
+		fails INT NOT NULL,
+		distance_cm REAL NOT NULL,
+		light_level INT NOT NULL,
+		classification INT NOT NULL,
+		confidence REAL NOT NULL,
+		recommendation TEXT NOT NULL,
+		status VARCHAR(20) DEFAULT 'pending',
+		created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+	);`
+	if _, err := p.DB.Exec(mfaRequestsTableQuery); err != nil {
+		return fmt.Errorf("failed creating mfa_requests table: %w", err)
+	}
+
 	log.Println("PostgreSQL schema initialized successfully")
 	return nil
 }
