@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -25,47 +26,49 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+type SyntheticData struct {
+	Feature1 float64 `json:"feature1"`
+	Feature2 float64 `json:"feature2"`
+}
+
+type EvaluateRequest struct {
+	DatasetPath   string          `json:"dataset_path"`
+	SyntheticData []SyntheticData `json:"synthetic_data"`
+}
+
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	log.Printf("Starting backend with Config: Port=%d, AIAddr=%s, RabbitURL=%s\n", cfg.Port, cfg.AIServiceAddr, cfg.RabbitMQURL)
-
-	// Create channel for MQTT telemetry events
 	telemetryChan := make(chan models.SensorPayload, 100)
 
-	// Initialize PostgreSQL Client
 	dbClient, err := core.NewPostgresClient(cfg.PostgresURL)
 	if err != nil {
 		log.Fatalf("Critical: Failed to connect to PostgreSQL: %v", err)
 	}
 	defer dbClient.Close()
 
-	// Initialize InfluxDB Client
 	influxClient, err := core.NewInfluxClient(cfg.InfluxDBURL, cfg.InfluxDBToken)
 	if err != nil {
 		log.Fatalf("Critical: Failed to connect to InfluxDB: %v", err)
 	}
 	defer influxClient.Close()
 
-	// Initialize RabbitMQ Client
 	rabbitClient, err := core.NewRabbitMQClient(cfg.RabbitMQURL)
 	if err != nil {
 		log.Fatalf("Critical: Failed to connect to RabbitMQ: %v", err)
 	}
 	defer rabbitClient.Close()
 
-	// Initialize gRPC connection to AI Service
 	var grpcConn *grpc.ClientConn
 	for i := range 15 {
-		grpcConn, err = grpc.NewClient(cfg.AIServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		grpcConn, err = grpc.Dial(cfg.AIServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err == nil {
-			log.Println("Connected to AI service gRPC server successfully")
 			break
 		}
-		log.Printf("Failed to connect to AI service gRPC, retrying in 2 seconds... (%d/15): %v", i+1, err)
+		log.Printf("... retrying... (%d/15): %v", i+1, err)
 		time.Sleep(2 * time.Second)
 	}
 	if err != nil {
@@ -73,230 +76,150 @@ func main() {
 	}
 	defer grpcConn.Close()
 
-	// Initialize MQTT Mosquitto Client
 	mqttClient, err := core.NewMQTTClient(cfg.MQTTBroker, telemetryChan)
 	if err != nil {
 		log.Fatalf("Critical: Failed to connect to MQTT broker: %v", err)
 	}
 	defer mqttClient.Close()
 
-	// Initialize domains
-	// AI Domain
 	rawAIClient := smartlock.NewAIServiceClient(grpcConn)
-	aiService := ai.NewGRPCClient(rawAIClient)
+	grpcClient := ai.NewGRPCClient(rawAIClient)
 
-	// User Domain
+	aiRepo := ai.NewRepository(dbClient.DB)
+	aiService := ai.NewService(aiRepo, grpcClient)
+
 	userRepo := user.NewRepository(dbClient.DB)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService)
 
-	// Telemetry Domain
 	telemetryRepo := telemetry.NewRepository(dbClient.DB)
 	telemetryService := telemetry.NewService(telemetryRepo, userService, rabbitClient, mqttClient, aiService)
 	telemetryHandler := telemetry.NewHandler(telemetryService)
 
-	// 7. Start Background Health Monitor
-	healthMonitor := monitor.NewMonitor(
-		dbClient,
-		mqttClient,
-		influxClient,
-		rabbitClient,
-		cfg.RabbitMQURL,
-		cfg.InfluxDBOrg,
-		cfg.InfluxDBBucket,
-	)
-
+	healthMonitor := monitor.NewMonitor(dbClient, mqttClient, influxClient, rabbitClient, cfg.RabbitMQURL, cfg.InfluxDBOrg, cfg.InfluxDBBucket)
 	monitorCtx, cancelMonitor := context.WithCancel(context.Background())
 	defer cancelMonitor()
 	go healthMonitor.Start(monitorCtx)
 
-	// 8. Start MQTT Event Consumer loop asynchronously
 	go func() {
 		for event := range telemetryChan {
-			log.Printf("Processing MQTT event: %s from device: %s\n", event.Event, event.DeviceID)
-			if err := telemetryService.Ingest(context.Background(), event); err != nil {
-				log.Printf("Error ingesting telemetry event: %v\n", err)
-			}
+			_ = telemetryService.Ingest(context.Background(), event)
 		}
 	}()
 
-	// 9. Start RabbitMQ Heartbeat Consumer loop asynchronously
-	go func() {
-		log.Println("Starting background RabbitMQ heartbeat consumer...")
-		err := rabbitClient.ConsumeHeartbeats(context.Background(), func(body []byte) error {
-			var payload models.SensorPayload
-			if err := json.Unmarshal(body, &payload); err != nil {
-				return err
-			}
-			log.Printf("Background saving heartbeat event from device: %s (uptime: %.1f)\n", payload.DeviceID, payload.Uptime)
-			return telemetryRepo.Save(context.Background(), payload)
-		})
-		if err != nil {
-			log.Printf("Failed to start RabbitMQ heartbeat consumer: %v\n", err)
-		}
-	}()
-
-	// 9. Setup go-chi router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(corsMiddleware)
 
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"OK"}`))
-	})
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
-	r.Get("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		statuses := healthMonitor.GetLatestStatuses()
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(statuses)
-	})
-
-	r.Get("/api/metrics/health", func(w http.ResponseWriter, r *http.Request) {
-		timeRange := r.URL.Query().Get("range")
-		if timeRange == "" {
-			timeRange = "24h"
-		}
-		interval := r.URL.Query().Get("interval")
-		if interval == "" {
-			interval = "1m"
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		series, err := influxClient.QueryHealth(ctx, cfg.InfluxDBOrg, cfg.InfluxDBBucket, timeRange, interval)
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-			return
-		}
-
-		if series == nil {
-			series = []models.ServiceHealthSeries{}
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"series": series,
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			next.ServeHTTP(w, r)
 		})
 	})
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(`{"status":"OK"}`)) })
 
-	// Register domain routes
-	// Endpoint para controlar a porta via MQTT
-	r.Post("/api/device/door", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/api/ai/evaluate", func(w http.ResponseWriter, r *http.Request) {
+		var req EvaluateRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Erro ao decodificar pedido", http.StatusBadRequest)
+			return
+		}
 
-		err := mqttClient.PublishOpenDoor()
+		pathToEvaluate := req.DatasetPath
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		// 1. Fallback se não houver caminho
+		if pathToEvaluate == "" {
+			pathToEvaluate = "/test_data.csv"
+		}
+
+		// 2. Se o ficheiro não existir, verifica se o input contém dados CSV diretamente
+		if _, err := os.Stat(pathToEvaluate); os.IsNotExist(err) {
+			content := pathToEvaluate
+			// Se o input não parecer conteúdo CSV (não tem cabeçalho/dados), gera o fallback sintético
+			if !strings.Contains(pathToEvaluate, "feature1") && !strings.Contains(pathToEvaluate, "fails") {
+				log.Println("Ficheiro não encontrado e input não é CSV, a gerar dados sintéticos na memória...")
+				content = "feature1,feature2\n0.5,0.2"
+			} else {
+				log.Println("A processar CSV recebido diretamente no input...")
+			}
+
+			// Enviamos a string 'content' diretamente para o gRPC
+			result, err := aiService.EvaluateModel(ctx, content)
+			if err != nil {
+				log.Printf("Erro na IA: %v", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(result)
+			return
+		}
+
+		// 3. Caso o ficheiro exista, lê o conteúdo e envia
+		contentBytes, err := os.ReadFile(pathToEvaluate)
 		if err != nil {
-			http.Error(w, "Falha ao enviar comando via MQTT", http.StatusInternalServerError)
+			http.Error(w, "Erro ao ler ficheiro", http.StatusInternalServerError)
+			return
+		}
+
+		// IMPORTANTE: Envia o conteúdo convertido para string
+		result, err := aiService.EvaluateModel(ctx, string(contentBytes))
+		if err != nil {
+			log.Printf("Erro na IA: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"error": err.Error()})
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"status": "success", "message": "Comando enviado"})
+		json.NewEncoder(w).Encode(result)
+	})
+
+	r.Post("/api/ai/retrain", func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			DatasetPath string `json:"dataset_path"`
+			Epochs      int32  `json:"epochs"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Erro ao decodificar pedido", http.StatusBadRequest)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		defer cancel()
+
+		result, err := aiService.RetrainModel(ctx, req.Epochs, req.DatasetPath)
+		if err != nil {
+			log.Printf("Erro ao treinar modelo: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{"error": err.Error()})
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(result)
 	})
 
 	userHandler.RegisterRoutes(r)
 	telemetryHandler.RegisterRoutes(r)
 
-	// AI evaluate endpoint
-	r.Post("/api/ai/evaluate", func(w http.ResponseWriter, r *http.Request) {
-		type EvaluateRequest struct {
-			DatasetPath string `json:"dataset_path"`
-		}
-
-		var req EvaluateRequest
-		_ = json.NewDecoder(r.Body).Decode(&req)
-
-		if req.DatasetPath == "" {
-			req.DatasetPath = "data/sensor_events.csv"
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		result, err := aiService.EvaluateModel(ctx, req.DatasetPath)
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"error": fmt.Sprintf("AI evaluation error: %v", err),
-			})
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(result)
-	})
-
-	// AI retrain endpoint
-	r.Post("/api/ai/retrain", func(w http.ResponseWriter, r *http.Request) {
-		type RetrainRequest struct {
-			Epochs      int32  `json:"epochs"`
-			DatasetPath string `json:"dataset_path"`
-		}
-
-		var req RetrainRequest
-		_ = json.NewDecoder(r.Body).Decode(&req)
-
-		if req.Epochs <= 0 {
-			req.Epochs = 10
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
-
-		success, message, err := aiService.RetrainModel(ctx, req.Epochs, req.DatasetPath)
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"success": false,
-				"message": fmt.Sprintf("AI error: %v", err),
-			})
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"success": success,
-			"message": message,
-		})
-	})
-
-	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.Port),
-		Handler: r,
-	}
-
-	go func() {
-		log.Printf("REST API server listening on :%d", cfg.Port)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Listen and serve error: %v", err)
-		}
-	}()
+	srv := &http.Server{Addr: fmt.Sprintf(":%d", cfg.Port), Handler: r}
+	go srv.ListenAndServe()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
-
-	log.Println("Shutting down server...")
-
-	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelShutdown()
-
-	if err := srv.Shutdown(shutdownCtx); err != nil {
-		log.Printf("Server forced shutdown: %v", err)
-	}
-
-	log.Println("Server stopped.")
-	os.Exit(0)
+	srv.Shutdown(context.Background())
 }
 
 func corsMiddleware(next http.Handler) http.Handler {

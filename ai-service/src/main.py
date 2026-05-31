@@ -4,6 +4,7 @@ import os
 import threading
 import time
 from concurrent import futures
+from urllib import request
 
 import gen.lock_pb2 as smartlock
 import gen.lock_pb2_grpc as smartlock_grpc
@@ -12,6 +13,16 @@ import model as model_lib
 import numpy as np
 import pika
 import tensorflow as tf
+import io
+import pandas as pd
+
+from sklearn.metrics import (
+    confusion_matrix,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score
+)
 
 # Paths
 MODEL_PATH = "severity_model.keras"
@@ -158,26 +169,174 @@ class AIService(smartlock_grpc.AIServiceServicer):
             # Load the dataset
             X, y = model_lib.load_dataset(dataset_path)
 
-            # Thread-safe retraining and swap
             with self.model_lock:
-                # Compile a new model to train fresh or load and fit
+            # Criar novo modelo
                 model = model_lib.create_model()
-                model_lib.train_model(model, X, y, epochs=epochs)
-                model.save(MODEL_PATH)
-                self.model = tf.keras.models.load_model(MODEL_PATH)
 
-            msg = f"Model retrained successfully on {len(X)} samples and updated in memory."
+            # Treinar e guardar histórico
+            history = model_lib.train_model(
+                model,
+                X,
+                y,
+                epochs=epochs
+                )
+
+            # Métricas finais
+            train_acc = history.history["accuracy"][-1]
+            val_acc = history.history["val_accuracy"][-1]
+            train_loss = history.history["loss"][-1]
+            val_loss = history.history["val_loss"][-1]
+
+            # Heurísticas simples
+            overfitting = (train_acc - val_acc) > 0.10
+
+            underfitting = (
+                train_acc < 0.70 and
+                val_acc < 0.70
+            )
+
+            # Guardar modelo
+            model.save(MODEL_PATH)
+            self.model = tf.keras.models.load_model(MODEL_PATH)
+
+            msg = (
+            f"Model retrained successfully on {len(X)} samples. "
+            f"Train Acc={train_acc:.3f}, "
+            f"Val Acc={val_acc:.3f}, "
+            f"Overfitting={overfitting}, "
+            f"Underfitting={underfitting}"
+            )
+
             print(msg)
-            return smartlock.RetrainModelResponse(success=True, message=msg)
+
+            diagnostics = smartlock.TrainingDiagnostics(
+                train_accuracy=float(train_acc),
+                validation_accuracy=float(val_acc),
+                train_loss=float(train_loss),
+                validation_loss=float(val_loss),
+                underfitting_detected=bool(underfitting),
+                overfitting_detected=bool(overfitting)
+            )
+
+            return smartlock.RetrainModelResponse(
+                success=True,
+                message=msg,
+                diagnostics=diagnostics
+            )
 
         except Exception as e:
             error_msg = f"Retraining failed: {str(e)}"
             print(error_msg)
-            return smartlock.RetrainModelResponse(success=False, message=error_msg)
+
+            return smartlock.RetrainModelResponse(
+            success=False,
+            message=error_msg
+            )
+
 
     def EvaluateModel(self, request, context):
-        return super().EvaluateModel(request, context)
+        try:
+            import io
+            import pandas as pd
 
+            # 1. Tenta ler o conteúdo recebido (a string CSV do Go)
+            data_content = request.dataset_path
+            
+            # Se a string contiver a nossa estrutura de dados:
+            df = pd.read_csv(io.StringIO(data_content))
+            
+            # Se a string contiver vírgulas e "feature1", tratamos como CSV em memória
+            if "feature1" in data_content or "feature2" in data_content:
+                df = pd.read_csv(io.StringIO(data_content))
+            # Se não, tentamos ver se é um caminho de ficheiro válido
+            elif os.path.exists(data_content):
+                df = pd.read_csv(data_content)
+            else:
+                raise Exception(f"Dados ou ficheiro não encontrados: {data_content}")
+
+            # 2. Mapeamento de colunas (para o modelo funcionar)
+            df = df.rename(columns={'feature1': 'fails', 'feature2': 'distance_cm'})
+            if 'is_denied' not in df.columns: df['is_denied'] = 0.0
+
+            # Verificar se o dataset tem labels
+            if "severity" not in df.columns:
+                raise Exception(
+            "O dataset deve conter a coluna 'severity' para avaliação.")
+            # Normalizar como no treino
+            X = np.array([
+                model_lib.normalize_features(
+                row["fails"],
+                row["distance_cm"],
+                row["is_denied"]
+                )
+                for _, row in df.iterrows()
+                ])
+            y_true = df["severity"].values
+            # Previsões do modelo
+            with self.model_lock:
+                predictions = self.model.predict(X, verbose=0)
+
+            # Classe prevista (0,1,2,3)
+            y_pred = np.argmax(predictions, axis=1)
+
+            # Métricas
+            cm = confusion_matrix(y_true, y_pred)
+
+            accuracy = accuracy_score(y_true, y_pred)
+
+            precision = precision_score(
+            y_true,
+            y_pred,
+            average="macro",
+            zero_division=0
+            )
+
+            recall = recall_score(
+            y_true,
+            y_pred,
+            average="macro",
+            zero_division=0
+            )
+
+            f1 = f1_score(
+                y_true,
+                y_pred,
+                average="macro",
+                zero_division=0
+            )
+            rows = []
+
+            for row in cm:
+                rows.append(
+                smartlock.ConfusionMatrixRow(
+                values=[int(x) for x in row]
+            )
+            )
+            
+            # ... (o resto da tua lógica de predict e retorno continua igual)
+            # 4. Cálculo simples para teste
+            return smartlock.EvaluateModelResponse(
+            confusion_matrix=rows,
+            metrics=smartlock.EvaluationMetrics(
+                accuracy=float(accuracy),
+                precision_macro=float(precision),
+                recall_macro=float(recall),
+                f1_macro=float(f1),
+            ),
+            binary_metrics=smartlock.BinaryEvaluationMetrics(
+                accuracy=float(accuracy),
+                precision=float(precision),
+                recall=float(recall),
+                f1=float(f1),
+            )
+)
+
+        except Exception as e:
+            print(f"Erro detalhado na avaliação: {str(e)}")
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(f"Erro ao processar dados: {str(e)}")
+            return smartlock.EvaluateModelResponse()
+        
 class RabbitMQConsumer(threading.Thread):
     def __init__(self, ai_service):
         super().__init__()

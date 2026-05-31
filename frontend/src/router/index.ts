@@ -40,11 +40,11 @@ const router = createRouter({
       },
     },
     {
-      path: '/add-users',
-      name: 'Add Users',
-      component: () => import('../views/Forms/AddUsers.vue'),
+      path: '/ai/retrain',
+      name: 'AiRetrain',
+      component: () => import('../views/Pages/AiRetrainView.vue'),
       meta: {
-        title: 'Adicionar Utilizadores',
+        title: 'AI Model Retraining',
       },
     },
     {

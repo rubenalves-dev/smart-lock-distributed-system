@@ -67,8 +67,8 @@ func (f *fakeAIService) PredictSeverity(ctx context.Context, event models.Sensor
 	return 1, 0.95, "Keep monitor", nil
 }
 
-func (f *fakeAIService) RetrainModel(ctx context.Context, epochs int32, datasetPath string) (bool, string, error) {
-	return true, "Retrained", nil
+func (f *fakeAIService) RetrainModel(ctx context.Context, epochs int32, datasetPath string) (*models.RetrainResult, error) {
+	return &models.RetrainResult{Success: true, Message: "Retrained"}, nil
 }
 
 func (f *fakeAIService) EvaluateModel(ctx context.Context, datasetPath string) (*models.EvaluationResult, error) {
