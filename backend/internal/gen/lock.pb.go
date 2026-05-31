@@ -557,17 +557,102 @@ func (x *RemoteUnlockResponse) GetMessage() string {
 	return ""
 }
 
+type TrainingDiagnostics struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	TrainAccuracy        float32                `protobuf:"fixed32,1,opt,name=train_accuracy,json=trainAccuracy,proto3" json:"train_accuracy,omitempty"`
+	ValidationAccuracy   float32                `protobuf:"fixed32,2,opt,name=validation_accuracy,json=validationAccuracy,proto3" json:"validation_accuracy,omitempty"`
+	TrainLoss            float32                `protobuf:"fixed32,3,opt,name=train_loss,json=trainLoss,proto3" json:"train_loss,omitempty"`
+	ValidationLoss       float32                `protobuf:"fixed32,4,opt,name=validation_loss,json=validationLoss,proto3" json:"validation_loss,omitempty"`
+	UnderfittingDetected bool                   `protobuf:"varint,5,opt,name=underfitting_detected,json=underfittingDetected,proto3" json:"underfitting_detected,omitempty"`
+	OverfittingDetected  bool                   `protobuf:"varint,6,opt,name=overfitting_detected,json=overfittingDetected,proto3" json:"overfitting_detected,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *TrainingDiagnostics) Reset() {
+	*x = TrainingDiagnostics{}
+	mi := &file_lock_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TrainingDiagnostics) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TrainingDiagnostics) ProtoMessage() {}
+
+func (x *TrainingDiagnostics) ProtoReflect() protoreflect.Message {
+	mi := &file_lock_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TrainingDiagnostics.ProtoReflect.Descriptor instead.
+func (*TrainingDiagnostics) Descriptor() ([]byte, []int) {
+	return file_lock_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *TrainingDiagnostics) GetTrainAccuracy() float32 {
+	if x != nil {
+		return x.TrainAccuracy
+	}
+	return 0
+}
+
+func (x *TrainingDiagnostics) GetValidationAccuracy() float32 {
+	if x != nil {
+		return x.ValidationAccuracy
+	}
+	return 0
+}
+
+func (x *TrainingDiagnostics) GetTrainLoss() float32 {
+	if x != nil {
+		return x.TrainLoss
+	}
+	return 0
+}
+
+func (x *TrainingDiagnostics) GetValidationLoss() float32 {
+	if x != nil {
+		return x.ValidationLoss
+	}
+	return 0
+}
+
+func (x *TrainingDiagnostics) GetUnderfittingDetected() bool {
+	if x != nil {
+		return x.UnderfittingDetected
+	}
+	return false
+}
+
+func (x *TrainingDiagnostics) GetOverfittingDetected() bool {
+	if x != nil {
+		return x.OverfittingDetected
+	}
+	return false
+}
+
 type RetrainModelResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Diagnostics   *TrainingDiagnostics   `protobuf:"bytes,3,opt,name=diagnostics,proto3" json:"diagnostics,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RetrainModelResponse) Reset() {
 	*x = RetrainModelResponse{}
-	mi := &file_lock_proto_msgTypes[8]
+	mi := &file_lock_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -579,7 +664,7 @@ func (x *RetrainModelResponse) String() string {
 func (*RetrainModelResponse) ProtoMessage() {}
 
 func (x *RetrainModelResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lock_proto_msgTypes[8]
+	mi := &file_lock_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -592,7 +677,7 @@ func (x *RetrainModelResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RetrainModelResponse.ProtoReflect.Descriptor instead.
 func (*RetrainModelResponse) Descriptor() ([]byte, []int) {
-	return file_lock_proto_rawDescGZIP(), []int{8}
+	return file_lock_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *RetrainModelResponse) GetSuccess() bool {
@@ -609,6 +694,13 @@ func (x *RetrainModelResponse) GetMessage() string {
 	return ""
 }
 
+func (x *RetrainModelResponse) GetDiagnostics() *TrainingDiagnostics {
+	if x != nil {
+		return x.Diagnostics
+	}
+	return nil
+}
+
 type GetSystemHealthResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ServiceName   string                 `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
@@ -621,7 +713,7 @@ type GetSystemHealthResponse struct {
 
 func (x *GetSystemHealthResponse) Reset() {
 	*x = GetSystemHealthResponse{}
-	mi := &file_lock_proto_msgTypes[9]
+	mi := &file_lock_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -633,7 +725,7 @@ func (x *GetSystemHealthResponse) String() string {
 func (*GetSystemHealthResponse) ProtoMessage() {}
 
 func (x *GetSystemHealthResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lock_proto_msgTypes[9]
+	mi := &file_lock_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -646,7 +738,7 @@ func (x *GetSystemHealthResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSystemHealthResponse.ProtoReflect.Descriptor instead.
 func (*GetSystemHealthResponse) Descriptor() ([]byte, []int) {
-	return file_lock_proto_rawDescGZIP(), []int{9}
+	return file_lock_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetSystemHealthResponse) GetServiceName() string {
@@ -687,7 +779,7 @@ type RetrainModelRequest struct {
 
 func (x *RetrainModelRequest) Reset() {
 	*x = RetrainModelRequest{}
-	mi := &file_lock_proto_msgTypes[10]
+	mi := &file_lock_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -699,7 +791,7 @@ func (x *RetrainModelRequest) String() string {
 func (*RetrainModelRequest) ProtoMessage() {}
 
 func (x *RetrainModelRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lock_proto_msgTypes[10]
+	mi := &file_lock_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -712,7 +804,7 @@ func (x *RetrainModelRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RetrainModelRequest.ProtoReflect.Descriptor instead.
 func (*RetrainModelRequest) Descriptor() ([]byte, []int) {
-	return file_lock_proto_rawDescGZIP(), []int{10}
+	return file_lock_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *RetrainModelRequest) GetDatasetPath() string {
@@ -738,7 +830,7 @@ type EvaluateModelRequest struct {
 
 func (x *EvaluateModelRequest) Reset() {
 	*x = EvaluateModelRequest{}
-	mi := &file_lock_proto_msgTypes[11]
+	mi := &file_lock_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -750,7 +842,7 @@ func (x *EvaluateModelRequest) String() string {
 func (*EvaluateModelRequest) ProtoMessage() {}
 
 func (x *EvaluateModelRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_lock_proto_msgTypes[11]
+	mi := &file_lock_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -763,7 +855,7 @@ func (x *EvaluateModelRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluateModelRequest.ProtoReflect.Descriptor instead.
 func (*EvaluateModelRequest) Descriptor() ([]byte, []int) {
-	return file_lock_proto_rawDescGZIP(), []int{11}
+	return file_lock_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *EvaluateModelRequest) GetDatasetPath() string {
@@ -782,7 +874,7 @@ type ConfusionMatrixRow struct {
 
 func (x *ConfusionMatrixRow) Reset() {
 	*x = ConfusionMatrixRow{}
-	mi := &file_lock_proto_msgTypes[12]
+	mi := &file_lock_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -794,7 +886,7 @@ func (x *ConfusionMatrixRow) String() string {
 func (*ConfusionMatrixRow) ProtoMessage() {}
 
 func (x *ConfusionMatrixRow) ProtoReflect() protoreflect.Message {
-	mi := &file_lock_proto_msgTypes[12]
+	mi := &file_lock_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -807,7 +899,7 @@ func (x *ConfusionMatrixRow) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfusionMatrixRow.ProtoReflect.Descriptor instead.
 func (*ConfusionMatrixRow) Descriptor() ([]byte, []int) {
-	return file_lock_proto_rawDescGZIP(), []int{12}
+	return file_lock_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ConfusionMatrixRow) GetValues() []int32 {
@@ -829,7 +921,7 @@ type EvaluationMetrics struct {
 
 func (x *EvaluationMetrics) Reset() {
 	*x = EvaluationMetrics{}
-	mi := &file_lock_proto_msgTypes[13]
+	mi := &file_lock_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -841,7 +933,7 @@ func (x *EvaluationMetrics) String() string {
 func (*EvaluationMetrics) ProtoMessage() {}
 
 func (x *EvaluationMetrics) ProtoReflect() protoreflect.Message {
-	mi := &file_lock_proto_msgTypes[13]
+	mi := &file_lock_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -854,7 +946,7 @@ func (x *EvaluationMetrics) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluationMetrics.ProtoReflect.Descriptor instead.
 func (*EvaluationMetrics) Descriptor() ([]byte, []int) {
-	return file_lock_proto_rawDescGZIP(), []int{13}
+	return file_lock_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *EvaluationMetrics) GetAccuracy() float32 {
@@ -897,7 +989,7 @@ type BinaryEvaluationMetrics struct {
 
 func (x *BinaryEvaluationMetrics) Reset() {
 	*x = BinaryEvaluationMetrics{}
-	mi := &file_lock_proto_msgTypes[14]
+	mi := &file_lock_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -909,7 +1001,7 @@ func (x *BinaryEvaluationMetrics) String() string {
 func (*BinaryEvaluationMetrics) ProtoMessage() {}
 
 func (x *BinaryEvaluationMetrics) ProtoReflect() protoreflect.Message {
-	mi := &file_lock_proto_msgTypes[14]
+	mi := &file_lock_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -922,7 +1014,7 @@ func (x *BinaryEvaluationMetrics) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BinaryEvaluationMetrics.ProtoReflect.Descriptor instead.
 func (*BinaryEvaluationMetrics) Descriptor() ([]byte, []int) {
-	return file_lock_proto_rawDescGZIP(), []int{14}
+	return file_lock_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *BinaryEvaluationMetrics) GetAccuracy() float32 {
@@ -964,7 +1056,7 @@ type EvaluateModelResponse struct {
 
 func (x *EvaluateModelResponse) Reset() {
 	*x = EvaluateModelResponse{}
-	mi := &file_lock_proto_msgTypes[15]
+	mi := &file_lock_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -976,7 +1068,7 @@ func (x *EvaluateModelResponse) String() string {
 func (*EvaluateModelResponse) ProtoMessage() {}
 
 func (x *EvaluateModelResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_lock_proto_msgTypes[15]
+	mi := &file_lock_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -989,7 +1081,7 @@ func (x *EvaluateModelResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluateModelResponse.ProtoReflect.Descriptor instead.
 func (*EvaluateModelResponse) Descriptor() ([]byte, []int) {
-	return file_lock_proto_rawDescGZIP(), []int{15}
+	return file_lock_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *EvaluateModelResponse) GetConfusionMatrix() []*ConfusionMatrixRow {
@@ -1058,10 +1150,19 @@ const file_lock_proto_rawDesc = "" +
 	"secret_key\x18\x02 \x01(\tR\tsecretKey\"J\n" +
 	"\x14RemoteUnlockResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"J\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x9d\x02\n" +
+	"\x13TrainingDiagnostics\x12%\n" +
+	"\x0etrain_accuracy\x18\x01 \x01(\x02R\rtrainAccuracy\x12/\n" +
+	"\x13validation_accuracy\x18\x02 \x01(\x02R\x12validationAccuracy\x12\x1d\n" +
+	"\n" +
+	"train_loss\x18\x03 \x01(\x02R\ttrainLoss\x12'\n" +
+	"\x0fvalidation_loss\x18\x04 \x01(\x02R\x0evalidationLoss\x123\n" +
+	"\x15underfitting_detected\x18\x05 \x01(\bR\x14underfittingDetected\x121\n" +
+	"\x14overfitting_detected\x18\x06 \x01(\bR\x13overfittingDetected\"\x87\x01\n" +
 	"\x14RetrainModelResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\x94\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12;\n" +
+	"\vdiagnostics\x18\x03 \x01(\v2\x19.lock.TrainingDiagnosticsR\vdiagnostics\"\x94\x01\n" +
 	"\x17GetSystemHealthResponse\x12!\n" +
 	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x1b\n" +
@@ -1115,7 +1216,7 @@ func file_lock_proto_rawDescGZIP() []byte {
 }
 
 var file_lock_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_lock_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_lock_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_lock_proto_goTypes = []any{
 	(Severity)(0),                    // 0: lock.Severity
 	(*Empty)(nil),                    // 1: lock.Empty
@@ -1126,40 +1227,42 @@ var file_lock_proto_goTypes = []any{
 	(*AuthenticateUserResponse)(nil), // 6: lock.AuthenticateUserResponse
 	(*RemoteUnlockRequest)(nil),      // 7: lock.RemoteUnlockRequest
 	(*RemoteUnlockResponse)(nil),     // 8: lock.RemoteUnlockResponse
-	(*RetrainModelResponse)(nil),     // 9: lock.RetrainModelResponse
-	(*GetSystemHealthResponse)(nil),  // 10: lock.GetSystemHealthResponse
-	(*RetrainModelRequest)(nil),      // 11: lock.RetrainModelRequest
-	(*EvaluateModelRequest)(nil),     // 12: lock.EvaluateModelRequest
-	(*ConfusionMatrixRow)(nil),       // 13: lock.ConfusionMatrixRow
-	(*EvaluationMetrics)(nil),        // 14: lock.EvaluationMetrics
-	(*BinaryEvaluationMetrics)(nil),  // 15: lock.BinaryEvaluationMetrics
-	(*EvaluateModelResponse)(nil),    // 16: lock.EvaluateModelResponse
-	(*timestamppb.Timestamp)(nil),    // 17: google.protobuf.Timestamp
+	(*TrainingDiagnostics)(nil),      // 9: lock.TrainingDiagnostics
+	(*RetrainModelResponse)(nil),     // 10: lock.RetrainModelResponse
+	(*GetSystemHealthResponse)(nil),  // 11: lock.GetSystemHealthResponse
+	(*RetrainModelRequest)(nil),      // 12: lock.RetrainModelRequest
+	(*EvaluateModelRequest)(nil),     // 13: lock.EvaluateModelRequest
+	(*ConfusionMatrixRow)(nil),       // 14: lock.ConfusionMatrixRow
+	(*EvaluationMetrics)(nil),        // 15: lock.EvaluationMetrics
+	(*BinaryEvaluationMetrics)(nil),  // 16: lock.BinaryEvaluationMetrics
+	(*EvaluateModelResponse)(nil),    // 17: lock.EvaluateModelResponse
+	(*timestamppb.Timestamp)(nil),    // 18: google.protobuf.Timestamp
 }
 var file_lock_proto_depIdxs = []int32{
-	17, // 0: lock.SensorEvent.timestamp:type_name -> google.protobuf.Timestamp
+	18, // 0: lock.SensorEvent.timestamp:type_name -> google.protobuf.Timestamp
 	2,  // 1: lock.PredictSeverityRequest.events:type_name -> lock.SensorEvent
 	0,  // 2: lock.PredictSeverityResponse.classification:type_name -> lock.Severity
-	13, // 3: lock.EvaluateModelResponse.confusion_matrix:type_name -> lock.ConfusionMatrixRow
-	14, // 4: lock.EvaluateModelResponse.metrics:type_name -> lock.EvaluationMetrics
-	15, // 5: lock.EvaluateModelResponse.binary_metrics:type_name -> lock.BinaryEvaluationMetrics
-	3,  // 6: lock.AIService.PredictSeverity:input_type -> lock.PredictSeverityRequest
-	11, // 7: lock.AIService.RetrainModel:input_type -> lock.RetrainModelRequest
-	12, // 8: lock.AIService.EvaluateModel:input_type -> lock.EvaluateModelRequest
-	5,  // 9: lock.LockService.AuthenticateUser:input_type -> lock.AuthenticateUserRequest
-	7,  // 10: lock.LockService.RemoteUnlock:input_type -> lock.RemoteUnlockRequest
-	1,  // 11: lock.LockService.GetSystemHealth:input_type -> lock.Empty
-	4,  // 12: lock.AIService.PredictSeverity:output_type -> lock.PredictSeverityResponse
-	9,  // 13: lock.AIService.RetrainModel:output_type -> lock.RetrainModelResponse
-	16, // 14: lock.AIService.EvaluateModel:output_type -> lock.EvaluateModelResponse
-	6,  // 15: lock.LockService.AuthenticateUser:output_type -> lock.AuthenticateUserResponse
-	8,  // 16: lock.LockService.RemoteUnlock:output_type -> lock.RemoteUnlockResponse
-	10, // 17: lock.LockService.GetSystemHealth:output_type -> lock.GetSystemHealthResponse
-	12, // [12:18] is the sub-list for method output_type
-	6,  // [6:12] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	9,  // 3: lock.RetrainModelResponse.diagnostics:type_name -> lock.TrainingDiagnostics
+	14, // 4: lock.EvaluateModelResponse.confusion_matrix:type_name -> lock.ConfusionMatrixRow
+	15, // 5: lock.EvaluateModelResponse.metrics:type_name -> lock.EvaluationMetrics
+	16, // 6: lock.EvaluateModelResponse.binary_metrics:type_name -> lock.BinaryEvaluationMetrics
+	3,  // 7: lock.AIService.PredictSeverity:input_type -> lock.PredictSeverityRequest
+	12, // 8: lock.AIService.RetrainModel:input_type -> lock.RetrainModelRequest
+	13, // 9: lock.AIService.EvaluateModel:input_type -> lock.EvaluateModelRequest
+	5,  // 10: lock.LockService.AuthenticateUser:input_type -> lock.AuthenticateUserRequest
+	7,  // 11: lock.LockService.RemoteUnlock:input_type -> lock.RemoteUnlockRequest
+	1,  // 12: lock.LockService.GetSystemHealth:input_type -> lock.Empty
+	4,  // 13: lock.AIService.PredictSeverity:output_type -> lock.PredictSeverityResponse
+	10, // 14: lock.AIService.RetrainModel:output_type -> lock.RetrainModelResponse
+	17, // 15: lock.AIService.EvaluateModel:output_type -> lock.EvaluateModelResponse
+	6,  // 16: lock.LockService.AuthenticateUser:output_type -> lock.AuthenticateUserResponse
+	8,  // 17: lock.LockService.RemoteUnlock:output_type -> lock.RemoteUnlockResponse
+	11, // 18: lock.LockService.GetSystemHealth:output_type -> lock.GetSystemHealthResponse
+	13, // [13:19] is the sub-list for method output_type
+	7,  // [7:13] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_lock_proto_init() }
@@ -1173,7 +1276,7 @@ func file_lock_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lock_proto_rawDesc), len(file_lock_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   16,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
