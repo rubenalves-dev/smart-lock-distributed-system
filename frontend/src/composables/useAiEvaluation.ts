@@ -26,12 +26,12 @@ export function useAiEvaluation() {
   const evaluate = async (path: string): Promise<EvaluationResponse | null> => {
     loading.value = true;
     try {
-      const response = await fetch('/api/ai/evaluate', {        
+      const response = await fetch('https://smartlock-api.raiiaa.dev/api/ai/evaluate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dataset_path: path })
+        body: JSON.stringify({ dataset_path: path }),
       });
-      
+
       if (!response.ok) return null;
       return await response.json();
     } catch {
