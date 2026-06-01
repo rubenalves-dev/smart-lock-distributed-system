@@ -54,15 +54,11 @@
           Conetividade Hardware
         </p>
         <div class="mt-2 flex items-center">
-          <span
-            :class="[
-              'rounded-full px-3 py-1 text-theme-xs font-semibold inline-block',
-              deviceData?.status === 'online'
-                ? 'bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-400'
-                : 'bg-error-50 text-error-700 dark:bg-error-500/15 dark:text-error-400',
-            ]"
-          >
-            {{ deviceData?.status ? deviceData.status.toUpperCase() : 'A VERIFICAR...' }}
+          <span :class="[
+            'rounded-full px-3 py-1 text-theme-xs font-semibold inline-block',
+            deviceData?.is_online ? 'bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-400' : 'bg-error-50 text-error-700 dark:bg-error-500/15 dark:text-error-400'
+          ]">
+            {{ deviceData?.is_online ? 'ONLINE' : 'OFFLINE' }}
           </span>
         </div>
       </div>
@@ -102,7 +98,7 @@
 
           <button
             @click="remoteUnlock"
-            :disabled="isLoading || deviceData?.status !== 'online'"
+            :disabled="isLoading || !deviceData?.is_online"
             class="w-full sm:w-auto px-5 py-2.5 rounded-lg text-white font-medium text-theme-sm transition-all shadow-sm focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed bg-brand-500 hover:bg-brand-600"
           >
             {{ isLoading ? 'A enviar comando MQTT...' : 'Enviar Comando de Abertura' }}
@@ -176,15 +172,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { API_BASE_URL } from '@/config';
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { API_BASE_URL } from '@/config'
 
-const deviceData = ref(null);
-const isUnlocked = ref(false);
-const isLoading = ref(false);
-const devices = ref([]);
-const selectedDevice = ref('lock-1');
-let telemetryInterval = null;
+const deviceData = ref(null)
+const manualUnlockActive = ref(false)
+
+const isUnlocked = computed(() => {
+  if (manualUnlockActive.value) return true
+  if (!deviceData.value) return false
+  const event = deviceData.value.event
+  const details = deviceData.value.details
+  const status = deviceData.value.status
+  
+  return status === 'UNLOCKED' || details === 'UNLOCKED' || event === 'access_granted' || status === 'Success'
+})
+const isLoading = ref(false)
+const devices = ref([])
+const selectedDevice = ref('lock-1')
+let telemetryInterval = null
 
 // Buscar todos os dispositivos com telemetria no banco
 const fetchDevicesList = async () => {
@@ -232,11 +238,11 @@ const remoteUnlock = async () => {
     if (response.ok) {
       const data = await response.json();
       if (data.success) {
-        isUnlocked.value = true;
+        manualUnlockActive.value = true
         // Mantém a indicação de aberta temporariamente por 5 segundos (UX de simulação física)
         setTimeout(() => {
-          isUnlocked.value = false;
-        }, 5000);
+          manualUnlockActive.value = false
+        }, 5000)
       }
     } else {
       throw new Error('Erro na resposta do Servidor Go');

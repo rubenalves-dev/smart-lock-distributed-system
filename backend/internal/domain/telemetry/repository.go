@@ -58,7 +58,8 @@ func (r *sqlRepository) GetLatest(ctx context.Context, deviceID string) (*models
 			COALESCE(fails, 0), 
 			COALESCE(rfid_uid, ''), 
 			COALESCE(rssi, 0), 
-			COALESCE(uptime, 0.0)
+			COALESCE(uptime, 0.0),
+			timestamp
 		FROM telemetry
 		WHERE device_id = $1
 		ORDER BY timestamp DESC
@@ -76,6 +77,7 @@ func (r *sqlRepository) GetLatest(ctx context.Context, deviceID string) (*models
 		&p.RfidUID,
 		&p.RSSI,
 		&p.Uptime,
+		&p.Timestamp,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
