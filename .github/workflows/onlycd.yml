@@ -9,7 +9,6 @@ jobs:
   deploy:
     name: CD - Deploy to VPS
     runs-on: ubuntu-latest
-    needs: build-and-test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
