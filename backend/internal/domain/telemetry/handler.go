@@ -41,7 +41,14 @@ func (h *Handler) IngestTelemetry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	processedPayload, err := h.service.IngestWithResult(r.Context(), payload)
+	if err := h.service.Ingest(r.Context(), payload); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
+	latestPayload, err := h.service.GetLatestTelemetry(r.Context(), payload.DeviceID)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -50,11 +57,12 @@ func (h *Handler) IngestTelemetry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"status":    "accepted",
-		"telemetry": processedPayload,
-	})
+	w.WriteHeader(http.StatusOK)
+	if latestPayload == nil {
+		json.NewEncoder(w).Encode(map[string]string{"status": "processed"})
+		return
+	}
+	json.NewEncoder(w).Encode(latestPayload)
 }
 
 func (h *Handler) GetLatestTelemetry(w http.ResponseWriter, r *http.Request) {

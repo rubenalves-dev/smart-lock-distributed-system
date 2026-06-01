@@ -2,77 +2,55 @@ package telemetry
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/mfa"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/user"
+	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/models"
 )
 
-func TestIngestTelemetryRejectsMissingRequiredFields(t *testing.T) {
-	telemetryRepo := &mockTelemetryRepository{}
+func TestIngestTelemetryRequiresDeviceIDAndEvent(t *testing.T) {
+	repo := &mockTelemetryRepository{}
 	uRepo := &fakeUserRepo{users: make(map[string]*user.User)}
 	uSvc := user.NewService(uRepo)
-	svc := NewService(telemetryRepo, uSvc, nil, nil, &fakeAIService{}, nil)
-	handler := NewHandler(svc)
+	handler := NewHandler(NewService(repo, uSvc, nil, nil, nil, nil))
 
-	req := httptest.NewRequest(http.MethodPost, "/api/telemetry", bytes.NewBufferString(`{"details":"x"}`))
+	req := httptest.NewRequest(http.MethodPost, "/api/telemetry", bytes.NewBufferString(`{"device_id":"","event":""}`))
 	rec := httptest.NewRecorder()
 
 	handler.IngestTelemetry(rec, req)
 
 	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, rec.Code)
+		t.Fatalf("expected status 400, got %d", rec.Code)
 	}
 }
 
-func TestIngestTelemetryReturnsProcessedTelemetry(t *testing.T) {
-	telemetryRepo := &mockTelemetryRepository{}
+func TestIngestTelemetryReturnsProcessedPayload(t *testing.T) {
+	repo := &mockTelemetryRepository{}
 	uRepo := &fakeUserRepo{users: make(map[string]*user.User)}
 	uSvc := user.NewService(uRepo)
-	aiSvc := &fakeAIServiceSuspicious{}
-	mfaRepo := &mockMFARepository{}
-	mfaSvc := mfa.NewService(mfaRepo, uSvc, nil, nil)
-	svc := NewService(telemetryRepo, uSvc, nil, nil, aiSvc, mfaSvc)
-	handler := NewHandler(svc)
+	handler := NewHandler(NewService(repo, uSvc, nil, nil, nil, nil))
 
-	isAccepted := true
-	if _, err := uSvc.UpdateUser(context.Background(), "88:77:66:55", nil, nil, &isAccepted, nil); err != nil {
-		t.Fatalf("failed to setup user: %v", err)
-	}
-
-	reqBody := `{"device_id":"lock_test","event":"access_request","rfid_uid":"88:77:66:55"}`
-	req := httptest.NewRequest(http.MethodPost, "/api/telemetry", bytes.NewBufferString(reqBody))
+	req := httptest.NewRequest(http.MethodPost, "/api/telemetry", bytes.NewBufferString(`{"device_id":"lock_test","event":"access_denied","rfid_uid":"AA:BB:CC:DD"}`))
 	rec := httptest.NewRecorder()
 
 	handler.IngestTelemetry(rec, req)
 
-	if rec.Code != http.StatusAccepted {
-		t.Fatalf("expected status %d, got %d", http.StatusAccepted, rec.Code)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
 	}
 
-	var body map[string]interface{}
-	if err := json.NewDecoder(rec.Body).Decode(&body); err != nil {
-		t.Fatalf("failed to decode response body: %v", err)
+	var got models.SensorPayload
+	if err := json.NewDecoder(rec.Body).Decode(&got); err != nil {
+		t.Fatalf("failed to decode response payload: %v", err)
 	}
 
-	if body["status"] != "accepted" {
-		t.Fatalf("expected status=accepted, got %v", body["status"])
+	if got.Event != "new_card" {
+		t.Fatalf("expected event new_card, got %s", got.Event)
 	}
-
-	telemetryBody, ok := body["telemetry"].(map[string]interface{})
-	if !ok {
-		t.Fatalf("expected telemetry object in response")
-	}
-
-	if telemetryBody["event"] != "mfa_pending" {
-		t.Fatalf("expected telemetry.event=mfa_pending, got %v", telemetryBody["event"])
-	}
-	if telemetryBody["status"] != "Pending" {
-		t.Fatalf("expected telemetry.status=Pending, got %v", telemetryBody["status"])
+	if got.Status != "Pending" {
+		t.Fatalf("expected status Pending, got %s", got.Status)
 	}
 }
-
