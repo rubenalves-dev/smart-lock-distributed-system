@@ -16,6 +16,7 @@
 <script setup>
 import VueApexCharts from "vue3-apexcharts";
 import { ref, onMounted } from "vue";
+import { API_BASE_URL } from '@/config';
 
 const series = ref([]);
 const loading = ref(true);
@@ -58,7 +59,7 @@ const chartOptions = ref({
 
 const fetchUptimeMetrics = async () => {
   try {
-    const response = await fetch('https://smartlock-api.raiiaa.dev/api/metrics/health?range=24h&interval=24h');
+    const response = await fetch(`${API_BASE_URL}/metrics/health?range=24h&interval=5m`);
     if (response.ok) {
       const data = await response.json();
       

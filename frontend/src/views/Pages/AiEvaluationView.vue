@@ -45,6 +45,9 @@
                   <div class="text-[10px] text-gray-400 dark:text-gray-500">
                     Apenas ficheiros .csv
                   </div>
+                  <div class="text-[9px] text-gray-400 dark:text-gray-500 italic mt-1 font-semibold">
+                    Nota: O cabeçalho deve conter: fails, distance_cm, is_denied, severity
+                  </div>
                 </div>
 
                 <div v-else class="space-y-3 w-full flex flex-col items-center">
@@ -231,12 +234,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useAiEvaluation, type EvaluationResponse } from '@/composables/useAiEvaluation';
 import EvaluationHistoryTable, { type HistoryItem } from '@/components/common/EvaluationHistoryTable.vue';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
 import ComponentCard from '@/components/common/ComponentCard.vue';
+import { API_BASE_URL } from '@/config';
 
 const evaluationMode = ref<'file' | 'path'>('file');
 const datasetFile = ref<File | null>(null);
@@ -248,6 +252,26 @@ const showResults = ref(false);
 const results = ref<EvaluationResponse | null>(null);
 
 const { evaluate, loading } = useAiEvaluation();
+
+const fetchEvaluationHistory = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/ai/evaluations`);
+    if (res.ok) {
+      const data = await res.json();
+      history.value = data.map((item: any) => ({
+        id: item.id,
+        date: new Date(item.created_at).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        datasetPath: item.dataset_path,
+        accuracy: Number((item.accuracy * 100).toFixed(1)),
+        precision: 0,
+        recall: 0,
+        f1: 0
+      }));
+    }
+  } catch (err) {
+    console.error('Erro ao carregar histórico:', err);
+  }
+};
 
 const handleFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement;
@@ -271,7 +295,6 @@ const clearFile = () => {
 
 const handleEvaluate = async () => {
   let targetInput = '';
-  let datasetLabel = '';
 
   if (evaluationMode.value === 'file') {
     if (!datasetFileContent.value) {
@@ -279,10 +302,8 @@ const handleEvaluate = async () => {
       return;
     }
     targetInput = datasetFileContent.value;
-    datasetLabel = datasetFile.value?.name || 'Ficheiro Local';
   } else {
     targetInput = datasetPath.value;
-    datasetLabel = datasetPath.value || '/test_data.csv';
   }
 
   const data = await evaluate(targetInput);
@@ -290,24 +311,13 @@ const handleEvaluate = async () => {
   if (data) {
     results.value = data;
     showResults.value = true;
-
-    // Extrair métricas principais para guardar no histórico (prioriza binárias com fallback para macro)
-    const accuracy = data.binary_metrics ? data.binary_metrics.accuracy : (data.metrics ? data.metrics.accuracy : 0);
-    const precision = data.binary_metrics ? data.binary_metrics.precision : (data.metrics ? data.metrics.precision_macro : 0);
-    const recall = data.binary_metrics ? data.binary_metrics.recall : (data.metrics ? data.metrics.recall_macro : 0);
-    const f1 = data.binary_metrics ? data.binary_metrics.f1 : (data.metrics ? data.metrics.f1_macro : 0);
-
-    history.value.push({
-      id: Date.now(),
-      date: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-      datasetPath: datasetLabel,
-      accuracy: Number(accuracy.toFixed(1)),
-      precision: Number(precision.toFixed(1)),
-      recall: Number(recall.toFixed(1)),
-      f1: Number(f1.toFixed(1))
-    });
+    await fetchEvaluationHistory();
   } else {
     alert('Erro ao processar a avaliação. Verifique a estrutura do ficheiro CSV ou o caminho indicado.');
   }
 };
+
+onMounted(() => {
+  fetchEvaluationHistory();
+});
 </script>

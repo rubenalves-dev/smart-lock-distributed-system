@@ -11,6 +11,8 @@ import (
 type Repository interface {
 	Save(ctx context.Context, payload models.SensorPayload) error
 	GetLatest(ctx context.Context, deviceID string) (*models.SensorPayload, error)
+	GetAll(ctx context.Context) ([]models.SensorPayload, error)
+	GetDevices(ctx context.Context) ([]string, error)
 }
 
 type sqlRepository struct {
@@ -82,5 +84,75 @@ func (r *sqlRepository) GetLatest(ctx context.Context, deviceID string) (*models
 		return nil, fmt.Errorf("failed to get latest telemetry: %w", err)
 	}
 	return &p, nil
+}
+
+func (r *sqlRepository) GetAll(ctx context.Context) ([]models.SensorPayload, error) {
+	query := `
+		SELECT 
+			device_id, 
+			event, 
+			COALESCE(details, ''), 
+			COALESCE(status, ''), 
+			COALESCE(distance_cm, 0.0), 
+			COALESCE(light_level, 0), 
+			COALESCE(fails, 0), 
+			COALESCE(rfid_uid, ''), 
+			COALESCE(rssi, 0), 
+			COALESCE(uptime, 0.0)
+		FROM telemetry
+		ORDER BY timestamp DESC`
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all telemetry: %w", err)
+	}
+	defer rows.Close()
+
+	payloads := []models.SensorPayload{}
+	for rows.Next() {
+		var p models.SensorPayload
+		err := rows.Scan(
+			&p.DeviceID,
+			&p.Event,
+			&p.Details,
+			&p.Status,
+			&p.DistanceCm,
+			&p.LightLevel,
+			&p.Fails,
+			&p.RfidUID,
+			&p.RSSI,
+			&p.Uptime,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan telemetry row: %w", err)
+		}
+		payloads = append(payloads, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating telemetry rows: %w", err)
+	}
+	return payloads, nil
+}
+
+func (r *sqlRepository) GetDevices(ctx context.Context) ([]string, error) {
+	query := `SELECT DISTINCT device_id FROM telemetry`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query devices: %w", err)
+	}
+	defer rows.Close()
+
+	devices := []string{}
+	for rows.Next() {
+		var d string
+		if err := rows.Scan(&d); err != nil {
+			return nil, fmt.Errorf("failed to scan device: %w", err)
+		}
+		devices = append(devices, d)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating devices: %w", err)
+	}
+	return devices, nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/ai"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/mfa"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/user"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/models"
@@ -28,6 +29,14 @@ func (m *mockTelemetryRepository) GetLatest(ctx context.Context, deviceID string
 		}
 	}
 	return latest, nil
+}
+
+func (m *mockTelemetryRepository) GetAll(ctx context.Context) ([]models.SensorPayload, error) {
+	return m.payloads, nil
+}
+
+func (m *mockTelemetryRepository) GetDevices(ctx context.Context) ([]string, error) {
+	return []string{"lock_test"}, nil
 }
 
 type fakeUserRepo struct {
@@ -75,6 +84,14 @@ func (f *fakeAIService) RetrainModel(ctx context.Context, epochs int32, datasetP
 
 func (f *fakeAIService) EvaluateModel(ctx context.Context, datasetPath string) (*models.EvaluationResult, error) {
 	return &models.EvaluationResult{}, nil
+}
+
+func (f *fakeAIService) ListEvaluations(ctx context.Context) ([]ai.Evaluation, error) {
+	return nil, nil
+}
+
+func (f *fakeAIService) ListRetrains(ctx context.Context) ([]ai.Retrain, error) {
+	return nil, nil
 }
 
 
@@ -134,9 +151,9 @@ func TestTelemetryIngestHeartbeat(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Verify telemetry was NOT saved synchronously
-	if len(telemetryRepo.payloads) != 0 {
-		t.Errorf("expected 0 synchronously saved telemetry payloads for heartbeat, got %d", len(telemetryRepo.payloads))
+	// Verify telemetry was saved synchronously
+	if len(telemetryRepo.payloads) != 1 {
+		t.Errorf("expected 1 synchronously saved telemetry payloads for heartbeat, got %d", len(telemetryRepo.payloads))
 	}
 
 	// Verify AI predict was NOT called

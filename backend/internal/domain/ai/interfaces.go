@@ -10,6 +10,8 @@ type AIService interface {
 	PredictSeverity(ctx context.Context, event models.SensorPayload) (int32, float32, string, error)
 	RetrainModel(ctx context.Context, epochs int32, datasetPath string) (*models.RetrainResult, error)
 	EvaluateModel(ctx context.Context, datasetPath string) (*models.EvaluationResult, error)
+	ListEvaluations(ctx context.Context) ([]Evaluation, error)
+	ListRetrains(ctx context.Context) ([]Retrain, error)
 }
 
 type GRPCClient interface {
@@ -20,4 +22,7 @@ type GRPCClient interface {
 
 type Repository interface {
 	SaveEvaluation(ctx context.Context, e *Evaluation) error
+	ListEvaluations(ctx context.Context) ([]Evaluation, error)
+	SaveRetrain(ctx context.Context, r *Retrain) error
+	ListRetrains(ctx context.Context) ([]Retrain, error)
 }

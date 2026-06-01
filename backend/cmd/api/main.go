@@ -243,7 +243,19 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 		defer cancel()
 
-		result, err := aiService.RetrainModel(ctx, req.Epochs, req.DatasetPath)
+		pathToTrain := req.DatasetPath
+		if req.DatasetPath == "database" {
+			csvData, err := telemetryService.GetTelemetryAsCSV(ctx)
+			if err != nil {
+				log.Printf("Erro ao extrair telemetria para treino: %v", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(map[string]interface{}{"error": err.Error()})
+				return
+			}
+			pathToTrain = csvData
+		}
+
+		result, err := aiService.RetrainModel(ctx, req.Epochs, pathToTrain)
 		if err != nil {
 			log.Printf("Erro ao treinar modelo: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -253,6 +265,42 @@ func main() {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(result)
+	})
+
+	r.Get("/api/ai/evaluations", func(w http.ResponseWriter, r *http.Request) {
+		evals, err := aiService.ListEvaluations(r.Context())
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(evals)
+	})
+
+	r.Get("/api/ai/retrains", func(w http.ResponseWriter, r *http.Request) {
+		retrains, err := aiService.ListRetrains(r.Context())
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(retrains)
+	})
+
+	r.Get("/api/telemetry/devices", func(w http.ResponseWriter, r *http.Request) {
+		devices, err := telemetryService.GetDevices(r.Context())
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(devices)
 	})
 
 	r.Get("/api/ws", wsHub.ServeWebSocket)

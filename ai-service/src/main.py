@@ -157,17 +157,34 @@ class AIService(smartlock_grpc.AIServiceServicer):
         epochs = request.epochs if request.epochs > 0 else 10
         dataset_path = request.dataset_path if request.dataset_path else DATASET_PATH
 
-        if not os.path.exists(dataset_path):
+        # Determine if dataset_path contains raw inline CSV content
+        is_csv_content = False
+        if "\n" in dataset_path or "," in dataset_path:
+            if any(h in dataset_path for h in ["fails", "distance_cm", "is_denied", "severity", "feature1", "feature2"]):
+                is_csv_content = True
+
+        temp_path = None
+        if is_csv_content:
+            import tempfile
+            # Create a temporary file to hold the inline CSV content
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+                f.write(dataset_path)
+                temp_path = f.name
+            actual_dataset_path = temp_path
+        else:
+            actual_dataset_path = dataset_path
+
+        if not is_csv_content and not os.path.exists(actual_dataset_path):
             return smartlock.RetrainModelResponse(
                 success=False,
-                message=f"Dataset path '{dataset_path}' does not exist."
+                message=f"Dataset path '{actual_dataset_path}' does not exist."
             )
 
-        print(f"Retraining model on dataset: {dataset_path} for {epochs} epochs...")
+        print(f"Retraining model on dataset: {actual_dataset_path} for {epochs} epochs...")
 
         try:
             # Load the dataset
-            X, y = model_lib.load_dataset(dataset_path)
+            X, y = model_lib.load_dataset(actual_dataset_path)
 
             with self.model_lock:
             # Criar novo modelo
@@ -232,6 +249,13 @@ class AIService(smartlock_grpc.AIServiceServicer):
             success=False,
             message=error_msg
             )
+        finally:
+            # Cleanup temporary file if it was created
+            if temp_path and os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except Exception as e:
+                    print(f"Error cleaning up temp retrain file: {e}")
 
 
     def EvaluateModel(self, request, context):
@@ -239,16 +263,16 @@ class AIService(smartlock_grpc.AIServiceServicer):
             import io
             import pandas as pd
 
-            # 1. Tenta ler o conteúdo recebido (a string CSV do Go)
+            # Determine if request.dataset_path is inline CSV content or a file path
             data_content = request.dataset_path
             
-            # Se a string contiver a nossa estrutura de dados:
-            df = pd.read_csv(io.StringIO(data_content))
-            
-            # Se a string contiver vírgulas e "feature1", tratamos como CSV em memória
-            if "feature1" in data_content or "feature2" in data_content:
+            is_csv_content = False
+            if "\n" in data_content or "," in data_content:
+                if any(h in data_content for h in ["fails", "distance_cm", "is_denied", "severity", "feature1", "feature2"]):
+                    is_csv_content = True
+
+            if is_csv_content:
                 df = pd.read_csv(io.StringIO(data_content))
-            # Se não, tentamos ver se é um caminho de ficheiro válido
             elif os.path.exists(data_content):
                 df = pd.read_csv(data_content)
             else:

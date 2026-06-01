@@ -1,6 +1,21 @@
 <template>
   <div class="w-full px-4 py-6 md:px-8 space-y-10">
     
+    <!-- Device Selector Dropdown -->
+    <div class="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-150 pb-5 dark:border-gray-800">
+      <div>
+        <h3 class="text-lg font-bold text-gray-800 dark:text-white/90">Seleção de Dispositivo</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400">Controle e visualize telemetria de um dispositivo IoT específico.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Dispositivo:</label>
+        <select v-model="selectedDevice" @change="onDeviceChange" class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-xs font-semibold text-gray-800 dark:text-white/90 outline-none transition focus:border-brand-500">
+          <option v-for="dev in devices" :key="dev" :value="dev">{{ dev }}</option>
+          <option v-if="devices.length === 0" value="lock-1">lock-1 (Sem telemetria DB)</option>
+        </select>
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 w-full">
       
       <div class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
@@ -107,18 +122,40 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { API_BASE_URL } from '@/config'
 
 const deviceData = ref(null)
 const isUnlocked = ref(false)
 const isLoading = ref(false)
+const devices = ref([])
+const selectedDevice = ref('lock-1')
 let telemetryInterval = null
+
+// Buscar todos os dispositivos com telemetria no banco
+const fetchDevicesList = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/telemetry/devices`)
+    if (response.ok) {
+      const data = await response.json()
+      devices.value = data
+      if (data.length > 0) {
+        selectedDevice.value = data[0]
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao recolher lista de dispositivos:', error)
+  }
+}
 
 // Consulta o estado mais recente de telemetria da fechadura do Postgres
 const fetchDeviceTelemetry = async () => {
+  if (!selectedDevice.value) return
   try {
-    const response = await fetch('https://smartlock-api.raiiaa.dev/api/telemetry/latest?device_id=lock-1')
+    const response = await fetch(`${API_BASE_URL}/telemetry/latest?device_id=${encodeURIComponent(selectedDevice.value)}`)
     if (response.ok) {
       deviceData.value = await response.json()
+    } else {
+      deviceData.value = null
     }
   } catch (error) {
     console.error('Erro ao recolher telemetria do gateway:', error)
@@ -129,7 +166,7 @@ const fetchDeviceTelemetry = async () => {
 const remoteUnlock = async () => {
   isLoading.value = true
   try {
-    const response = await fetch('https://smartlock-api.raiiaa.dev/api/door/unlock', {
+    const response = await fetch(`${API_BASE_URL}/door/unlock`, {
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'application/json' }
@@ -155,8 +192,17 @@ const remoteUnlock = async () => {
   }
 }
 
-onMounted(() => {
+const onDeviceChange = () => {
   fetchDeviceTelemetry()
+  if (telemetryInterval) {
+    clearInterval(telemetryInterval)
+    telemetryInterval = setInterval(fetchDeviceTelemetry, 3000)
+  }
+}
+
+onMounted(async () => {
+  await fetchDevicesList()
+  await fetchDeviceTelemetry()
   // Atualiza as métricas e o sinal Wi-Fi a cada 3 segundos automaticamente
   telemetryInterval = setInterval(fetchDeviceTelemetry, 3000)
 })

@@ -12,7 +12,7 @@ type grpcClient struct {
 	client smartlock.AIServiceClient
 }
 
-func NewGRPCClient(client smartlock.AIServiceClient) AIService {
+func NewGRPCClient(client smartlock.AIServiceClient) GRPCClient {
 	return &grpcClient{client: client}
 }
 
