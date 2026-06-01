@@ -219,6 +219,7 @@ const saveUser = async () => {
     const payload = {
       name: modalData.value.name,
       email: modalData.value.email,
+      ...(isAccepting.value ? { is_accepted: true } : {}),
     }
 
     const response = await fetch(`https://smartlock-api.raiiaa.dev/api/users/${encodeURIComponent(modalData.value.rfid_uid)}`, {

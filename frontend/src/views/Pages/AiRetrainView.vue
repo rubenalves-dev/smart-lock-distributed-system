@@ -9,9 +9,82 @@
           title="Configuração do Treino" 
           desc="Defina as opções de época e caminho do dataset para iniciar o processo de treino e atualização dos pesos da rede neuronal."
         >
+          <!-- Mode Toggle Switcher -->
+          <div class="flex rounded-lg bg-gray-100 p-1 dark:bg-white/[0.03] mb-4">
+            <button type="button" @click="retrainMode = 'db'" 
+                    class="flex-1 rounded-md py-1.5 text-[10px] font-semibold transition-all"
+                    :class="retrainMode === 'db' ? 'bg-white text-gray-800 shadow-xs dark:bg-gray-800 dark:text-white/90' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white/90'">
+              Base Dados
+            </button>
+            <button type="button" @click="retrainMode = 'file'" 
+                    class="flex-1 rounded-md py-1.5 text-[10px] font-semibold transition-all"
+                    :class="retrainMode === 'file' ? 'bg-white text-gray-800 shadow-xs dark:bg-gray-800 dark:text-white/90' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white/90'">
+              Ficheiro Local
+            </button>
+            <button type="button" @click="retrainMode = 'path'" 
+                    class="flex-1 rounded-md py-1.5 text-[10px] font-semibold transition-all"
+                    :class="retrainMode === 'path' ? 'bg-white text-gray-800 shadow-xs dark:bg-gray-800 dark:text-white/90' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white/90'">
+              Caminho Servidor
+            </button>
+          </div>
+
           <form @submit.prevent="handleRetrain" class="space-y-5">
-            <!-- Dataset Path Input -->
-            <div class="space-y-2">
+            <!-- Mode 1: DB Telemetry Info -->
+            <div v-if="retrainMode === 'db'" class="p-3.5 bg-brand-50/50 dark:bg-brand-500/5 rounded-xl border border-brand-100 dark:border-brand-500/20 text-xs text-brand-700 dark:text-brand-300 leading-relaxed font-medium">
+              O retreino será executado utilizando os registos de telemetria atualmente armazenados na base de dados PostgreSQL.
+            </div>
+
+            <!-- Mode 2: File Upload Selector -->
+            <div v-else-if="retrainMode === 'file'" class="space-y-2">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Carregar Ficheiro CSV do Dataset
+              </label>
+              
+              <div class="relative flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50/50 p-6 text-center hover:bg-gray-50 dark:border-gray-700 dark:bg-white/[0.01] dark:hover:bg-white/[0.02] transition-colors">
+                <input type="file" accept=".csv" @change="handleFileChange" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                
+                <div v-if="!datasetFile" class="space-y-2">
+                  <div class="flex justify-center">
+                    <svg class="h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                  </div>
+                  <div class="text-xs font-medium text-gray-800 dark:text-white/90">
+                    Arraste um ficheiro CSV ou <span class="text-brand-500 hover:underline">procure</span>
+                  </div>
+                  <div class="text-[10px] text-gray-400 dark:text-gray-500">
+                    Apenas ficheiros .csv
+                  </div>
+                  <div class="text-[9px] text-gray-400 dark:text-gray-500 italic mt-1 font-semibold">
+                    Nota: O cabeçalho deve conter: fails, distance_cm, is_denied, severity
+                  </div>
+                </div>
+
+                <div v-else class="space-y-3 w-full flex flex-col items-center">
+                  <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg max-w-full">
+                    <svg class="h-6 w-6 text-success-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="text-left overflow-hidden">
+                      <div class="text-xs font-semibold text-gray-800 dark:text-white/90 truncate max-w-[150px]">
+                        {{ datasetFile.name }}
+                      </div>
+                      <div class="text-[10px] text-gray-400 dark:text-gray-500">
+                        {{ (datasetFile.size / 1024).toFixed(1) }} KB
+                      </div>
+                    </div>
+                    <button type="button" @click.stop="clearFile" class="text-gray-400 hover:text-error-500 transition-colors p-1">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mode 3: Server File Path Textbox -->
+            <div v-else class="space-y-2">
               <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Caminho do Dataset (Servidor)
               </label>
@@ -313,11 +386,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useAiRetrain, type RetrainResponse } from '@/composables/useAiRetrain';
 import AdminLayout from '@/components/layout/AdminLayout.vue';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
 import ComponentCard from '@/components/common/ComponentCard.vue';
+import { API_BASE_URL } from '@/config';
 
 interface HistoryItem {
   id: number;
@@ -331,6 +405,9 @@ interface HistoryItem {
   fitting: 'Balanced' | 'Overfitting' | 'Underfitting';
 }
 
+const retrainMode = ref<'db' | 'file' | 'path'>('db');
+const datasetFile = ref<File | null>(null);
+const datasetFileContent = ref<string>('');
 const datasetPath = ref('data/sensor_events.csv');
 const epochs = ref(10);
 const showResults = ref(false);
@@ -339,41 +416,86 @@ const history = ref<HistoryItem[]>([]);
 
 const { retrain, loading } = useAiRetrain();
 
+const fetchRetrainHistory = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/ai/retrains`);
+    if (res.ok) {
+      const data = await res.json();
+      history.value = data.map((item: any) => {
+        let fittingState: 'Balanced' | 'Overfitting' | 'Underfitting' = 'Balanced';
+        if (item.overfitting_detected) {
+          fittingState = 'Overfitting';
+        } else if (item.underfitting_detected) {
+          fittingState = 'Underfitting';
+        }
+        return {
+          id: item.id,
+          time: new Date(item.created_at).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          dataset: item.dataset_path,
+          epochs: item.epochs,
+          trainAcc: (item.train_accuracy * 100).toFixed(1),
+          valAcc: (item.validation_accuracy * 100).toFixed(1),
+          trainLoss: item.train_loss.toFixed(4),
+          valLoss: item.validation_loss.toFixed(4),
+          fitting: fittingState
+        };
+      });
+    }
+  } catch (err) {
+    console.error('Erro ao carregar histórico de retreino:', err);
+  }
+};
+
+const handleFileChange = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (file) {
+    datasetFile.value = file;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      datasetFileContent.value = event.target?.result as string;
+    };
+    reader.readAsText(file);
+  } else {
+    clearFile();
+  }
+};
+
+const clearFile = () => {
+  datasetFile.value = null;
+  datasetFileContent.value = '';
+};
+
 const handleRetrain = async () => {
-  if (!datasetPath.value.trim()) {
-    alert('Por favor, indique o caminho do ficheiro do dataset.');
-    return;
+  let targetPath = '';
+  if (retrainMode.value === 'db') {
+    targetPath = 'database';
+  } else if (retrainMode.value === 'file') {
+    if (!datasetFileContent.value) {
+      alert('Por favor, selecione um ficheiro CSV primeiro.');
+      return;
+    }
+    targetPath = datasetFileContent.value;
+  } else {
+    if (!datasetPath.value.trim()) {
+      alert('Por favor, indique o caminho do ficheiro do dataset.');
+      return;
+    }
+    targetPath = datasetPath.value;
   }
 
-  const response = await retrain(epochs.value, datasetPath.value);
+  const response = await retrain(epochs.value, targetPath);
 
   if (response) {
     results.value = response;
     showResults.value = true;
-
-    if (response.success && response.diagnostics) {
-      const diag = response.diagnostics;
-      let fittingState: 'Balanced' | 'Overfitting' | 'Underfitting' = 'Balanced';
-      if (diag.overfitting_detected) {
-        fittingState = 'Overfitting';
-      } else if (diag.underfitting_detected) {
-        fittingState = 'Underfitting';
-      }
-
-      history.value.unshift({
-        id: Date.now(),
-        time: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        dataset: datasetPath.value,
-        epochs: epochs.value,
-        trainAcc: (diag.train_accuracy * 100).toFixed(1),
-        valAcc: (diag.validation_accuracy * 100).toFixed(1),
-        trainLoss: diag.train_loss.toFixed(4),
-        valLoss: diag.validation_loss.toFixed(4),
-        fitting: fittingState
-      });
-    }
+    await fetchRetrainHistory();
   } else {
     alert('Erro de comunicação ao treinar o modelo. Verifique os logs e a conexão.');
   }
 };
+
+onMounted(() => {
+  fetchRetrainHistory();
+});
 </script>

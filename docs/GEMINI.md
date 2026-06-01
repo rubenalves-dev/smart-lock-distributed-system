@@ -2,6 +2,29 @@
 
 This document tracks structural changes made to the repository code.
 
+## 2026-06-01: Major Overhaul of Model Evaluation, Retraining, History Storage, User Activation, Heartbeat Storing, Device Control and Uptime Charts
+
+### Database Schema (`/backend`)
+- **[NEW] [AI History Tables]**: Modified [postgres.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/core/postgres.go) to declare and run migrations for `ai_evaluations` and `ai_retrains` history tracking tables on startup.
+
+### Python AI Service (`/ai-service`)
+- **[Evaluation CSV Parsing Fix]**: Modified `EvaluateModel` in [main.py](file:///Users/rubenalves/Documents/repos/_school/iot/final/ai-service/src/main.py) to reliably detect inline CSV contents vs file paths, resolving file evaluation crashes.
+- **[Retraining Inline CSV Support]**: Updated `RetrainModel` in [main.py](file:///Users/rubenalves/Documents/repos/_school/iot/final/ai-service/src/main.py) to write inline CSV payloads (such as database telemetry data dumps) to a temporary file, retrain, and clean it up automatically.
+
+### Go Backend (`/backend`)
+- **[Telemetry Heartbeat Storage]**: Modified `Ingest` in [service.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/service.go) to store periodic heartbeat payloads in PostgreSQL, ensuring ESP32 heartbeats are tracked in the database.
+- **[Telemetry List & Devices Queries]**: Added `GetAll` and `GetDevices` queries to [repository.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/repository.go) and [service.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/service.go) to select all telemetry logs (and generate training CSVs) and find active device IDs.
+- **[AI Database Persistence]**: Added database operations to `SaveRetrain`, `ListRetrains`, and `ListEvaluations` in [repository.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/ai/repository.go) and [service.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/ai/service.go), mapping evaluations/retrains logs to PostgreSQL and sanitizing dataset path string column lengths.
+- **[New REST Endpoints]**: Registered `GET /api/ai/evaluations`, `GET /api/ai/retrains`, and `GET /api/telemetry/devices` routes in [main.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/cmd/api/main.go) and updated the `POST /api/ai/retrain` endpoint to dump telemetry logs as CSV if requested with `"database"`.
+- **[Decoupled Client Interfaces]**: Adjusted signature of `NewGRPCClient` in [grpc_client.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/ai/grpc_client.go) to return the decoupled `GRPCClient` interface. Updated tests mocks in [service_test.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/service_test.go).
+
+### Vue Frontend (`/frontend`)
+- **[User Activation PUT Fix]**: Modified [UsersView.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/views/Tables/UsersView.vue) to explicitly send `is_accepted: true` when registering a pending RFID card, enabling the AI verification pipeline on subsequent swipes.
+- **[Uptime Charts Query Interval]**: Modified [UptimeChart.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/charts/LineChart/UptimeChart.vue) to query pings dynamically through `API_BASE_URL` with 5-minute intervals inside a 24-hour range.
+- **[Device Selection Controls]**: Added a dynamic device selection dropdown at the top of [Device.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/device/Device.vue), querying active device IDs from the backend and loading corresponding parameters.
+- **[Model Evaluation View]**: Integrated evaluations database history querying on mount in [AiEvaluationView.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/views/Pages/AiEvaluationView.vue) and added a header format note.
+- **[AI Retraining View]**: Refactored [AiRetrainView.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/views/Pages/AiRetrainView.vue) to include a mode switcher (Base Dados, Ficheiro Local, Caminho Servidor), local file drag-and-drop parser with a header format note, and history query synchronization on mount.
+
 ## 2026-05-31: Multi-Factor Authentication (MFA) and Real-time Notifications
 
 ### Database Schema (`/backend`)

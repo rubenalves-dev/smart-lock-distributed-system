@@ -3,6 +3,7 @@ package ai
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/models"
 )
@@ -24,7 +25,38 @@ func (s *service) PredictSeverity(ctx context.Context, event models.SensorPayloa
 }
 
 func (s *service) RetrainModel(ctx context.Context, epochs int32, datasetPath string) (*models.RetrainResult, error) {
-	return s.grpcClient.RetrainModel(ctx, epochs, datasetPath)
+	result, err := s.grpcClient.RetrainModel(ctx, epochs, datasetPath)
+	if err != nil {
+		return nil, err
+	}
+
+	label := datasetPath
+	if datasetPath == "database" {
+		label = "[Database Telemetry]"
+	} else if len(datasetPath) > 200 || strings.Contains(datasetPath, "\n") || strings.HasPrefix(datasetPath, "fails,distance_cm") {
+		label = "[Uploaded CSV]"
+	}
+
+	retrainObj := &Retrain{
+		DatasetPath: label,
+		Epochs:      int(epochs),
+		Success:     result.Success,
+		Message:     result.Message,
+	}
+	if result.Diagnostics != nil {
+		retrainObj.TrainAccuracy = float64(result.Diagnostics.TrainAccuracy)
+		retrainObj.ValidationAccuracy = float64(result.Diagnostics.ValidationAccuracy)
+		retrainObj.TrainLoss = float64(result.Diagnostics.TrainLoss)
+		retrainObj.ValidationLoss = float64(result.Diagnostics.ValidationLoss)
+		retrainObj.Underfitting = result.Diagnostics.UnderfittingDetected
+		retrainObj.Overfitting = result.Diagnostics.OverfittingDetected
+	}
+
+	if err := s.repo.SaveRetrain(ctx, retrainObj); err != nil {
+		fmt.Printf("ERRO: Falha ao guardar retreino na base de dados: %v\n", err)
+	}
+
+	return result, nil
 }
 
 func (s *service) EvaluateModel(ctx context.Context, datasetPath string) (*models.EvaluationResult, error) {
@@ -34,8 +66,13 @@ func (s *service) EvaluateModel(ctx context.Context, datasetPath string) (*model
 		return nil, err
 	}
 
+	label := datasetPath
+	if len(datasetPath) > 200 || strings.Contains(datasetPath, "\n") || strings.HasPrefix(datasetPath, "fails,distance_cm") {
+		label = "[Uploaded CSV]"
+	}
+
 	eval := &Evaluation{
-		DatasetPath: datasetPath,
+		DatasetPath: label,
 		Accuracy:    float64(result.Metrics.Accuracy),
 	}
 
@@ -45,4 +82,12 @@ func (s *service) EvaluateModel(ctx context.Context, datasetPath string) (*model
 	}
 
 	return result, nil
+}
+
+func (s *service) ListEvaluations(ctx context.Context) ([]Evaluation, error) {
+	return s.repo.ListEvaluations(ctx)
+}
+
+func (s *service) ListRetrains(ctx context.Context) ([]Retrain, error) {
+	return s.repo.ListRetrains(ctx)
 }

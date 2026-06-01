@@ -102,6 +102,36 @@ func (p *PostgresClient) initSchema() error {
 		return fmt.Errorf("failed creating mfa_requests table: %w", err)
 	}
 
+	aiEvaluationsTableQuery := `
+	CREATE TABLE IF NOT EXISTS ai_evaluations (
+		id SERIAL PRIMARY KEY,
+		dataset_path TEXT NOT NULL,
+		accuracy REAL NOT NULL,
+		created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+	);`
+	if _, err := p.DB.Exec(aiEvaluationsTableQuery); err != nil {
+		return fmt.Errorf("failed creating ai_evaluations table: %w", err)
+	}
+
+	aiRetrainsTableQuery := `
+	CREATE TABLE IF NOT EXISTS ai_retrains (
+		id SERIAL PRIMARY KEY,
+		dataset_path TEXT NOT NULL,
+		epochs INT NOT NULL,
+		success BOOLEAN NOT NULL,
+		message TEXT,
+		train_accuracy REAL,
+		validation_accuracy REAL,
+		train_loss REAL,
+		validation_loss REAL,
+		underfitting_detected BOOLEAN,
+		overfitting_detected BOOLEAN,
+		created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+	);`
+	if _, err := p.DB.Exec(aiRetrainsTableQuery); err != nil {
+		return fmt.Errorf("failed creating ai_retrains table: %w", err)
+	}
+
 	log.Println("PostgreSQL schema initialized successfully")
 	return nil
 }

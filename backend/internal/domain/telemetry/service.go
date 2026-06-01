@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/core"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/ai"
@@ -44,6 +45,11 @@ func NewService(
 func (s *Service) Ingest(ctx context.Context, payload models.SensorPayload) error {
 	// 1. If it is a heartbeat event, publish to RabbitMQ heartbeat queue and bypass synchronous DB/AI actions
 	if payload.Event == "heartbeat" {
+		// Save periodic heartbeat telemetry in the postgres DB
+		if err := s.repo.Save(ctx, payload); err != nil {
+			log.Printf("Failed to save heartbeat telemetry to DB: %v\n", err)
+		}
+
 		payloadBytes, err := json.Marshal(payload)
 		if err == nil && s.rabbitClient != nil {
 			go func() {
@@ -172,5 +178,46 @@ func (s *Service) UnlockDoor(ctx context.Context) error {
 		return fmt.Errorf("MQTT client is nil")
 	}
 	return s.mqttClient.PublishOpenDoor()
+}
+
+func (s *Service) GetDevices(ctx context.Context) ([]string, error) {
+	return s.repo.GetDevices(ctx)
+}
+
+func (s *Service) GetTelemetryAsCSV(ctx context.Context) (string, error) {
+	telemetries, err := s.repo.GetAll(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	var sb strings.Builder
+	sb.WriteString("fails,distance_cm,is_denied,severity\n")
+
+	for _, t := range telemetries {
+		isDenied := 0.0
+		eventLower := strings.ToLower(t.Event)
+		detailsLower := strings.ToLower(t.Details)
+		statusLower := strings.ToLower(t.Status)
+		if strings.Contains(eventLower, "denied") || strings.Contains(eventLower, "fail") || strings.Contains(detailsLower, "denied") || statusLower == "failed" {
+			isDenied = 1.0
+		}
+
+		severity := 0
+		if t.Fails >= 3 {
+			severity = 3
+		} else if t.Fails == 2 {
+			severity = 2
+		} else if t.Fails == 1 {
+			severity = 1
+		} else if t.DistanceCm < 15.0 && isDenied == 1.0 {
+			severity = 2
+		} else {
+			severity = 0
+		}
+
+		sb.WriteString(fmt.Sprintf("%d,%f,%f,%d\n", t.Fails, t.DistanceCm, isDenied, severity))
+	}
+
+	return sb.String(), nil
 }
 
