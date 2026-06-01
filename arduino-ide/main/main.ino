@@ -85,7 +85,7 @@ void sendTelemetry(String eventType, String details, String rfidUid) {
     doc["rfid_uid"] = rfidUid;
   }
 
-  doc["status"] = "";
+  doc["status"] = isLocked ? "LOCKED" : "UNLOCKED";
   doc["distance_cm"] = ultrassonic.distance();
   doc["light_level"] = ldr.lightLevel();
   doc["fails"] = rfid.failCount();

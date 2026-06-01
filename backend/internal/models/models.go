@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type SensorPayload struct {
 	DeviceID string `json:"device_id"`
 	Event    string `json:"event"`
@@ -16,7 +18,11 @@ type SensorPayload struct {
 	Uptime float32 `json:"uptime"`
 
 	RfidUID string `json:"rfid_uid,omitempty"`
+
+	Timestamp time.Time `json:"timestamp,omitempty"`
+	IsOnline  bool      `json:"is_online"`
 }
+
 
 type HealthPoint struct {
 	Timestamp string `json:"ts"`

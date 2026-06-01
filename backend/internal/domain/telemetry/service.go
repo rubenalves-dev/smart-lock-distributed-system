@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/core"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/domain/ai"
@@ -175,7 +176,14 @@ func (s *Service) IngestWithResult(ctx context.Context, payload models.SensorPay
 }
 
 func (s *Service) GetLatestTelemetry(ctx context.Context, deviceID string) (*models.SensorPayload, error) {
-	return s.repo.GetLatest(ctx, deviceID)
+	payload, err := s.repo.GetLatest(ctx, deviceID)
+	if err != nil {
+		return nil, err
+	}
+	if payload != nil {
+		payload.IsOnline = time.Since(payload.Timestamp) < 15*time.Second
+	}
+	return payload, nil
 }
 
 func (s *Service) UnlockDoor(ctx context.Context) error {
