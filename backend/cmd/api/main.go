@@ -213,6 +213,7 @@ func main() {
 		// 3. Caso o ficheiro exista, lê o conteúdo e envia
 		contentBytes, err := os.ReadFile(pathToEvaluate)
 		if err != nil {
+			log.Printf("Erro ao ler ficheiro: %v", err)
 			http.Error(w, "Erro ao ler ficheiro", http.StatusInternalServerError)
 			return
 		}
