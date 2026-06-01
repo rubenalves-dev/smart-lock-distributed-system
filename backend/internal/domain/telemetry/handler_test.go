@@ -54,4 +54,3 @@ func TestIngestTelemetryReturnsProcessedPayload(t *testing.T) {
 		t.Fatalf("expected status Pending, got %s", got.Status)
 	}
 }
-
