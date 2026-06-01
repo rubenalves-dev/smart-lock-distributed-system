@@ -14,7 +14,21 @@ void RFID::setup(int sckPin, int misoPin, int mosiPin) {
   delay(100);
   mfrc522_.PCD_Init();
   delay(50);
-  Serial.println("RFID initialized");
+  Serial.println("[RFID] Reader initialization triggered");
+  byte v = getVersion();
+  Serial.print("[RFID] MFRC522 Software Version: 0x");
+  Serial.print(v, HEX);
+  if (v == 0x91) {
+    Serial.println(" = v1.0");
+  } else if (v == 0x92) {
+    Serial.println(" = v2.0");
+  } else if (v == 0x88) {
+    Serial.println(" = clone / FM17522");
+  } else if (v == 0x00 || v == 0xFF) {
+    Serial.println(" = WARNING: Communication failure! Check wiring.");
+  } else {
+    Serial.println(" = unknown version");
+  }
 }
 
 bool RFID::is_new_uid_present() {
@@ -34,6 +48,8 @@ bool RFID::check(byte uid[4]) {
   if (!is_new_uid_present()) {
     return false;
   }
+
+  Serial.println("[RFID] Got read on new card");
 
   String cardId = "";
   for (byte i = 0; i < mfrc522_.uid.size; i++) {
@@ -63,10 +79,22 @@ bool RFID::check(byte uid[4]) {
     lastMatchUID_[2] = mfrc522_.uid.uidByte[2];
     lastMatchUID_[3] = mfrc522_.uid.uidByte[3];
   }
+
+  Serial.println("[RFID] Card Matched!! :D");
   return match;
 }
 
 void RFID::update() {
+  mfrc522_.PCD_DumpVersionToSerial();
+}
+
+byte RFID::getVersion() {
+  return mfrc522_.PCD_ReadRegister(MFRC522::VersionReg);
+}
+
+bool RFID::isConnected() {
+  byte v = getVersion();
+  return (v != 0x00 && v != 0xFF);
 }
 
 void RFID::halt() {

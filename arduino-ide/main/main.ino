@@ -117,13 +117,17 @@ void callback(char *topic, byte *payload, unsigned int length) {
   for (int i = 0; i < length; i++) {
     msg += (char)payload[i];
   }
-  Serial.print("Received MQTT message: ");
+  Serial.print("[MQTT] Received message on topic ");
+  Serial.print(topic);
+  Serial.print(": ");
   Serial.println(msg);
 
   if (msg == "UNLOCK") {
-    updateLockState(false);
+    Serial.println("[MQTT] AI/Backend authorized door UNLOCK");
+    updateLockState(false, "mqtt_command");
   } else if (msg == "LOCK") {
-    updateLockState(true);
+    Serial.println("[MQTT] AI/Backend command: LOCK");
+    updateLockState(true, "mqtt_command");
   }
 }
 
@@ -295,9 +299,11 @@ void loop() {
     Serial.println(" cm)");
   }
 
-  // --- 3. RFID Check (polled on every cycle for responsive scan detection)
-  if (isClose)
+  // --- 3. RFID Check (polled every 100ms for stable RF field and responsive scan detection)
+  static unsigned long lastRFIDCheck = 0;
+  if (millis() - lastRFIDCheck >= 100)
   {
+    lastRFIDCheck = millis();
     if (rfid.readCard())
     {
       // Format UID as string (e.g. "DE:AD:BE:EF")
@@ -472,6 +478,14 @@ void loop() {
     Serial.print(ultrassonic.distance());
     Serial.print(" cm | Light: ");
     Serial.print(ldr.lightLevel());
+    Serial.print(" | RFID: ");
+    if (rfid.isConnected()) {
+      Serial.print("CONNECTED (v0x");
+      Serial.print(rfid.getVersion(), HEX);
+      Serial.print(")");
+    } else {
+      Serial.print("DISCONNECTED");
+    }
     Serial.print(" | Lock: ");
     Serial.println(isLocked ? "LOCKED" : "UNLOCKED");
   }
