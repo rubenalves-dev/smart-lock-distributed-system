@@ -44,6 +44,11 @@ func NewService(
 }
 
 func (s *Service) Ingest(ctx context.Context, payload models.SensorPayload) error {
+	_, err := s.IngestWithResult(ctx, payload)
+	return err
+}
+
+func (s *Service) IngestWithResult(ctx context.Context, payload models.SensorPayload) (models.SensorPayload, error) {
 	// 1. If it is a heartbeat event, publish to RabbitMQ heartbeat queue and bypass synchronous DB/AI actions
 	if payload.Event == "heartbeat" {
 		// Save periodic heartbeat telemetry in the postgres DB
@@ -59,7 +64,7 @@ func (s *Service) Ingest(ctx context.Context, payload models.SensorPayload) erro
 				}
 			}()
 		}
-		return nil
+		return payload, nil
 	}
 
 	// 2. Intercept and handle RFID card validation dynamically
@@ -167,7 +172,7 @@ func (s *Service) Ingest(ctx context.Context, payload models.SensorPayload) erro
 		}()
 	}
 
-	return nil
+	return payload, nil
 }
 
 func (s *Service) GetLatestTelemetry(ctx context.Context, deviceID string) (*models.SensorPayload, error) {
@@ -228,4 +233,3 @@ func (s *Service) GetTelemetryAsCSV(ctx context.Context) (string, error) {
 
 	return sb.String(), nil
 }
-

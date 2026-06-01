@@ -14,6 +14,7 @@ void RFID::setup(int sckPin, int misoPin, int mosiPin) {
   delay(100);
   mfrc522_.PCD_Init();
   delay(50);
+  mfrc522_.PCD_SetAntennaGain(mfrc522_.RxGain_max);
   Serial.println("[RFID] Reader initialization triggered");
   byte v = getVersion();
   Serial.print("[RFID] MFRC522 Software Version: 0x");
