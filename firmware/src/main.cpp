@@ -107,16 +107,20 @@ void callback(char *topic, byte *payload, unsigned int length)
   {
     msg += (char)payload[i];
   }
-  Serial.print("Received MQTT message: ");
+  Serial.print("[MQTT] Received message on topic ");
+  Serial.print(topic);
+  Serial.print(": ");
   Serial.println(msg);
 
   if (msg == "UNLOCK")
   {
-    updateLockState(false);
+    Serial.println("[MQTT] AI/Backend authorized door UNLOCK");
+    updateLockState(false, "mqtt_command");
   }
   else if (msg == "LOCK")
   {
-    updateLockState(true);
+    Serial.println("[MQTT] AI/Backend command: LOCK");
+    updateLockState(true, "mqtt_command");
   }
 }
 
@@ -272,9 +276,11 @@ void loop()
   autoCloseTimer.update();
 
 
-  // --- 3. RFID Check
-  if (ultrassonic.isObjectClose() /*&&stepper.state() == Stepper::State::Closed*/)
+  // --- 3. RFID Check (polled every 100ms for stable RF field and responsive scan detection)
+  static unsigned long lastRFIDCheck = 0;
+  if (millis() - lastRFIDCheck >= 100)
   {
+    lastRFIDCheck = millis();
     if (rfid.check(authorizedUID))
     {
       lastUser = "authorized_user"; // In real case, map UID to user
@@ -293,5 +299,29 @@ void loop()
     }
   }
 
-  delay(1000); // Main loop delay to reduce CPU usage
+  // --- Periodic Status Print
+  static unsigned long lastStatusPrint = 0;
+  unsigned long currentMillis = millis();
+  if (currentMillis - lastStatusPrint >= 5000)
+  {
+    lastStatusPrint = currentMillis;
+    Serial.print("[Status] Uptime: ");
+    Serial.print(millis() / 1000);
+    Serial.print("s | Distance: ");
+    Serial.print(ultrassonic.distance());
+    Serial.print(" cm | Light: ");
+    Serial.print(ldr.lightLevel());
+    Serial.print(" | RFID: ");
+    if (rfid.isConnected()) {
+      Serial.print("CONNECTED (v0x");
+      Serial.print(rfid.getVersion(), HEX);
+      Serial.print(")");
+    } else {
+      Serial.print("DISCONNECTED");
+    }
+    Serial.print(" | Lock: ");
+    Serial.println(isLocked ? "LOCKED" : "UNLOCKED");
+  }
+
+  delay(10); // Reduce CPU usage slightly, allowing faster RFID polling
 }

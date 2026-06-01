@@ -2,6 +2,16 @@
 
 This document tracks structural changes made to the repository code.
 
+## 2026-06-01: Continuous RFID Polling and Reader Diagnostics
+
+### ESP32 Firmware (`/arduino-ide` & `/firmware`)
+- **[Continuous RFID Check & Rate-Limiting]**: Modified [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) and [main.cpp](file:///Users/rubenalves/Documents/repos/_school/iot/final/firmware/src/main.cpp) to remove the proximity/ultrasonic gating (`isClose` / `isObjectClose`) on the RFID sensor. Implemented a non-blocking 100ms polling rate-limiter using `millis()` to allow the MFRC522 RF antenna field to charge passive cards stably, resolving scan failures.
+- **[Reader State Diagnostics]**: Modified `RFID.h` and `RFID.cpp` in both the [arduino-ide](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/RFID.h) and [firmware](file:///Users/rubenalves/Documents/repos/_school/iot/final/firmware/lib/RFID/RFID.h) directories to implement `getVersion()` (queries MFRC522 `VersionReg`) and `isConnected()` (verifies connection status) helper methods.
+- **[Diagnostic Logging]**:
+  - Updated RFID initialization setup methods to print the specific card reader chip software version to Serial (identifying versions `v1.0`, `v2.0`, `clone`, or `WARNING` connection failures).
+  - Updated the periodic status print routines to include the RFID connection state (`CONNECTED` with version or `DISCONNECTED`).
+  - Formatted the MQTT subscription callback logs to print the target topic and details when `UNLOCK` and `LOCK` commands are received.
+
 ## 2026-06-01: Major Overhaul of Model Evaluation, Retraining, History Storage, User Activation, Heartbeat Storing, Device Control and Uptime Charts
 
 ### Database Schema (`/backend`)

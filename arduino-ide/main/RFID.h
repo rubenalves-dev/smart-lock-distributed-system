@@ -19,6 +19,9 @@ public:
     void update();
     void halt();
 
+    byte getVersion();
+    bool isConnected();
+
     uint failCount() const { return failCount_; }
     byte *lastMatchUID() { return lastMatchUID_; }
     byte *buffer() { return buffer_; }
