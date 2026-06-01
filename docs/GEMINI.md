@@ -323,3 +323,20 @@ This document tracks structural changes made to the repository code.
 
 ### Vue Frontend (`/frontend`)
 - **[Production Server Upgrade]**: Modified the [Dockerfile](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/Dockerfile) to replace the `http-server` package with Vercel's standard `serve` package. Configured it to run `serve -s dist -l 8080` in the entrypoint command. The `-s` / `--single` flag ensures history API routing works natively in production, redirecting missing page refresh paths (such as `/ai/evaluation`) back to `index.html`.
+
+## 2026-06-01: Fixed Device Control Reactivity, Connectivity Status, and State Binding
+
+### Go Backend (`/backend`)
+- **[Models Update]**: Modified [models.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/models/models.go) to add `Timestamp` (`time.Time`) and `IsOnline` (`bool`) fields to the `SensorPayload` struct.
+- **[Repository Query Update]**: Modified [repository.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/repository.go) to select the `timestamp` column and scan it into `Timestamp` inside `GetLatest` db queries.
+- **[Dynamic Connectivity Check]**: Refactored `GetLatestTelemetry` inside [service.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/service.go) to check if the timestamp of the latest telemetry is within a 15-second threshold, dynamically setting the `IsOnline` property of the returned JSON payload.
+
+### Vue Frontend (`/frontend`)
+- **[Rereactive Binds and Bads]**: Modified [Device.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/components/device/Device.vue):
+  - Bind "Conetividade Hardware" card badge and styling classes to `deviceData?.is_online` status instead of the incorrect `status === 'online'` comparison.
+  - Convert `isUnlocked` from a standard ref variable to a Vue `computed` property deriving from `deviceData` event states (`access_granted`, `status_change` with `UNLOCKED`) and manual override actions.
+  - Disable the remote unlock button whenever the device goes offline (`!deviceData?.is_online`).
+
+### ESP32 Firmware (`/arduino-ide` & `/firmware`)
+- **[Device Telemetry Status Sync]**: Updated `sendTelemetry` in both [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) and [main.cpp](file:///Users/rubenalves/Documents/repos/_school/iot/final/firmware/src/main.cpp) to populate the `"status"` field with the actual current state of the lock (`isLocked ? "LOCKED" : "UNLOCKED"`) instead of writing empty strings, ensuring heartbeats always convey the current lock state.
+
