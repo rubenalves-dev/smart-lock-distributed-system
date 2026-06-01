@@ -3,6 +3,7 @@ package telemetry
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rubenalves-dev/smart-lock-distributed-system/internal/models"
@@ -31,6 +32,13 @@ func (h *Handler) IngestTelemetry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if strings.TrimSpace(payload.DeviceID) == "" || strings.TrimSpace(payload.Event) == "" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "device_id and event are required"})
+		return
+	}
+
 	if err := h.service.Ingest(r.Context(), payload); err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -38,9 +46,21 @@ func (h *Handler) IngestTelemetry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	latestPayload, err := h.service.GetLatestTelemetry(r.Context(), payload.DeviceID)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(map[string]string{"status": "accepted"})
+	w.WriteHeader(http.StatusOK)
+	if latestPayload == nil {
+		json.NewEncoder(w).Encode(map[string]string{"status": "processed"})
+		return
+	}
+	json.NewEncoder(w).Encode(latestPayload)
 }
 
 func (h *Handler) GetLatestTelemetry(w http.ResponseWriter, r *http.Request) {
@@ -90,4 +110,3 @@ func (h *Handler) UnlockDoor(w http.ResponseWriter, r *http.Request) {
 		"success": true,
 	})
 }
-
