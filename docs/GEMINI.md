@@ -7,6 +7,7 @@ This document tracks structural changes made to the repository code.
 ### ESP32 Firmware (`/arduino-ide` & `/firmware`)
 - **[Continuous RFID Check & Rate-Limiting]**: Modified [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) and [main.cpp](file:///Users/rubenalves/Documents/repos/_school/iot/final/firmware/src/main.cpp) to remove the proximity/ultrasonic gating (`isClose` / `isObjectClose`) on the RFID sensor. Implemented a non-blocking 100ms polling rate-limiter using `millis()` to allow the MFRC522 RF antenna field to charge passive cards stably, resolving scan failures.
 - **[Reader State Diagnostics]**: Modified `RFID.h` and `RFID.cpp` in both the [arduino-ide](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/RFID.h) and [firmware](file:///Users/rubenalves/Documents/repos/_school/iot/final/firmware/lib/RFID/RFID.h) directories to implement `getVersion()` (queries MFRC522 `VersionReg`) and `isConnected()` (verifies connection status) helper methods.
+- **[RFID Check Bug Fix]**: Fixed a buffer over-read bug in the `check()` method inside [RFID.cpp](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/RFID.cpp) by ensuring the UID size matches 4 bytes and restricting the `memcmp` operation size to 4 bytes, avoiding undefined behavior when 7-byte or 10-byte tags are scanned.
 - **[Diagnostic Logging]**:
   - Updated RFID initialization setup methods to print the specific card reader chip software version to Serial (identifying versions `v1.0`, `v2.0`, `clone`, or `WARNING` connection failures).
   - Updated the periodic status print routines to include the RFID connection state (`CONNECTED` with version or `DISCONNECTED`).
@@ -339,4 +340,9 @@ This document tracks structural changes made to the repository code.
 
 ### ESP32 Firmware (`/arduino-ide` & `/firmware`)
 - **[Device Telemetry Status Sync]**: Updated `sendTelemetry` in both [main.ino](file:///Users/rubenalves/Documents/repos/_school/iot/final/arduino-ide/main/main.ino) and [main.cpp](file:///Users/rubenalves/Documents/repos/_school/iot/final/firmware/src/main.cpp) to populate the `"status"` field with the actual current state of the lock (`isLocked ? "LOCKED" : "UNLOCKED"`) instead of writing empty strings, ensuring heartbeats always convey the current lock state.
+
+## 2026-06-02: Fix Inline CSV Evaluation for Large Datasets
+
+### Go Backend (`/backend`)
+- **[Inline CSV Check Bug Fix]**: Modified [main.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/cmd/api/main.go) to check for inline CSV properties (presence of newlines or length > 255) prior to running `os.Stat`. This prevents `ENAMETOOLONG` errors when the frontend uploads large CSV payloads directly as strings to the `/api/ai/evaluate` endpoint.
 

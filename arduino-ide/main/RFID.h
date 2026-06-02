@@ -16,7 +16,7 @@ public:
     bool check(byte uid[4]);
     bool is_new_uid_present();
     bool readCard();
-    void update();
+    bool update();
     void halt();
 
     byte getVersion();

@@ -38,7 +38,7 @@ bool RFID::is_new_uid_present() {
   }
 
   if (!mfrc522_.PICC_ReadCardSerial()) {
-    Serial.println("Failed to read card serial");
+    Serial.println("[RFID] Failed to read card serial");
     return false;
   }
 
@@ -46,47 +46,25 @@ bool RFID::is_new_uid_present() {
 }
 
 bool RFID::check(byte uid[4]) {
-  if (!is_new_uid_present()) {
-    return false;
-  }
-
-  Serial.println("[RFID] Got read on new card");
-
-  String cardId = "";
-  for (byte i = 0; i < mfrc522_.uid.size; i++) {
-    if (mfrc522_.uid.uidByte[i] < 0x10) {
-      cardId += "0";
-    }
-    cardId += String(mfrc522_.uid.uidByte[i], HEX);
-  }
-  cardId.toUpperCase();
-  Serial.println("Card UID: " + cardId);
-
-  bool match = memcmp(mfrc522_.uid.uidByte, uid, mfrc522_.uid.size) == 0;
-  halt();
-
-  buffer_[0] = mfrc522_.uid.uidByte[0];
-  buffer_[1] = mfrc522_.uid.uidByte[1];
-  buffer_[2] = mfrc522_.uid.uidByte[2];
-  buffer_[3] = mfrc522_.uid.uidByte[3];
+  bool match = (mfrc522_.uid.size == 4) && (memcmp(mfrc522_.uid.uidByte, uid, 4) == 0);
 
   if (!match) {
     failCount_++;
-    Serial.println("UID does not match authorized UID");
+    Serial.println("[RFID] UID does not match authorized UID");
   } else {
     failCount_ = 0;
     lastMatchUID_[0] = mfrc522_.uid.uidByte[0];
     lastMatchUID_[1] = mfrc522_.uid.uidByte[1];
     lastMatchUID_[2] = mfrc522_.uid.uidByte[2];
     lastMatchUID_[3] = mfrc522_.uid.uidByte[3];
+    Serial.println("[RFID] Card Matched!! :D");
   }
 
-  Serial.println("[RFID] Card Matched!! :D");
   return match;
 }
 
-void RFID::update() {
-  mfrc522_.PCD_DumpVersionToSerial();
+bool RFID::update() {
+  return readCard();
 }
 
 byte RFID::getVersion() {
@@ -108,10 +86,21 @@ bool RFID::readCard() {
     return false;
   }
 
+  Serial.println("[RFID] New card present");
   buffer_[0] = mfrc522_.uid.uidByte[0];
   buffer_[1] = mfrc522_.uid.uidByte[1];
   buffer_[2] = mfrc522_.uid.uidByte[2];
   buffer_[3] = mfrc522_.uid.uidByte[3];
+
+  String cardId = "";
+  for (byte i = 0; i < mfrc522_.uid.size; i++) {
+    if (mfrc522_.uid.uidByte[i] < 0x10) {
+      cardId += "0";
+    }
+    cardId += String(mfrc522_.uid.uidByte[i], HEX);
+  }
+  cardId.toUpperCase();
+  Serial.println("[RFID] Card UID: " + cardId);
 
   halt();
   return true;

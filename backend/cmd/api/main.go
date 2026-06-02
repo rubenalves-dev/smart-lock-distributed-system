@@ -188,7 +188,15 @@ func main() {
 		}
 
 		// 2. Se o ficheiro não existir, verifica se o input contém dados CSV diretamente
-		if _, err := os.Stat(pathToEvaluate); os.IsNotExist(err) {
+		isCSVContent := strings.Contains(pathToEvaluate, "\n") || len(pathToEvaluate) > 255
+
+		var fileErr error
+		if !isCSVContent {
+			_, fileErr = os.Stat(pathToEvaluate)
+		}
+
+		// 2. Se for detetado como CSV inline ou se o ficheiro não puder ser acedido no disco
+		if isCSVContent || fileErr != nil {
 			content := pathToEvaluate
 			// Se o input não parecer conteúdo CSV (não tem cabeçalho/dados), gera o fallback sintético
 			if !strings.Contains(pathToEvaluate, "feature1") && !strings.Contains(pathToEvaluate, "fails") {
