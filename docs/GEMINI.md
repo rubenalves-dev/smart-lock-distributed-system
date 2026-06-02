@@ -2,6 +2,15 @@
 
 This document tracks structural changes made to the repository code.
 
+## 2026-06-02: AI Retraining Timeout Configuration Fix
+
+### Go Backend (`/backend`)
+- **[Retraining Context Timeout]**: Increased the context timeout of the `/api/ai/retrain` endpoint in [main.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/cmd/api/main.go) from `2*time.Minute` to `10*time.Minute` to support long-running retraining cycles on large datasets or higher epoch counts without premature context cancellation.
+- **[Telemetry Query Limit]**: Modified `GetAll` query in [repository.go](file:///Users/rubenalves/Documents/repos/_school/iot/final/backend/internal/domain/telemetry/repository.go) to limit the telemetry logs to the latest 5,000 records (`LIMIT 5000`) instead of loading the entire table or using a time-based filter, keeping the training dataset size safe and ensuring retraining runs quickly.
+
+### Nginx Proxy (`/deployments/nginx`)
+- **[Nginx Proxy Timeouts]**: Appended `proxy_connect_timeout`, `proxy_send_timeout`, and `proxy_read_timeout` directives (set to `600s` / 10 minutes) inside the Backend API location block in [smartlock.conf](file:///Users/rubenalves/Documents/repos/_school/iot/final/deployments/nginx/smartlock.conf) to prevent 504 Gateway Timeout responses during retraining.
+
 ## 2026-06-02: AI Model Evaluation UI Metrics Formatting Bugfix
 
 ### Vue Frontend (`/frontend`)

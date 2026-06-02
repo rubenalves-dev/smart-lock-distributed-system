@@ -102,7 +102,8 @@ func (r *sqlRepository) GetAll(ctx context.Context) ([]models.SensorPayload, err
 			COALESCE(rssi, 0), 
 			COALESCE(uptime, 0.0)
 		FROM telemetry
-		ORDER BY timestamp DESC`
+		ORDER BY timestamp DESC
+		LIMIT 5000`
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {

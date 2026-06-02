@@ -249,7 +249,7 @@ func main() {
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
 
 		pathToTrain := req.DatasetPath
