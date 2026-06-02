@@ -154,7 +154,7 @@
               <div class="p-4 bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 rounded-2xl text-center">
                 <div class="text-[11px] font-medium text-brand-600 dark:text-brand-400 uppercase tracking-wider">Accuracy</div>
                 <div class="mt-1 text-2xl font-bold text-brand-700 dark:text-brand-300">
-                  {{ results.binary_metrics.accuracy.toFixed(1) }}%
+                  {{ (results.binary_metrics.accuracy * 100).toFixed(1) }}%
                 </div>
               </div>
               
@@ -162,7 +162,7 @@
               <div class="p-4 bg-success-50 dark:bg-success-500/10 border border-success-100 dark:border-success-500/20 rounded-2xl text-center">
                 <div class="text-[11px] font-medium text-success-600 dark:text-success-400 uppercase tracking-wider">Precision</div>
                 <div class="mt-1 text-2xl font-bold text-success-700 dark:text-success-300">
-                  {{ results.binary_metrics.precision.toFixed(1) }}%
+                  {{ (results.binary_metrics.precision * 100).toFixed(1) }}%
                 </div>
               </div>
 
@@ -170,7 +170,7 @@
               <div class="p-4 bg-warning-50 dark:bg-warning-500/10 border border-warning-100 dark:border-warning-500/20 rounded-2xl text-center">
                 <div class="text-[11px] font-medium text-warning-600 dark:text-warning-400 uppercase tracking-wider">Recall</div>
                 <div class="mt-1 text-2xl font-bold text-warning-700 dark:text-warning-300">
-                  {{ results.binary_metrics.recall.toFixed(1) }}%
+                  {{ (results.binary_metrics.recall * 100).toFixed(1) }}%
                 </div>
               </div>
 
@@ -178,7 +178,7 @@
               <div class="p-4 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl text-center">
                 <div class="text-[11px] font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">F1 Score</div>
                 <div class="mt-1 text-2xl font-bold text-blue-700 dark:text-blue-300">
-                  {{ results.binary_metrics.f1.toFixed(1) }}%
+                  {{ (results.binary_metrics.f1 * 100).toFixed(1) }}%
                 </div>
               </div>
             </div>
@@ -193,7 +193,7 @@
               <div class="p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-gray-800 rounded-2xl text-center">
                 <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Accuracy</div>
                 <div class="mt-1 text-2xl font-bold text-gray-800 dark:text-white/90">
-                  {{ results.metrics.accuracy.toFixed(1) }}%
+                  {{ (results.metrics.accuracy * 100).toFixed(1) }}%
                 </div>
               </div>
 
@@ -201,7 +201,7 @@
               <div class="p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-gray-800 rounded-2xl text-center">
                 <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Precision (Macro)</div>
                 <div class="mt-1 text-2xl font-bold text-gray-800 dark:text-white/90">
-                  {{ results.metrics.precision_macro.toFixed(1) }}%
+                  {{ (results.metrics.precision_macro * 100).toFixed(1) }}%
                 </div>
               </div>
 
@@ -209,7 +209,7 @@
               <div class="p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-gray-800 rounded-2xl text-center">
                 <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recall (Macro)</div>
                 <div class="mt-1 text-2xl font-bold text-gray-800 dark:text-white/90">
-                  {{ results.metrics.recall_macro.toFixed(1) }}%
+                  {{ (results.metrics.recall_macro * 100).toFixed(1) }}%
                 </div>
               </div>
 
@@ -217,7 +217,7 @@
               <div class="p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-gray-800 rounded-2xl text-center">
                 <div class="text-[11px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">F1 (Macro)</div>
                 <div class="mt-1 text-2xl font-bold text-gray-800 dark:text-white/90">
-                  {{ results.metrics.f1_macro.toFixed(1) }}%
+                  {{ (results.metrics.f1_macro * 100).toFixed(1) }}%
                 </div>
               </div>
             </div>

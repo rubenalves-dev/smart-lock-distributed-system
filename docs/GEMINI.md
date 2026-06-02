@@ -2,6 +2,11 @@
 
 This document tracks structural changes made to the repository code.
 
+## 2026-06-02: AI Model Evaluation UI Metrics Formatting Bugfix
+
+### Vue Frontend (`/frontend`)
+- **[Model Evaluation Cards Metrics Scaling]**: Fixed a UI rendering issue in [AiEvaluationView.vue](file:///Users/rubenalves/Documents/repos/_school/iot/final/frontend/src/views/Pages/AiEvaluationView.vue) where decimal metrics (accuracy, precision, recall, f1) returned from the backend in the range `[0.0, 1.0]` were formatted using `.toFixed(1)%` directly without being scaled by 100 first, resulting in misleadingly low values like `< 1%`.
+
 ## 2026-06-01: Continuous RFID Polling and Reader Diagnostics
 
 ### ESP32 Firmware (`/arduino-ide` & `/firmware`)
